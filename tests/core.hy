@@ -48,8 +48,7 @@
 (defn test-dec []
   (assert-equal 0 (dec 1))
   (assert-equal -1 (dec 0))
-  (assert-equal 0 (dec (dec 2)))
-  (assert-requires-num dec))
+  (assert-equal 0 (dec (dec 2))))
 
 
 (defn test-distinct []
@@ -103,7 +102,6 @@
 (defn test-inc []
   (assert-equal 3 (inc 2))
   (assert-equal 0 (inc -1))
-  (assert-requires-num inc)
 
   (defclass X [object]
     (defn __add__ [self other] (.format "__add__ got {}" other)))
