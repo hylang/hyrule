@@ -102,18 +102,13 @@
   (assert (= (lif None "true" "false") "false"))
 
   ;; But everything else is True!  Even falsey things.
-  (assert (= (lif True "true" "false") "true"))
-  (assert (= (lif False "true" "false") "true"))
-  (assert (= (lif 0 "true" "false") "true"))
-  (assert (= (lif "some-string" "true" "false") "true"))
-  (assert (= (lif "" "true" "false") "true"))
-  (assert (= (lif (+ 1 2 3) "true" "false") "true"))
-  (assert (= (lif None "true" "false") "false"))
-  (assert (= (lif 0 "true" "false") "true"))
+  (for [x [True False 0 "some-string" "" (+ 1 2 3)]]
+    (assert (= (lif x "true" "false") "true")))
 
   ;; Test ellif [sic]
+  (setv x 0)
   (assert (= (lif None 0
                   None 1
-                  0 2
+                  x 2
                   3)
              2)))

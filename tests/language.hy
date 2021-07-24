@@ -7,20 +7,20 @@
 (defn test-xor []
 
   ; Test each cell of the truth table.
-  (assert (is (xor False  False) False))
-  (assert (is (xor False True)  True))
-  (assert (is (xor True  False) True))
-  (assert (is (xor True  True)  False))
+  (assert (= (xor False  False) False))
+  (assert (= (xor False True)  True))
+  (assert (= (xor True  False) True))
+  (assert (= (xor True  True)  False))
 
   ; Same thing, but with numbers.
-  (assert (is (xor 0 0) 0))
-  (assert (is (xor 0 1) 1))
-  (assert (is (xor 1 0) 1))
-  (assert (is (xor 1 1) False))
+  (assert (= (xor 0 0) 0))
+  (assert (= (xor 0 1) 1))
+  (assert (= (xor 1 0) 1))
+  (assert (= (xor 1 1) False))
 
   ; Of two distinct false values, the second is returned.
-  (assert (is (xor False 0) 0))
-  (assert (is (xor 0 False) False)))
+  (assert (= (xor False 0) 0))
+  (assert (= (xor 0 False) False)))
 
 
 (defn test-threading []
