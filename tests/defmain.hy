@@ -67,7 +67,7 @@
 
 
 (defn test-bin-hy-main-exitvalue []
-  (run-cmd "hy tests/resources/bin/main.hy exit1" :expect 1))
+  (run-cmd "hy tests/resources/bin/main.hy exit47" :expect 47))
 
 
 (defn test-bin-hy-module-main []
@@ -81,4 +81,4 @@
 
 
 (defn test-bin-hy-module-main-exitvalue []
-  (run-cmd "hy -m tests.resources.bin.main exit1" :expect 1))
+  (run-cmd "hy -m tests.resources.bin.main exit47" :expect 47))
