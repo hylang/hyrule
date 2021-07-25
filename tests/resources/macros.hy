@@ -7,3 +7,6 @@
   (defn f [#* args] (.join "" (+ (, "c") args)))
   (setv variable (hy.models.Symbol (->> "d" (f))))
   `(setv ~variable 5))
+
+(defmacro test-macro []
+  '(setv blah 1))
