@@ -78,7 +78,7 @@ variable name, as in ``(print \"My favorite Stephen King book is\" 'it)``."
        2
        3"
   (rit `(for [~it ~xs]
-    (unless ~(R form)
+    (if (not ~(R form))
       (break))
     ~@(R body))))
 
