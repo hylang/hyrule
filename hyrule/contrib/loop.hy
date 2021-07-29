@@ -29,9 +29,13 @@ tail-call optimization (TCO) in their Hy code.
     -- Wikipedia (https://en.wikipedia.org/wiki/Tail_call)
 "
 
-(import hy.contrib.walk [prewalk])
+(require
+  hyrule.macros [defmacro/g!])
 
-(defn __trampoline__ [f]
+(import
+  hyrule.contrib.walk [prewalk])
+
+(defn _trampoline [f]
   "Wrap f function and make it tail-call optimized."
   ;; Takes the function "f" and returns a wrapper that may be used for tail-
   ;; recursive algorithms. Note that the returned function is not side-effect
@@ -52,25 +56,6 @@ tail-call optimization (TCO) in their Hy code.
       result)))
 
 
-(defmacro/g! fnr [signature #* body]
-  (setv new-body (prewalk
-    (fn [x] (if (= x 'recur) g!recur-fn x))
-    body))
-  `(do
-    (import hy.contrib.loop [__trampoline__])
-    (with-decorator
-      __trampoline__
-      (defn ~g!recur-fn [~@signature] ~@new-body))
-    ~g!recur-fn))
-
-
-(defmacro defnr [name lambda-list #* body]
-  (if (not (= (type name) hy.models.Symbol))
-      (raise (TypeError "defnr takes a name as first argument")))
-  `(do (require hy.contrib.loop)
-       (setv ~name (hy.contrib.loop.fnr ~lambda-list ~@body))))
-
-
 (defmacro/g! loop [bindings #* body]
   "``loop`` establishes a recursion point. With ``loop``, ``recur``
   rebinds the variables set in the recursion point and sends code
@@ -83,7 +68,7 @@ tail-call optimization (TCO) in their Hy code.
   Examples:
     ::
 
-       => (require hy.contrib.loop [loop])
+       => (require hyrule.contrib.loop [loop])
        => (defn factorial [n]
        ...  (loop [[i n] [acc 1]]
        ...    (if (= i 0)
@@ -91,6 +76,10 @@ tail-call optimization (TCO) in their Hy code.
        ...      (recur (dec i) (* acc i)))))
        => (factorial 1000)"
   (setv [fnargs initargs] (if bindings (zip #* bindings) [[] []]))
-  `(do (require hy.contrib.loop)
-       (hy.contrib.loop.defnr ~g!recur-fn [~@fnargs] ~@body)
-       (~g!recur-fn ~@initargs)))
+  (setv new-body (prewalk
+    (fn [x] (if (= x 'recur) g!recur-fn x))
+    body))
+  `(do
+    (import hyrule.contrib.loop [_trampoline :as ~g!t])
+    (setv ~g!recur-fn (~g!t (fn [~@fnargs] ~@new-body)))
+    (~g!recur-fn ~@initargs)))
