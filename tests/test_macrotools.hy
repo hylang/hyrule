@@ -1,3 +1,9 @@
+(require
+  hyrule [defmacro! defmacro/g! with-gensyms ->])
+(import
+  hyrule [macroexpand-all])
+
+
 (defn test-with-gensym []
   (import ast)
   (import hy.compiler [hy-compile])
@@ -97,18 +103,26 @@
   (assert (= (bar! 2) 1)))
 
 
-(defn test-lif []
-  ;; None is false
-  (assert (= (lif None "true" "false") "false"))
+(defmacro foo-walk []
+  42)
 
-  ;; But everything else is True!  Even falsey things.
-  (for [x [True False 0 "some-string" "" (+ 1 2 3)]]
-    (assert (= (lif x "true" "false") "true")))
+(defn test-macroexpand-all []
+  ;; make sure a macro from the current module works
+  (assert (= (macroexpand-all '(foo-walk))
+             '42))
+  (assert (= (macroexpand-all '(-> 1 a))
+             '(a 1)))
+  ;; macros within f-strings should also be expanded
+  ;; related to https://github.com/hylang/hy/issues/1843
+  (assert (= (macroexpand-all 'f"{(foo-walk)}")
+             'f"{42}"))
+  (assert (= (macroexpand-all 'f"{(-> 1 a)}")
+             'f"{(a 1)}"))
 
-  ;; Test ellif [sic]
-  (setv x 0)
-  (assert (= (lif None 0
-                  None 1
-                  x 2
-                  3)
-             2)))
+  (defmacro require-macro []
+    `(do
+       (require tests.resources.macros [test-macro :as my-test-macro])
+       (my-test-macro)))
+
+  (assert (= (get (macroexpand-all '(require-macro)) -1)
+             '(setv blah 1))))

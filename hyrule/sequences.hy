@@ -6,12 +6,6 @@ allow accessing the same element multiple times. They cache calculated values,
 and the implementation allows for recursive definition of sequences without
 resulting in recursive computation.
 
-To use these macros, you need to require them and import some other names like
-so::
-
-   (require hy.contrib.sequences [defseq seq])
-   (import hy.contrib.sequences [Sequence end-sequence])
-
 The simplest sequence can be defined as ``(seq [n] n)``. This defines a sequence
 that starts as ``[0 1 2 3 ...]`` and continues forever. In order to define a
 finite sequence, you need to call ``end-sequence`` to signal the end of the
@@ -41,7 +35,9 @@ be defined as::
 This results in the sequence ``[0 1 1 2 3 5 8 13 21 34 ...]``.
 "
 
-(import itertools [islice])
+(import
+  itertools [islice]
+  hyrule.misc [inc])
 
 (defclass Sequence []
   "Container for construction of lazy sequences."

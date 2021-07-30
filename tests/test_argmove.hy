@@ -1,26 +1,4 @@
-(defn test-rest []
-  (assert (= (list (rest [1 2 3 4 5])) [2 3 4 5]))
-  (assert (= (list (islice (rest (count 8)) 3)) [9 10 11]))
-  (assert (= (list (rest [])) [])))
-
-
-(defn test-xor []
-
-  ; Test each cell of the truth table.
-  (assert (= (xor False  False) False))
-  (assert (= (xor False True)  True))
-  (assert (= (xor True  False) True))
-  (assert (= (xor True  True)  False))
-
-  ; Same thing, but with numbers.
-  (assert (= (xor 0 0) 0))
-  (assert (= (xor 0 1) 1))
-  (assert (= (xor 1 0) 1))
-  (assert (= (xor 1 1) False))
-
-  ; Of two distinct false values, the second is returned.
-  (assert (= (xor False 0) 0))
-  (assert (= (xor 0 False) False)))
+(require hyrule [-> ->> as-> doto])
 
 
 (defn test-threading []
@@ -31,6 +9,7 @@
 (defn test-tail-threading []
   (assert (= (.join ", " (* 10 ["foo"]))
              (->> ["foo"] (* 10) (.join ", ")))))
+
 
 (defn test-threading-in-macro []
   ; https://github.com/hylang/hy/issues/1537
@@ -72,32 +51,11 @@
              "Sir Joseph Cooke Verco")))
 
 
-(defn test-assoc []
-  (setv vals {"one" "two"})
-  (assoc vals "two" "three")
-  (assert (= (get vals "two") "three")))
-
-
-(defn test-multiassoc []
-  (setv vals {"one" "two"})
-  (assoc vals "two" "three" "four" "five")
-  (assert (and (= (get vals "two") "three") (= (get vals "four") "five") (= (get vals "one") "two"))))
-
-
-(defn test-assoc-eval-lvalue-once []
-  ;; https://github.com/hylang/hy/issues/1068
-  "`assoc` only evaluates its lvalue once"
-  (setv counter [])
-  (setv d {})
-  (defn f []
-    (.append counter 1)
-    d)
-  (assoc (f)  "a" 1  "b" 2  "c" 3)
-  (assert (= d {"a" 1  "b" 2  "c" 3}))
-  (assert (= counter [1])))
-
-
-(defn test-of []
-  (assert (= (of str) str))
-  (assert (= (of List int) (get List int)))
-  (assert (= (of Dict str str) (get Dict (, str str)))))
+(defn test-doto []
+  (setv collection [])
+  (doto collection (.append 1) (.append 2) (.append 3))
+  (assert (= collection [1 2 3]))
+  (setv res (doto (set) (.add 2) (.add 1)))
+  (assert (= res (set [1 2])))
+  (setv res (doto [] (.append 1) (.append 2) .reverse))
+  (assert (= res [2 1])))

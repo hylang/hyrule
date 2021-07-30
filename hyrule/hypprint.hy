@@ -1,4 +1,4 @@
-"``hy.contrib.pprint`` is a port of python's built-in ``pprint`` that can pretty
+"``hyrule.pprint`` is a port of python's built-in ``pprint`` that can pretty
 print objects using Hy syntax.
 
 Hy ``pprint`` leverages ``hy.repr`` for much of it's pretty printing and
@@ -25,6 +25,11 @@ The differences that do exist are as follows:
 "
 ;; Adapted from: https://github.com/python/cpython/blob/3.9/Lib/pprint.py
 
+(require
+  hyrule.argmove [->]
+  hyrule.collections [assoc]
+  hyrule.control [unless])
+
 (import sys
         re
         collections
@@ -33,7 +38,8 @@ The differences that do exist are as follows:
                 _safe-tuple
                 _safe-key]
         hy.core.hy-repr
-        hy._compat [PY3_8 PY3_10])
+        hy._compat [PY3_8 PY3_10]
+        hyrule.misc [inc dec constantly])
 
 (setv __all__ ["pprint" "pformat" "saferepr" "PrettyPrinter" "is_readable" "is_recursive" "pp"])
 

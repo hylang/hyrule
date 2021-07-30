@@ -1,75 +1,8 @@
-(import hy.contrib.walk *)
-(require hy.contrib.walk *)
+(require
+  hyrule [let smacrolet])
+(import
+  sys)
 
-(import pytest)
-
-(setv walk-form '(print {"foo" "bar"
-                         "array" [1 2 3 [4]]
-                         "something" (+ 1 2 3 4)
-                         "quoted?" '(foo)
-                         "fstring" f"this {pytest} is {formatted !s :>{(+ width 3)}}"}))
-
-(setv walk-form-inc '(print {"foo" "bar"
-                             "array" [2 3 4 [5]]
-                             "something" (+ 2 3 4 5)
-                             "quoted?" '(foo)
-                             "fstring" f"this {pytest} is {formatted !s :>{(+ width 4)}}"}))
-
-(defn collector [acc x]
-  (.append acc x)
-  None)
-
-(defn inc-ints [x]
-  (if (isinstance x int) (+ x 1) x))
-
-(defn test-walk-identity []
-  (assert (= (walk (fn [x] x) (fn [x] x) walk-form)
-             walk-form)))
-
-(defn test-walk []
-  (setv acc [])
-  (assert (= (list (walk (partial collector acc) (fn [x] x) walk-form))
-             [None None]))
-  (assert (= acc (list walk-form)))
-  (setv acc [])
-  (assert (= (walk (fn [x] x) (partial collector acc) walk-form)
-             None))
-  (assert (= acc [walk-form])))
-
-(defn test-walk-iterators []
-  (assert (= (walk (fn [x] (* 2 x)) (fn [x] x)
-                   (rest [1 [2 [3 [4]]]]))
-             [[2 [3 [4]] 2 [3 [4]]]])))
-
-;; test that expressions within f-strings are also walked
-;; https://github.com/hylang/hy/issues/1843
-(defn test-walking-update []
-  (assert (= (hy.as-model (prewalk inc-ints walk-form)) walk-form-inc))
-  (assert (= (hy.as-model (postwalk inc-ints walk-form)) walk-form-inc)))
-
-(defmacro foo-walk []
-  42)
-
-(defn test-macroexpand-all []
-  ;; make sure a macro from the current module works
-  (assert (= (macroexpand-all '(foo-walk))
-             '42))
-  (assert (= (macroexpand-all '(-> 1 a))
-             '(a 1)))
-  ;; macros within f-strings should also be expanded
-  ;; related to https://github.com/hylang/hy/issues/1843
-  (assert (= (macroexpand-all 'f"{(foo-walk)}")
-             'f"{42}"))
-  (assert (= (macroexpand-all 'f"{(-> 1 a)}")
-             'f"{(a 1)}"))
-
-  (defmacro require-macro []
-    `(do
-       (require tests.resources.macros [test-macro :as my-test-macro])
-       (my-test-macro)))
-
-  (assert (= (get (macroexpand-all '(require-macro)) -1)
-             '(setv blah 1))))
 
 (defn test-smacrolet []
   (setv form '(do
@@ -95,6 +28,7 @@
                       (setv bar (fn [a [b 1]] (* b (inc a))))
                       (* b (bar 7))))))
 
+
 (defn test-let-basic []
   (assert (= (let [a 0] a) 0))
   (setv a "a"
@@ -117,6 +51,7 @@
   ;; scope of q is limited to let body
   (assert (not-in "q" (.keys (vars)))))
 
+
 ;; let should substitute within f-strings
 ;; related to https://github.com/hylang/hy/issues/1843
 (defn test-let-fstring []
@@ -131,6 +66,7 @@
       (assert (= f"double f >{b :^{(+ a 1)}}<"
                  "double f >  y  <")))))
 
+
 (defn test-let-sequence []
   ;; assignments happen in sequence, not parallel.
   (let [a "a"
@@ -140,6 +76,7 @@
     (let [c "c"
           abc (+ ab c)]
       (assert (= abc "abc")))))
+
 
 (defn test-let-early []
   (setv a "a")
@@ -155,11 +92,13 @@
       (assert (= b 15))))
   (assert (= a "a")))
 
+
 (defn test-let-special []
   ;; special forms in function position still work as normal
   (let [, 1]
     (assert (= (, , ,)
                (, 1 1)))))
+
 
 (defn test-let-quasiquote []
   (setv a-symbol 'a)
@@ -176,6 +115,7 @@
     (assert (= (hy.as-model `(foo `(bar [a] ~@[a] ~@~(hy.models.List [a 'a `a]) ~~@[a])))
                '(foo `(bar [a] ~@[a] ~@["x" a a] ~"x"))))))
 
+
 (defn test-let-except []
   (let [foo 42
         bar 33]
@@ -191,6 +131,7 @@
         (assert (isinstance foo Exception))))
     ;; let binding did not get clobbered.
     (assert (= foo 42))))
+
 
 (defn test-let-mutation []
   (setv foo 42)
@@ -220,11 +161,13 @@
   (assert (= foo 42))
   (assert (= baz 3)))
 
+
 (defn test-let-break []
   (for [x (range 3)]
     (let [done (% x 2)]
       (if done (break))))
   (assert (= x 1)))
+
 
 (defn test-let-continue []
   (let [foo []]
@@ -233,6 +176,7 @@
         (if odd (continue))
         (.append foo x)))
     (assert (= foo [0 2 4 6 8]))))
+
 
 (defn test-let-yield []
   (defn grind []
@@ -244,12 +188,14 @@
   (assert (= (tuple (grind))
              (, 0 1 2))))
 
+
 (defn test-let-return []
   (defn get-answer []
     (let [answer 42]
       (return answer)))
   (assert (= (get-answer)
              42)))
+
 
 (defn test-let-import []
   (let [types 6]
@@ -260,6 +206,7 @@
   ;; import happened in Python scope.
   (assert (in "types" (vars)))
   (assert (isinstance types types.ModuleType)))
+
 
 (defn test-let-defclass []
   (let [Foo 42
@@ -273,6 +220,7 @@
     (assert (= quux "quux")))
   ;; defclass always creates a python-scoped variable, even if it's a let binding name
   (assert (= Foo.x 42)))
+
 
 (defn test-let-dot []
   (setv foo (fn [])
@@ -298,6 +246,7 @@
                   [a])
                2))))
 
+
 (defn test-let-positional []
   (let [a 0
         b 1
@@ -312,6 +261,7 @@
     (assert (= a 0))
     (assert (= b 1))
     (assert (= c 300))))
+
 
 (defn test-let-rest []
   (let [xs 6
@@ -331,6 +281,7 @@
     (assert (= c 64))
     (assert (= a 88))))
 
+
 (defn test-let-kwargs []
   (let [kws 6
         &kwargs 13]
@@ -339,6 +290,7 @@
     (assert (= kws 6))
     (assert (= (foo :a 1)
                (, 13 {"a" 1})))))
+
 
 (defn test-let-optional []
   (let [a 1
@@ -351,6 +303,7 @@
     (assert (= (foo 10 20 30)
                (, 10 20 30)))))
 
+
 (defn test-let-closure []
   (let [count 0]
     (defn +count [[x 1]]
@@ -361,14 +314,17 @@
   (assert (= 2 (+count)))
   (assert (= 42 (+count 40))))
 
+
 (defmacro triple [a]
   (setv g!a (hy.gensym a))
   `(do
      (setv ~g!a ~a)
      (+ ~g!a ~g!a ~g!a)))
 
+
 (defmacro ap-triple []
   '(+ a a a))
+
 
 (defn test-let-macros []
   (let [a 1
@@ -381,6 +337,7 @@
     (assert (= b 3))
     (assert (= c 3))))
 
+
 (defn test-let-rebind []
   (let [x "foo"
         y "bar"
@@ -389,6 +346,7 @@
         x (+ x x)]
     (assert (= x "foobarfoobar"))
     (assert (= y "barfoobar"))))
+
 
 (defn test-let-unpacking []
   (let [[a b] [1 2]
@@ -405,6 +363,7 @@
     (assert (= c 1))
     (assert (= nrest [2]))))
 
+
 (defn test-let-unpacking-rebind []
   (let [[a b] [:foo :bar]
         [a #* c] (range 3)
@@ -414,6 +373,7 @@
     (assert (= c [1 2]))
     (assert (= head 0))
     (assert (= tail [:bar [1 2]]))))
+
 
 (defn test-no-extra-eval-of-function-args []
   ; https://github.com/hylang/hy/issues/2116
@@ -427,6 +387,7 @@
   (assert (= (g) 5))
   (assert (= l [1])))
 
+
 (defn test-let-optional []
   (let [a 1
         b 6
@@ -437,6 +398,7 @@
                   (, 1 "b" 2)))
        (assert (= (foo :b 20 :a 10 :c 30)
                   (, 10 20 30)))))
+
 
 (when (>= sys.version-info (, 3 10)) (hy.eval
 '(defn test-let-with-pattern-matching []
@@ -457,3 +419,4 @@
     (assert (= 42
                (match [1 2 3]
                     _ _)))))))
+

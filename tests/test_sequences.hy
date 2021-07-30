@@ -1,11 +1,13 @@
-(require hy.contrib.sequences [seq defseq])
-
+(require
+  hyrule [seq defseq])
 (import
-  hy.contrib.sequences [Sequence end-sequence])
+  hyrule [Sequence end-sequence inc dec rest])
+
 
 (defn test-infinite-sequence []
   (assert (= (list (cut (seq [n] n) 5))
              [0 1 2 3 4])))
+
 
 (defn test-indexing-sequence []
   (defseq shorty [n]
@@ -21,6 +23,7 @@
   (assert (= (get shorty -1)
              (get 0-to-9 -1))
           "getting element -1 failed"))
+
 
 (defn test-slicing-sequence []
   (defseq shorty [n]
@@ -43,6 +46,7 @@
              (list (cut 0-to-9 8 2 -2)))
           "negative cut failed"))
 
+
 (defn test-recursive-sequence []
   (defseq fibonacci [n]
     (cond [(= n 0) 0]
@@ -61,6 +65,7 @@
   (assert (= (list (cut fibonacci 9))
              [0 1 1 2 3 5 8 13 21])
           "taking 8 elements of fibonacci didn't match"))
+
 
 (defn test-nested-functions []
   (defseq primes [n]

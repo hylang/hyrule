@@ -1,8 +1,10 @@
-(import pytest)
-(import collections.abc)
-(import itertools [cycle count islice])
-(import hy.contrib.destructure [destructure])
-(require hy.contrib.destructure [setv+ dict=: defn+ fn+ let+])
+(require
+  hyrule [setv+ dict=: defn+ fn+ let+])
+(import
+  pytest
+  collections.abc
+  itertools [cycle count islice]
+  hyrule [destructure])
 
 (defn iterator? [x]
   (isinstance x collections.abc.Iterator))

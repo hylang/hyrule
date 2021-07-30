@@ -102,12 +102,17 @@ Iterator Pattern
 Iterator patterns are specified using round brackets. They are the same as list patterns, but can be safely used with infinite generators. The iterator pattern does not allow for recursive destructuring within the ``:as`` special option.
 "
 
-(require hy.contrib.walk [let])
+(require
+  hyrule.argmove [->>]
+  hyrule.control [unless]
+  hyrule.macrotools [defmacro! defmacro/g!]
+  hyrule.let [let])
 (import
   itertools [starmap chain count]
   functools [reduce]
-  hy.contrib.walk [by2s]
-  hy.pyops *)
+  hy.pyops *
+  hyrule.iterables [rest]
+  hyrule.let [by2s])
 
 (defmacro! ifp [o!pred o!expr #* clauses]
   "Takes a binary predicate ``pred``, an expression ``expr``, and a set of

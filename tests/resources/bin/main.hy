@@ -1,3 +1,5 @@
+(require hyrule [defmain])
+
 (defmain [#* args]
   (print (+ "<" (.join "|" (cut args 1 None)) ">"))
   (print "Hello World")

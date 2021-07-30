@@ -1,5 +1,10 @@
-(import  hy.errors [HyMacroExpansionError]  hy.pyops *)
-(require hy.extra.anaphoric *)
+(require
+  hyrule [->>]
+  hyrule.anaphoric *)
+(import
+  hy.errors [HyMacroExpansionError]
+  hy.pyops *
+  hyrule [inc])
 
 (defn even? [x] (= (% x 2) 0))
 (defn odd?  [x] (= (% x 2) 1))

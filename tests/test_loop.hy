@@ -1,5 +1,9 @@
-(require hy.contrib.loop [loop])
-(import sys)
+(require
+  hyrule [loop])
+(import
+  sys
+  hyrule [inc dec])
+
 
 (defn tco-sum [x y]
   (loop [[x x] [y y]]
@@ -8,11 +12,13 @@
          [(< y 0) (recur (dec x) (inc y))]
          [True x])))
 
+
 (defn non-tco-sum [x y]
   (cond
    [(> y 0) (inc (non-tco-sum x (dec y)))]
    [(< y 0) (dec (non-tco-sum x (inc y)))]
    [True x]))
+
 
 (defn test-loop []
   ;; non-tco-sum should fail
@@ -31,6 +37,7 @@
    (else
     (assert (= n 10100)))))
 
+
 (defn test-recur-in-wrong-loc []
   (defn bad-recur [n]
     (loop [[i n]]
@@ -44,6 +51,7 @@
      (assert True))
    (else
     (assert False))))
+
 
 (defn test-recur-string []
   "test that `loop` doesn't touch a string named `recur`"

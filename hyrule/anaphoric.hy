@@ -10,10 +10,6 @@ concise and easy to read.
 
     -- Wikipedia (https://en.wikipedia.org/wiki/Anaphoric_macro)
 
-To use these macros you need to require the ``hy.extra.anaphoric`` module like so:
-
-``(require hy.extra.anaphoric *)``
-
 These macros are implemented by replacing any use of the designated
 anaphoric symbols (``it``, in most cases) with a gensym. Consequently,
 it's unwise to nest these macros where symbol replacement is happening.
@@ -21,6 +17,10 @@ Symbol replacement typically takes place in ``body`` or ``form``
 parameters, where the output of the expression may be returned. It is also
 recommended to avoid using an affected symbol as something other than a
 variable name, as in ``(print \"My favorite Stephen King book is\" 'it)``."
+
+(require
+  hyrule.macrotools [defmacro!]
+  hyrule.argmove [->])
 
 ;;; Macro to help write anaphoric macros
 
@@ -250,6 +250,7 @@ variable name, as in ``(print \"My favorite Stephen King book is\" 'it)``."
     ``#%`` determines the parameter list by the presence of a ``%*`` or ``%**``
     symbol and by the maximum ``%i`` symbol found *anywhere* in the expression,
     so nesting of ``#%`` forms is not recommended."
+  (import hyrule [flatten inc])
   (setv %symbols (sfor a (flatten [expr])
                        :if (and (isinstance a hy.models.Symbol)
                                 (.startswith a '%))
@@ -278,7 +279,7 @@ variable name, as in ``(print \"My favorite Stephen King book is\" 'it)``."
 
 (defn recur-sym-replace [d form]
   "Recursive symbol replacement."
-  (import collections.abc)
+  (import hyrule [coll?])
   (cond
     [(isinstance form hy.models.Symbol)
       (.get d form form)]
