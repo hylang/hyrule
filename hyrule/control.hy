@@ -63,8 +63,6 @@
 (defmacro defmain [args #* body]
   "Write a function named \"main\" and do the 'if __main__' dance.
 
-  .. versionadded:: 0.10.1
-
   The ``defmain`` macro defines a main function that is immediately called
   with ``sys.argv`` as arguments if and only if this file is being executed
   as a script.  In other words, this:
@@ -122,8 +120,6 @@
 
 (defmacro lif [#* args]
   "Like `if`, but anything that is not None is considered true.
-
-  .. versionadded:: 0.10.0
 
   For those that prefer a more Lispy ``if`` clause, we have
   ``lif``. This *only* considers ``None`` to be false! All other

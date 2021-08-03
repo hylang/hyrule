@@ -93,8 +93,6 @@
 (defn flatten [coll]
   "Return a single flat list expanding all members of `coll`.
 
-  .. versionadded:: 0.9.12
-
   Returns a single list of all the items in *coll*, by flattening all
   contained lists and/or tuples.
 

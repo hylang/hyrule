@@ -1,6 +1,4 @@
-".. versionadded:: 0.12.0
-
-The sequences module contains a few macros for declaring sequences that are
+"The sequences module contains a few macros for declaring sequences that are
 evaluated only as much as the client code requires. Unlike generators, they
 allow accessing the same element multiple times. They cache calculated values,
 and the implementation allows for recursive definition of sequences without

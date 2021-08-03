@@ -49,8 +49,6 @@
 (defmacro as-> [head name #* rest]
   "Beginning with `head`, expand a sequence of assignments `rest` to `name`.
 
-  .. versionadded:: 0.12.0
-
   Each assignment is passed to the subsequent form. Returns the final assignment,
   leaving the name bound to it in the local scope.
 
@@ -131,8 +129,6 @@
 
 (defmacro doto [form #* expressions]
   "Perform possibly mutating `expressions` on `form`, returning resulting obj.
-
-  .. versionadded:: 0.10.1
 
   ``doto`` is used to simplify a sequence of method calls to an object.
 

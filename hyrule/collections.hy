@@ -83,8 +83,6 @@
 (defn coll? [coll]
   "Returns ``True`` if *x* is iterable and not a string.
 
-  .. versionadded:: 0.10.0
-
   Examples:
     ::
 

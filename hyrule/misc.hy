@@ -34,8 +34,6 @@
 (defn constantly [value]
   "Create a new function that always returns `value` regardless of its input.
 
-  .. versionadded:: 0.12.0
-
   Create a new function that always returns the given value, regardless of
   the arguments given to it.
 
@@ -256,8 +254,6 @@
 
 (defn xor [a b]
   "Perform exclusive or between `a` and `b`.
-
-  .. versionadded:: 0.12.0
 
   ``xor`` performs the logical operation of exclusive OR. It takes two arguments.
   If exactly one argument is true, that argument is returned. If neither is true,

@@ -1,7 +1,5 @@
 ;;; Hy anaphoric macros
-".. versionadded:: 0.9.12
-
-The anaphoric macros module makes functional programming in Hy very
+"The anaphoric macros module makes functional programming in Hy very
 concise and easy to read.
 
     An anaphoric macro is a type of programming macro that
