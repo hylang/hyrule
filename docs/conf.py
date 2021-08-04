@@ -1,3 +1,6 @@
+import sys, os; sys.path.insert(0, os.path.abspath('..'))
+  # Read the Docs needs this bit to import Hyrule.
+
 html_title = 'The Hyrule manual'
 
 extensions = [
