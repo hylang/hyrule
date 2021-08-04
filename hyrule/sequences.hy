@@ -120,8 +120,5 @@ This results in the sequence ``[0 1 1 2 3 5 8 13 21 34 ...]``.
   Examples:
     ::
 
-       => (seq [n] (if (< n 5) n (end-sequence)))
-
-  Raise:
-    IndexError: to signal end of sequence"
+       => (seq [n] (if (< n 5) n (end-sequence)))"
   (raise (IndexError "list index out of range")))

@@ -8,7 +8,7 @@
   "Like `defmacro`, but symbols prefixed with 'g!' are gensymed.
 
   ``defmacro/g!`` is a special version of ``defmacro`` that is used to
-  automatically generate :hy:func:`gensym <hy.core.language.gensym>` for
+  automatically generate :hy:func:`gensyms <hy.gensym>` for
   any symbol that starts with
   ``g!``.
 
@@ -131,7 +131,7 @@
 (defmacro with-gensyms [args #* body]
   "Execute `body` with `args` as bracket of names to gensym for use in macros.
 
-  ``with-gensym`` is used to generate a set of :hy:func:`gensym <hy.core.language.gensym>`
+  ``with-gensym`` is used to generate a set of :hy:func:`gensyms <hy.gensym>`
   for use in a macro. The following code:
 
   Examples:

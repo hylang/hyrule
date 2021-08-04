@@ -47,8 +47,8 @@
   ``None``. (To collect return values, use :hy:macro:`list-n`
   instead.) Negative values of the count are treated as 0.
 
-  This macro is implemented as a :hy:macro:`for` loop, so you can use
-  :hy:macro:`break` and :hy:macro:`continue` in the body.
+  This macro is implemented as a :hy:func:`for` loop, so you can use
+  :hy:func:`break` and :hy:func:`continue` in the body.
 
   ::
 

@@ -184,8 +184,8 @@ variable name, as in ``(print \"My favorite Stephen King book is\" 'it)``."
 
 
 (defmacro! ap-reduce [form o!xs [initial-value None]]
-  "This macro is an anaphoric version of :py:func:`reduce`. It works as
-  follows:
+  "This macro is an anaphoric version of :py:func:`functools.reduce`. It works
+  as follows:
 
   - Bind ``acc`` to the first element of ``xs``, bind ``it`` to the
     second, and evaluate ``form``.
