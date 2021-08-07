@@ -17,10 +17,15 @@
 
 (defn test-coll? []
   (assert (coll? [1 2 3]))
+  (assert (coll? []))
   (assert (coll? {"a" 1 "b" 2}))
+  (assert (coll? #{1 2}))
   (assert (coll? (range 10)))
+  (assert (coll? (bytearray b"abc")))
   (assert (not (coll? "abc")))
-  (assert (not (coll? 1))))
+  (assert (not (coll? b"abc")))
+  (assert (not (coll? 1)))
+  (assert (not (coll? None))))
 
 
 (defn test-distinct []
