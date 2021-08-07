@@ -1,6 +1,6 @@
 (import
   itertools [count islice]
-  hyrule [butlast coll? distinct drop-last flatten])
+  hyrule [butlast coll? distinct drop-last flatten rest])
 
 
 (defn test-butlast []
@@ -68,3 +68,9 @@
        (except [e [TypeError]] (assert (in "not a collection" (str e)))))
   (try (flatten 12.34)
        (except [e [TypeError]] (assert (in "not a collection" (str e))))))
+
+
+(defn test-rest []
+  (assert (= (list (rest [1 2 3 4 5])) [2 3 4 5]))
+  (assert (= (list (islice (rest (count 8)) 3)) [9 10 11]))
+  (assert (= (list (rest [])) [])))
