@@ -6,7 +6,8 @@
   itertools [islice]
   collections [OrderedDict]
   hy.reserved
-  hyrule.collections [coll? prewalk walk]
+  hyrule.collections [prewalk walk]
+  hyrule.iterables [coll?]
   hyrule.macrotools [macroexpand-all])
 
 

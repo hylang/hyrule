@@ -1,6 +1,6 @@
 (import
-  collections.abc [Iterable]
-  functools [partial])
+  functools [partial]
+  hyrule.iterables [coll?])
 
 
 (defmacro "#:" [key]
@@ -78,30 +78,6 @@
                 [])
               (lfor [i x] (enumerate (+ (, k1 v1) other-kvs))
                     (if (% i 2) x `(get ~c ~x))))))
-
-
-(defn coll? [coll]
-  "Returns ``True`` if *x* is iterable and not a string.
-
-  Examples:
-    ::
-
-       => (coll? [1 2 3 4])
-       True
-
-    ::
-
-       => (coll? {\"a\" 1 \"b\" 2})
-       True
-
-    ::
-
-       => (coll? \"abc\")
-       False
-  "
-  (and
-    (isinstance coll Iterable)
-    (not (isinstance coll str))))
 
 
 (defmacro ncut [seq key1 #* keys]

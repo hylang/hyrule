@@ -1,7 +1,7 @@
 (import
   hy.compiler [HyASTCompiler calling-module]
-  hyrule.iterables [distinct flatten rest]
-  hyrule.collections [coll? walk])
+  hyrule.iterables [coll? distinct flatten rest]
+  hyrule.collections [walk])
 
 
 (defmacro defmacro/g! [name args #* body]

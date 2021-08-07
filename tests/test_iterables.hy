@@ -1,6 +1,6 @@
 (import
   itertools [count islice]
-  hyrule [butlast distinct drop-last flatten])
+  hyrule [butlast coll? distinct drop-last flatten])
 
 
 (defn test-butlast []
@@ -13,6 +13,14 @@
   ; with an infinite sequence
   (assert (= (list (islice (butlast (count 10)) 5))
              [10 11 12 13 14])))
+
+
+(defn test-coll? []
+  (assert (coll? [1 2 3]))
+  (assert (coll? {"a" 1 "b" 2}))
+  (assert (coll? (range 10)))
+  (assert (not (coll? "abc")))
+  (assert (not (coll? 1))))
 
 
 (defn test-distinct []
