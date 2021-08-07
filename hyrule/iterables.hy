@@ -32,7 +32,8 @@
 
 
 (defn coll? [coll]
-  "Returns ``True`` if *x* is iterable and not a string.
+  "Returns ``True`` if *x* inherits from ``Iterable`` but not ``str``
+  or ``bytes``.
 
   Examples:
     ::
@@ -52,7 +53,7 @@
   "
   (and
     (isinstance coll Iterable)
-    (not (isinstance coll str))))
+    (not (isinstance coll (, str bytes)))))
 
 
 (defn distinct [coll]
