@@ -1,6 +1,6 @@
 (import
-  itertools [islice tee]
-  hyrule.collections [coll?])
+  collections.abc [Iterable]
+  itertools [islice tee])
 
 
 (defn butlast [coll]
@@ -29,6 +29,31 @@
        [10 11 12 13 14]
   "
   (drop-last 1 coll))
+
+
+(defn coll? [coll]
+  "Returns ``True`` if *x* inherits from ``Iterable`` but not ``str``
+  or ``bytes``.
+
+  Examples:
+    ::
+
+       => (coll? [1 2 3 4])
+       True
+
+    ::
+
+       => (coll? {\"a\" 1 \"b\" 2})
+       True
+
+    ::
+
+       => (coll? \"abc\")
+       False
+  "
+  (and
+    (isinstance coll Iterable)
+    (not (isinstance coll (, str bytes)))))
 
 
 (defn distinct [coll]

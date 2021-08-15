@@ -1,8 +1,7 @@
 (require
   hyrule [assoc])
 (import
-  itertools [count islice]
-  hyrule [coll? rest])
+  itertools [count islice])
 
 
 (defn test-assoc []
@@ -28,17 +27,3 @@
   (assoc (f)  "a" 1  "b" 2  "c" 3)
   (assert (= d {"a" 1  "b" 2  "c" 3}))
   (assert (= counter [1])))
-
-
-(defn test-coll? []
-  (assert (coll? [1 2 3]))
-  (assert (coll? {"a" 1 "b" 2}))
-  (assert (coll? (range 10)))
-  (assert (not (coll? "abc")))
-  (assert (not (coll? 1))))
-
-
-(defn test-rest []
-  (assert (= (list (rest [1 2 3 4 5])) [2 3 4 5]))
-  (assert (= (list (islice (rest (count 8)) 3)) [9 10 11]))
-  (assert (= (list (rest [])) [])))

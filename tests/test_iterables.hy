@@ -1,6 +1,6 @@
 (import
   itertools [count islice]
-  hyrule [butlast distinct drop-last flatten])
+  hyrule [butlast coll? distinct drop-last flatten rest])
 
 
 (defn test-butlast []
@@ -13,6 +13,19 @@
   ; with an infinite sequence
   (assert (= (list (islice (butlast (count 10)) 5))
              [10 11 12 13 14])))
+
+
+(defn test-coll? []
+  (assert (coll? [1 2 3]))
+  (assert (coll? []))
+  (assert (coll? {"a" 1 "b" 2}))
+  (assert (coll? #{1 2}))
+  (assert (coll? (range 10)))
+  (assert (coll? (bytearray b"abc")))
+  (assert (not (coll? "abc")))
+  (assert (not (coll? b"abc")))
+  (assert (not (coll? 1)))
+  (assert (not (coll? None))))
 
 
 (defn test-distinct []
@@ -60,3 +73,9 @@
        (except [e [TypeError]] (assert (in "not a collection" (str e)))))
   (try (flatten 12.34)
        (except [e [TypeError]] (assert (in "not a collection" (str e))))))
+
+
+(defn test-rest []
+  (assert (= (list (rest [1 2 3 4 5])) [2 3 4 5]))
+  (assert (= (list (islice (rest (count 8)) 3)) [9 10 11]))
+  (assert (= (list (rest [])) [])))
