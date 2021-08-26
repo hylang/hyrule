@@ -15,6 +15,8 @@ setuptools.setup(
             'Sphinx == 3.5.4',
             'sphinxcontrib-hydomain @ git+https://github.com/hylang/sphinxcontrib-hydomain@master#egg=sphinxcontrib-hydomain-1.0']),
     packages = setuptools.find_packages(),
+    package_data = {
+        'hyrule': ['*.hy', '__pycache__/*']},
     author = "Paul Tagliamonte",
     author_email = "tag@pault.ag",
     description = 'A utility library for the Hy programming language',
