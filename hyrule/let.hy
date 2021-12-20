@@ -6,7 +6,7 @@
   itertools [islice]
   collections [OrderedDict]
   hy.reserved
-  hyrule.collections [prewalk walk]
+  hyrule.collections [prewalk walk by2s]
   hyrule.iterables [coll?]
   hyrule.macrotools [macroexpand-all])
 
@@ -15,18 +15,6 @@
   "Checks whether form is a non-empty hy.models.Expression"
   (and (isinstance form hy.models.Expression)
        form))
-
-(defn by2s [x]
-  #[[Returns the given iterable in pairs.
-  (list (by2s (range 6))) => [(, 0 1) (, 2 3) (, 4 5)] #]]
-  (setv x (iter x))
-  (while True
-    (try
-      (yield (, (next x) (next x)))
-      (except [StopIteration]
-        (break)))))
-
-
 
 (setv _mangled-core-macros (frozenset
   (map hy.mangle (hy.reserved.macros))))
