@@ -281,22 +281,3 @@
       [(coll? form) (self.handle-coll)]
         ;; recursive base case--it's an atom. Put it back.
       [True (self.handle-base)])))
-
-(defmacro smacrolet [bindings #* body]
-  "symbol macro let.
-
-  Replaces symbols in body, but only where it would be a valid let binding.
-  The bindings pairs the target symbol and the expansion form for that symbol.
-  "
-  (if (% (len bindings) 2)
-      (raise (ValueError "bindings must be paired")))
-  (for [k (cut bindings None None 2)]
-    (if (not (isinstance k hy.models.Symbol))
-      (raise (TypeError "bind targets must be symbols")))
-    (if (in '. k)
-      (raise (ValueError "binding target may not contain a dot"))))
-  (setv bindings (dict (by2s bindings))
-        body (macroexpand-all body &compiler))
-  (symbolexpand `(do ~@body)
-                (fn [symbol]
-                  (.get bindings symbol symbol))))

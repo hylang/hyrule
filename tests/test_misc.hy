@@ -1,6 +1,7 @@
 (require
-  hyrule [comment of])
+  hyrule [comment of smacrolet])
 (import
+  pytest
   typing [List Dict]
   hyrule [constantly dec inc parse-args xor])
 
@@ -66,3 +67,21 @@
   ; Of two distinct false values, the second is returned.
   (assert (= (xor False 0) 0))
   (assert (= (xor 0 False) False)))
+
+(defn test-smacrolet []
+  (with [exc (pytest.raises UnboundLocalError)]
+    (smacrolet [b c]
+      b))
+  (assert (in "local variable 'c' referenced before assignment" (str exc)))
+  (assert (not-in "b" (locals)))
+
+  (setv c 42)
+  (assert (= 42 (smacrolet [b c] b)))
+
+  (smacrolet [b c]
+    (defn afunc [a [b 1]] (+ a b)))
+  (assert (= 2 (afunc 1)))
+
+  (smacrolet [foo bar]
+    (setv foo (fn [x] x)))
+  (assert (= 1 (bar 1))))

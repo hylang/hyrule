@@ -1,6 +1,10 @@
 (require
   hyrule.macrotools [defmacro/g!])
 
+(import
+  hy.scoping [ScopeLet]
+  hyrule.collections [by2s])
+
 
 (defmacro comment [#* body]
   "Ignores body and always expands to None
@@ -269,3 +273,43 @@
   (if (and a b)
     False
     (or a b)))
+
+(defmacro smacrolet [bindings #* body]
+  "symbol macro let.
+
+  Replaces symbols in body, but only where it would be a valid let binding. The
+  bindings pairs the target symbol and the expansion form for that symbol
+
+  Examples:
+
+    ::
+
+       (smacrolet [b c]
+         (defn foo [a [b 1]]
+           (* b (+ a 1)))
+         (* b (foo 7)))
+
+    Would compile to::
+
+       (defn foo [a [b 1]]
+         (* b (+ a 1)))
+       (* c (foo 7))
+
+    Notice that the ``b`` symbol defined by the ``defn`` remains unchanged as it
+    is not a valid ``let`` binding. Only the top level ``b`` sym has been
+    replaced with ``c``
+  "
+  (when (% (len bindings) 2)
+    (raise (ValueError "bindings must be paired")))
+
+  (setv scope (.scope.create &compiler ScopeLet))
+  (for [[target value] (by2s bindings)]
+    (when (not (isinstance value hy.models.Symbol))
+      (raise (ValueError "Bind target value must be a Symbol")))
+    (when (not (isinstance target hy.models.Symbol))
+      (raise (ValueError "Bind target must be a Symbol")))
+    (when (in '. target)
+      (raise (ValueError "Bind target must not contain a dot")))
+    (.add scope target (str value)))
+  (with [scope]
+    (.compile &compiler `(do ~@body))))
