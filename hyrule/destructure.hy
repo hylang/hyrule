@@ -105,8 +105,7 @@ Iterator patterns are specified using round brackets. They are the same as list 
 (require
   hyrule.argmove [->>]
   hyrule.control [unless]
-  hyrule.macrotools [defmacro! defmacro/g!]
-  hyrule.let [let])
+  hyrule.macrotools [defmacro! defmacro/g!])
 (import
   itertools [starmap chain count]
   functools [reduce]
