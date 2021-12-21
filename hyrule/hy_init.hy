@@ -4,7 +4,6 @@
   hyrule.collections *
   hyrule.control *
   hyrule.destructure *
-  hyrule.let *
   hyrule.macrotools *
   hyrule.misc *
   hyrule.sequences *)

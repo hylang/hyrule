@@ -105,14 +105,13 @@ Iterator patterns are specified using round brackets. They are the same as list 
 (require
   hyrule.argmove [->>]
   hyrule.control [unless]
-  hyrule.macrotools [defmacro! defmacro/g!]
-  hyrule.let [let])
+  hyrule.macrotools [defmacro! defmacro/g!])
 (import
   itertools [starmap chain count]
   functools [reduce]
   hy.pyops *
   hyrule.iterables [rest]
-  hyrule.let [by2s])
+  hyrule.collections [by2s])
 
 (defmacro! ifp [o!pred o!expr #* clauses]
   "Takes a binary predicate ``pred``, an expression ``expr``, and a set of
