@@ -22,7 +22,9 @@ setuptools.setup(
     description = 'A utility library for the Hy programming language',
     long_description = long_description,
     license = 'Expat',
-    url = "http://hylang.org/",
+    project_urls = dict(
+        Documentation = 'https://hyrule.readthedocs.io',
+        Source = 'https://github.com/hylang/hyrule'),
     platforms = ['any'],
     classifiers = [
         "Development Status :: 4 - Beta",
