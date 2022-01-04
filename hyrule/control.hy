@@ -13,6 +13,7 @@
   to ``(f (gfor ...))``.
 
   Examples:
+
   ::
      => (cfor tuple x (range 10) :if (% x 2) x)
      (, 1 3 5 7 9)
