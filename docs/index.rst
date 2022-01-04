@@ -71,7 +71,7 @@ Reference
 ``pprint`` — Pretty-printing data structures
 ----------------------------------------------------------------------
 
-.. hy:automodule:: hyrule.pprint
+.. hy:automodule:: hyrule.hypprint
   :members:
   :macros:
   :tags:
