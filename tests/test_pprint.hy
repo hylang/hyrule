@@ -1,41 +1,39 @@
 (import
   pytest
-  io
-  pprint :as pypprint
   hy._compat [PY3_8]
-  hy.contrib.pprint :as pprint)
+  hyrule [PrettyPrinter pformat recursive? readable?])
 
 (defn large-list-b []
   (list (range 200)))
 
 (defn large-list-a []
   (setv out (list (range 100)))
-  (assoc out -12 (large-list-b))
+  (setv (get out -12) (large-list-b))
   out)
 
 (defn test-basic []
-  (setv pp (pprint.PrettyPrinter))
+  (setv pp (PrettyPrinter))
   (for [safe (, 2 2.0 2j "abc" [3] (, 2 2) {3 3} b"def"
                 (bytearray b"ghi") True False None (large-list-a) (large-list-b))]
-    (assert (not (pprint.recursive? safe)))
-    (assert (pprint.readable? safe))
+    (assert (not (recursive? safe)))
+    (assert (readable? safe))
     (assert (not (pp.isrecursive safe)))
     (assert (pp.isreadable safe))))
 
 (defn test-knotted []
   (setv a (large-list-a)
-        b (large-list-b))
-  (assoc a 50 b)
-  (assoc b 67 a)
-  (setv d (dict))
-  (assoc d 2 d)
-  (assoc d 1 (get d 2))
-  (assoc d 0 (get d 1))
-  (setv pp (pprint.PrettyPrinter))
+        b (large-list-b)
+        (get a 50) b
+        (get b 67) a
+        d (dict)
+        (get d 2) d
+        (get d 1) (get d 2)
+        (get d 0) (get d 1))
+  (setv pp (PrettyPrinter))
 
   (for [icky (, a b d (, d d))]
-    (assert (pprint.recursive? icky))
-    (assert (not (pprint.readable? icky)))
+    (assert (recursive? icky))
+    (assert (not (readable? icky)))
     (assert (pp.isrecursive icky))
     (assert (not (pp.isreadable icky))))
 
@@ -45,16 +43,16 @@
   (del (cut b None))
 
   (for [safe (, a b d (, d d))]
-    (assert (not (pprint.recursive? safe)))
-    (assert (pprint.readable? safe))
+    (assert (not (recursive? safe)))
+    (assert (readable? safe))
     (assert (not (pp.isrecursive safe)))
     (assert (pp.isreadable safe))))
 
 (defn test-unreadable []
-  (setv pp (pprint.PrettyPrinter))
-  (for [unreadable (, (type 3) pprint pprint.recursive?)]
-    (assert (not (pprint.recursive? unreadable)))
-    (assert (not (pprint.readable? unreadable)))
+  (setv pp (PrettyPrinter))
+  (for [unreadable (, (type 3) pytest recursive?)]
+    (assert (not (recursive? unreadable)))
+    (assert (not (readable? unreadable)))
     (assert (not (pp.isrecursive unreadable)))
     (assert (not (pp.isreadable unreadable)))))
 
@@ -74,22 +72,22 @@
  "main_code_runtime_us" 0
  "read_io_runtime_us" 0
  "write_io_runtime_us" 43690}]])
-  (assert (= (pprint.pformat o) exp))
+  (assert (= (pformat o) exp))
 
   ;; Lists
   (setv o (list (range 100))
         exp (% "[%s]" (.join "\n " (map str o))))
-  (assert (= (pprint.pformat o) exp))
+  (assert (= (pformat o) exp))
 
   ;; Tuples
   (setv o (tuple (range 100))
         exp (% "(, %s)" (.join "\n   " (map str o))))
-  (assert (= (pprint.pformat o) exp))
+  (assert (= (pformat o) exp))
 
   ;; Indent paramater
   (setv o (list (range 100))
         exp (% "[   %s]" (.join "\n    " (map str o))))
-  (assert (= (pprint.pformat o :indent 4) exp)))
+  (assert (= (pformat o :indent 4) exp)))
 
 (defn test-nested-indentations []
   (setv o1 (list (range 10))
@@ -98,14 +96,14 @@
         exp #[FOO[
 [   [0 1 2 3 4 5 6 7 8 9]
     {"first" 1  "second" 2  "third" 3}]]FOO])
-  (assert (= (pprint.pformat o :indent 4 :width 39) exp))
+  (assert (= (pformat o :indent 4 :width 39) exp))
 
   (setv exp #[FOO[
 [   [0 1 2 3 4 5 6 7 8 9]
     {   "first" 1
         "second" 2
         "third" 3}]]FOO])
-  (assert (= (pprint.pformat o :indent 4 :width 38) exp)))
+  (assert (= (pformat o :indent 4 :width 38) exp)))
 
 (defn test-width []
   (defclass set2 [set])
@@ -121,10 +119,10 @@
      "1 2"]]]]]]FOO])
 
   (setv o (hy.eval (hy.read-str exp)))
-  (assert (= (pprint.pformat o :width 16) exp))
-  (assert (= (pprint.pformat o :width 17) exp))
-  (assert (= (pprint.pformat o :width 22) exp))
-  (assert (= (pprint.pformat o :width 12) #[FOO[
+  (assert (= (pformat o :width 16) exp))
+  (assert (= (pformat o :width 17) exp))
+  (assert (= (pformat o :width 22) exp))
+  (assert (= (pformat o :width 12) #[FOO[
 [[[[[[1
       2
       3]
@@ -148,24 +146,24 @@
   (setv nested-tuple (, 1 (, 2 (, 3 (, 4 (, 5 6)))))
         nested-dict {1 {2 {3 {4 {5 {6 6}}}}}}
         nested-list [1 [2 [3 [4 [5 [6 []]]]]]])
-  (assert (= (pprint.pformat nested-tuple) (hy.repr nested-tuple)))
-  (assert (= (pprint.pformat nested-dict) (hy.repr nested-dict)))
-  (assert (= (pprint.pformat nested-list) (hy.repr nested-list)))
+  (assert (= (pformat nested-tuple) (hy.repr nested-tuple)))
+  (assert (= (pformat nested-dict) (hy.repr nested-dict)))
+  (assert (= (pformat nested-list) (hy.repr nested-list)))
 
-  (assert (= (pprint.pformat nested-tuple :depth 1) "(, 1 (, ...))"))
-  (assert (= (pprint.pformat nested-dict :depth 1) "{1 {...}}"))
-  (assert (= (pprint.pformat nested-list :depth 1) "[1 [...]]")))
+  (assert (= (pformat nested-tuple :depth 1) "(, 1 (, ...))"))
+  (assert (= (pformat nested-dict :depth 1) "{1 {...}}"))
+  (assert (= (pformat nested-list :depth 1) "[1 [...]]")))
 
 (defn test-str-wrap []
   (setv fox "the quick brown fox jumped over the lazy dog")
   ;; Level 1
-  (assert (= (pprint.pformat fox :width 20) #[[
+  (assert (= (pformat fox :width 20) #[[
 (+ "the quick brown "
    "fox jumped over "
    "the lazy dog")]]))
 
   ;; Nested Levels
-  (assert (= (pprint.pformat (dict :a 1 :b fox :c 2) :width 26)
+  (assert (= (pformat (dict :a 1 :b fox :c 2) :width 26)
              #[[
 {"a" 1
  "b" (+ "the quick brown "
@@ -178,17 +176,17 @@
   indent properly and prefer chunking in blocks of
   length 4"
   (setv letters b"abcdefghijklmnopqrstuvwxyz")
-  (assert (= (pprint.pformat letters :width 29) (hy.repr letters)))
-  (assert (= (pprint.pformat letters :width 22) #[[
+  (assert (= (pformat letters :width 29) (hy.repr letters)))
+  (assert (= (pformat letters :width 22) #[[
 (+ b"abcdefghijklmnop"
    b"qrstuvwxyz")]]))
 
-  (assert (= (pprint.pformat letters :width 21) #[[
+  (assert (= (pformat letters :width 21) #[[
 (+ b"abcdefghijkl"
    b"mnopqrstuvwx"
    b"yz")]]))
 
-  (assert (= (pprint.pformat [letters] :width 21) #[FOO[
+  (assert (= (pformat [letters] :width 21) #[FOO[
 [(+ b"abcdefghijkl"
     b"mnopqrstuvwx"
     b"yz")]]FOO])))
@@ -196,7 +194,7 @@
 (defn test-sort-dicts []
   (setv d (dict.fromkeys "cba"))
   (if PY3_8
-      (assert (= (pprint.pformat d :sort-dicts False)
+      (assert (= (pformat d :sort-dicts False)
                  #[[{"c" None  "b" None  "a" None}]]))
       (with [e (pytest.raises ValueError)]
-        (pprint.pformat d :sort-dicts False))))
+        (pformat d :sort-dicts False))))
