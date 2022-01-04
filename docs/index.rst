@@ -60,14 +60,6 @@ Reference
   :macros:
   :tags:
 
-``let`` — Classical Lisp scoping
-----------------------------------------------------------------------
-
-.. hy:automodule:: hyrule.let
-  :members:
-  :macros:
-  :tags:
-
 ``macrotools`` — Tools for writing and handling macros
 ----------------------------------------------------------------------
 
