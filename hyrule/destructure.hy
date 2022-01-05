@@ -7,12 +7,6 @@ their arguments.
 Introduction
 ============
 
-To use these macros, you need to require them like so:
-
-.. code-block:: hy
-
-    (require hy.contrib.destructure [setv+ fn+ defn+ let+ defn/a+ fn/a+])
-
 Destructuring allows one to easily peek inside a data structure and assign names to values within. For example,
 
 .. code-block:: hy
