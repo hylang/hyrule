@@ -16,81 +16,67 @@ Reference
 ----------------------------------------------------------------------
 
 .. hy:automodule:: hyrule.anaphoric
-  :members:
-  :macros:
-  :tags:
+  :macros: #%, ap-if, ap-each, ap-each-while, ap-map, ap-map-when,
+    ap-filter, ap-reject, ap-dotimes, ap-first, ap-last, ap-reduce
 
 ``argmove`` — Macros for calls with unusual argument placement 
 ----------------------------------------------------------------------
 
 .. hy:automodule:: hyrule.argmove
-  :members:
-  :macros:
-  :tags:
+  :macros: ->, ->>, as->, doto
 
 ``collections`` — Tools for data structures
 ----------------------------------------------------------------------
 
 .. hy:automodule:: hyrule.collections
-  :members:
-  :macros:
-  :tags:
+  :members: postwalk, prewalk, walk
+  :macros: #:, assoc, ncut
 
 ``control`` — Control structures
 ----------------------------------------------------------------------
 
 .. hy:automodule:: hyrule.control
-  :members:
-  :macros:
-  :tags:
+  :macros: cfor, defmain, do-n, ifp, lif, list-n, loop, unless
 
 ``destructure`` — Macros for destructuring collections
 ----------------------------------------------------------------------
 
 .. hy:automodule:: hyrule.destructure
-  :members:
-  :macros:
-  :tags:
+  :macros: defn+, defn/a+, dict=:, fn+, fn/a+, let+, setv+
 
 ``iterables`` — Tools for iterable objects
 ----------------------------------------------------------------------
 
 .. hy:automodule:: hyrule.iterables
-  :members:
-  :macros:
-  :tags:
+  :members: butlast, coll?, distinct, drop-last, flatten, rest
 
 ``macrotools`` — Tools for writing and handling macros
 ----------------------------------------------------------------------
 
 .. hy:automodule:: hyrule.macrotools
-  :members:
-  :macros:
-  :tags:
+  :members: macroexpand-all
+  :macros: defmacro/g!, defmacro!, with-gensyms
 
 ``pprint`` — Pretty-printing data structures
 ----------------------------------------------------------------------
 
 .. hy:automodule:: hyrule.hypprint
-  :members:
-  :macros:
-  :tags:
+  :members: PrettyPrinter, pformat, pp, pprint, saferepr,
+      readable?, recursive?
 
 ``sequences`` — Lazy, indexable iterables
 ----------------------------------------------------------------------
 
 .. hy:automodule:: hyrule.sequences
-  :members:
-  :macros:
-  :tags:
+  :members: end-sequence
+  :macros: defseq, seq
 
 ``misc`` — Everything else
 ----------------------------------------------------------------------
 
 .. hy:automodule:: hyrule.misc
-  :members:
-  :macros:
-  :tags:
+  :members: constantly, dec, inc, parse-args, xor
+  :macros: comment, of, profile/calls, profile/cpu, smacrolet
 
 Contributing to Hyrule
 ======================
