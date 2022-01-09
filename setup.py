@@ -7,9 +7,9 @@ with open('README.rst', 'r') as o:
 
 setuptools.setup(
     name = 'hyrule',
-    version = None,
+    version = '0.1',
     install_requires = [
-        'hy @ git+https://github.com/hylang/hy@master#egg=hy-1.0'],
+        'hy == 1.0a4'],
     packages = setuptools.find_packages(),
     package_data = {
         'hyrule': ['*.hy', '__pycache__/*']},
