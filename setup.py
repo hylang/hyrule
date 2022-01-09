@@ -10,10 +10,6 @@ setuptools.setup(
     version = None,
     install_requires = [
         'hy @ git+https://github.com/hylang/hy@master#egg=hy-1.0'],
-    extras_require = dict(
-        docs = [
-            'Sphinx == 3.5.4',
-            'sphinxcontrib-hydomain @ git+https://github.com/hylang/sphinxcontrib-hydomain@master#egg=sphinxcontrib-hydomain-1.0']),
     packages = setuptools.find_packages(),
     package_data = {
         'hyrule': ['*.hy', '__pycache__/*']},
