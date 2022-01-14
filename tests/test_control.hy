@@ -1,5 +1,136 @@
 (require
-  hyrule [cfor do-n lif list-n unless])
+  hyrule [block cfor do-n lif list-n unless])
+(import
+  pytest)
+
+
+(defn test-block-simple []
+
+  (assert (= (block (block-ret 1) 2) 1))
+  (assert (is (block (block-ret) 2) None))
+  (assert (= (block 1 2) 2))
+  (assert (= (block (when False (block-ret 1)) 2) 2))
+  (assert (is (block) None))
+
+  (setv x "")
+  (block
+    (+= x "1")
+    (block-ret)
+    (+= x "2"))
+  (assert (= x "1"))
+
+  (setv x 1)
+  (setv r (block
+    (for [n [1 2 3 4 5]]
+      (*= x n)
+      (when (= n 3)
+        (block-ret "done")))))
+  (assert (= r "done"))
+  (assert (= x (* 1 2 3)))
+
+  (setv x "")
+  (setv r (block
+    (for [a "abc"]
+      (for [z "xyz"]
+        (+= x a z)
+        (when (= (+ a z) "by")
+          (block-ret "bye"))))))
+  (assert (= r "bye"))
+  (assert (= x "axayazbxby"))
+
+  (setv l [])
+  (block
+    (defn f [x]
+      (.append l x)
+      (when (= x 5)
+        (block-ret))
+      (f (+ x 1))
+      (.append l "a"))
+    (f 1)
+    (.append l "b"))
+  (assert (= l [1 2 3 4 5]))
+
+  (setv x "")
+  (setv r (block :fish
+    (+= x "a")
+    (block-ret-from :fish "stick")
+    (+= x "b")))
+  (assert (= r "stick"))
+  (assert (= x "a"))
+
+  (with [e (pytest.raises hy.errors.HyMacroExpansionError)]
+    (hy.eval '(block :whale (block-ret-from :fish))))
+  (assert (in "Unmatched block tag: :fish" e.value.msg))
+
+  (assert (= (block None (block-ret-from None 1) 2) 1))
+  (assert (= (block None (block-ret 1) 2) 1))
+
+  ; Matching of block names is lexical and checked at macro-expansion
+  ; time, even if the code would never be executed.
+  (with [e (pytest.raises hy.errors.HyMacroExpansionError)]
+    (hy.eval '(when False
+      (block :b
+        (block-ret-from :a)))))
+  (assert (in "Unmatched block tag: :a" e.value.msg))
+
+  ; `block-ret` and `block-ret-from` are ordinary names outside of
+  ; `block` and the heads of expressions.
+  (setv  block-ret "tiger"   block-ret-from "lion")
+  (block
+    (+= block-ret "z")
+    (block-ret "p")
+    (+= block-ret "q"))
+  (assert (= block-ret "tigerz"))
+  (assert (= block-ret-from "lion")))
+
+
+(defn test-block-nested []
+
+   (setv x "")
+   (block :a
+     (block :b
+       (block :c
+         (+= x "p")
+         (block-ret-from :b)
+         (+= x "q"))
+       (+= x "r"))
+     (+= x "s"))
+   (assert (= "ps"))
+
+   (setv x "")
+   (setv r (block :b1
+     (+= x "0")
+     (while True (block :b2
+       (for [n "12345"]
+         (+= x n)
+         (when (= n "3")
+           (if (< (len x) 5)
+             (block-ret-from :b2)
+             (block-ret-from :b1))))))
+     (+= x "9")))
+   (assert (= x "0123123"))
+
+   ; Names of inner blocks shadow the names of outer blocks.
+   (setv x "")
+   (block :a
+     (+= x "a")
+     (block :a
+       (+= x "b")
+       (block-ret-from :a)
+       (+= x "c"))
+     (+= x "d"))
+   (assert (= x "abd"))
+
+   ; Same thing, but with anonymous blocks.
+   (setv x "")
+   (block
+     (+= x "a")
+     (block
+       (+= x "b")
+       (block-ret)
+       (+= x "c"))
+     (+= x "d"))
+   (assert (= x "abd")))
 
 
 (defn test-cfor []

@@ -36,7 +36,7 @@ Reference
 ----------------------------------------------------------------------
 
 .. hy:automodule:: hyrule.control
-  :macros: cfor, defmain, do-n, ifp, lif, list-n, loop, unless
+  :macros: block, cfor, defmain, do-n, ifp, lif, list-n, loop, unless
 
 ``destructure`` — Macros for destructuring collections
 ----------------------------------------------------------------------
