@@ -1,7 +1,7 @@
 (require
   hyrule.macrotools [defmacro/g! defmacro!])
 (import
-  hyrule.collections [prewalk]
+  hyrule.collections [prewalk coll?]
   hyrule.misc [inc])
 
 
@@ -280,3 +280,110 @@
          None
          (do statement))"
   `(if (not ~test) (do ~@body)))
+
+
+(defmacro block [#* body]
+  #[[A macro that allows you to jump outside of a list of forms, like
+  the Common Lisp special operator of the same name. The body forms
+  are executed until ``(block-ret VALUE)`` is reached. The block
+  returns ``VALUE``, or the value of the last form, if execution
+  reached the end instead of being terminated by ``block-ret``.
+  ``VALUE`` is optional and defaults to ``None``. One use of ``block``
+  is to jump out of nested loops::
+
+      (block (for [x (range 5)]
+        (setv y x)
+        (while y
+          (print x y)
+          (when (and (= x 3) (= y 1))
+            (block-ret))
+          (-= y 1))))
+
+  Blocks can be named by using a literal keyword or ``None`` as the
+  first body form. Then you can use ``(block-ret-from NAME VALUE)`` to
+  specify which block to jump out of in a nested sequence of blocks::
+
+     (setv x "")
+     (block :a
+       (block :b
+         (block :c
+           (+= x "p")
+           (block-ret-from :b)
+           (+= x "q"))
+         (+= x "r"))
+       (+= x "s"))
+     (print x)   ; => "ps"
+
+  An anonymous block is treated as being named ``None``, and
+  ``(block-ret)`` is actually short for ``(block-ret-from None)``.
+
+  Block names are matched lexically at the time ``block`` is
+  macro-expanded. ``(block-ret-from :foo)`` outside of a block named
+  ``:foo`` is an error. Inner blocks names shadow outer blocks of the
+  same name, so ``block-ret`` will apply to the innermost of a series
+  of nested anonymous blocks.
+
+  There are no macros or functions named ``block-ret`` or
+  ``block-ret-from``, since these forms are processed entirely by
+  ``block``. ``block-ret`` and ``block-ret-from`` should not be
+  confused with Hy's built-in ``return``, which produces a true Python
+  return statement. ``block`` is implemented with exception-handling
+  rather than functions, so it doesn't create a new scope as ``fn``
+  and ``defn`` do.]]
+  (block-f body {} (hy.gensym "br") True))
+
+(defn block-f [body tags BR [top False]]
+
+  (setv tag 'None)
+  (when (and body (or
+      (= (get body 0) 'None)
+      (isinstance (get body 0) hy.models.Keyword)))
+    (setv [tag #* body] body))
+  (setv  exc (hy.gensym "e")  block-name (str (hy.gensym "block-")))
+  (setv tags {#** tags  tag block-name})
+
+  `(do
+    ~(when top `(import hyrule.control [BlockRet :as ~BR]))
+    (try
+      ~@(block-walker body tags BR)
+      (except [~exc ~BR]
+        (if (= ~block-name (. ~exc block-name))
+          (. ~exc value)
+          (raise))))))
+
+(defn block-walker [x tags BR]
+  (cond
+
+    [(and (isinstance x hy.models.Expression) x
+        (= (get x 0) 'block))
+      (block-f (cut x 1 None) tags BR)]
+
+    [(and (isinstance x hy.models.Expression) x
+        (in (get x 0) ['block-ret 'block-ret-from]))
+      (setv block-ret-from? (= (get x 0) 'block-ret-from))
+      (if block-ret-from?
+        (unless (in (len x) [2 3])
+          (raise (TypeError "`block-ret-from` takes two arguments (one optional)")))
+        (unless (in (len x) [1 2])
+          (raise (TypeError "`block-ret` takes one optional argument"))))
+      (setv tag (if block-ret-from? (get x 1) 'None))
+      (unless (or (= tag 'None) (isinstance tag hy.models.Keyword))
+        (raise (ValueError f"`block-ret-from` target must be a literal keyword or None")))
+      (unless (in tag tags)
+        (raise (ValueError f"Unmatched block tag: {tag}")))
+      `(raise (~BR
+        ~(get tags tag)
+        ~(if (> (len x) (if block-ret-from? 2 1))
+          (get x -1)
+          'None)))]
+
+    [(coll? x)
+      ((type x) (gfor  elem x  (block-walker elem tags BR)))]
+
+    [True
+      x]))
+
+(defclass BlockRet [Exception]
+  (setv __init__ (fn [self block-name value]
+    (setv self.block-name block-name)
+    (setv self.value value))))
