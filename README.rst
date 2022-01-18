@@ -4,4 +4,4 @@ All of Hyrule's contents can be imported or required directly from the top-level
 
 `Hyrule's documentation can be read online on Read the Docs. <https://hyrule.readthedocs.io>`_
 
-You can run Hyrule's test suite with the command ``pytest`` and build its documentation with ``( cd docs; sphinx-build . _build -b singlehtml )``.
+You can run Hyrule's test suite with the command ``pytest`` and build its documentation with ``( cd docs; sphinx-build . _build -b html )``.
