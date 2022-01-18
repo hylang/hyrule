@@ -62,54 +62,32 @@
 
 
 (defmacro defmain [args #* body]
-  "Write a function named \"main\" and do the 'if __main__' dance.
+  #[[Define a function to be called when :attr:`__name__` equals ``"__main__"``
+  (see :mod:`__main__`). ``args`` is the function's lambda list, which will be
+  matched against :data:`sys.argv`. Recall that the first element of
+  ``sys.argv`` is always the name of the script being invoked, whereas the rest
+  are command-line arguments. If ``args`` is ``[]``, this will be treated like
+  ``[#* _]``, so any command-line arguments (and the script name) will be
+  allowed, but ignored.
 
-  The ``defmain`` macro defines a main function that is immediately called
-  with ``sys.argv`` as arguments if and only if this file is being executed
-  as a script.  In other words, this:
+  If the defined function returns an :class:`int`, :func:`sys.exit` is called
+  with that integer as the return code.
 
-  Examples:
-    ::
+  If you want fancy command-line arguments, you can use the standard Python
+  module :mod:`argparse` in the usual way, because ``defmain`` doesn't change
+  ``sys.argv``. See also :hy:func:`parse-args <hyrule.misc.parse-args>`.
+  ::
 
-       => (defmain [#* args]
-       ...  (do-something-with args))
-
-    is the equivalent of:
-
-    .. code-block:: python
-
-       => def main(*args):
-       ...    do_something_with(args)
-       ...    return 0
-       ...
-       ... if __name__ == \"__main__\":
-       ...     import sys
-       ...     retval = main(*sys.argv)
-       ...
-       ...     if isinstance(retval, int):
-       ...         sys.exit(retval)
-
-    Note that as you can see above, if you return an integer from this
-    function, this will be used as the exit status for your script.
-    (Python defaults to exit status 0 otherwise, which means everything's
-    okay!) Since ``(sys.exit 0)`` is not run explicitly in the case of a
-    non-integer return from ``defmain``, it's a good idea to put ``(defmain)``
-    as the last piece of code in your file.
-
-    If you want fancy command-line arguments, you can use the standard Python
-    module ``argparse`` in the usual way::
-
-       => (import argparse)
-       => (defmain [#* _]
-       ...   (setv parser (argparse.ArgumentParser))
-       ...   (.add-argument parser \"STRING\"
-       ...     :help \"string to replicate\")
-       ...   (.add-argument parser \"-n\" :type int :default 3
-       ...     :help \"number of copies\")
-       ...   (setv args (parser.parse_args))
-       ...   (print (* args.STRING args.n))
-       ...   0)
-"
+      (import argparse)
+      (defmain []
+        (setv parser (argparse.ArgumentParser))
+        (.add-argument parser "STRING"
+          :help "string to replicate")
+        (.add-argument parser "-n" :type int :default 3
+          :help "number of copies")
+        (setv args (.parse-args parser))
+        (print (* args.STRING args.n))
+        0)]]
   (setv retval (hy.gensym)
         restval (hy.gensym))
   `(when (= __name__ "__main__")
