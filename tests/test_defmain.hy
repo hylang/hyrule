@@ -1,48 +1,47 @@
 (require hyrule [defmain])
 
 (import
+  sys
   shlex
   os
-  subprocess [Popen PIPE])
+  subprocess [Popen PIPE]
+  pytest)
 
 
 (defn test-defmain []
   (global __name__)
   (setv oldname __name__)
-  (setv __name__ "__main__")
+  (setv oldargs sys.argv)
+  (try
+    (setv __name__ "__main__")
+    (tdefmain-inner)
+    (finally (setv
+      __name__ oldname
+      sys.argv oldargs))))
+
+(defn tdefmain-inner []
 
   (defn main [x]
-    (print (isinstance x int))
+    (assert (isinstance x int))
     x)
 
-  (try
+  (with [e (pytest.raises SystemExit)]
     (defmain [#* args]
-      (main 42))
-    (assert False)
-    (except [e SystemExit]
-      (assert (= (str e) "42"))))
+      (main 42)))
+  (assert (= e.value.code 42))
 
   ;; Try a `defmain` without args
-  (try
+  (with [e (pytest.raises SystemExit)]
     (defmain []
-      (main 42))
-    (assert False)
-    (except [e SystemExit]
-      (assert (= (str e) "42"))))
+      (main 42)))
+  (assert (= e.value.code 42))
 
   ;; Try a `defmain` with only one arg
-  (import sys)
-  (setv oldargv sys.argv)
-  (try
-    (setv sys.argv [1])
+  (setv sys.argv [1])
+  (with [e (pytest.raises SystemExit)]
     (defmain [x]
-      (main x))
-    (assert False)
-    (except [e SystemExit]
-      (assert (= (str e) "1"))))
-
-  (setv sys.argv oldargv)
-  (setv __name__ oldname))
+      (main x)))
+  (assert (= e.value.code 1)))
 
 
 (defn run-cmd [cmd [stdin-data None] [expect 0]]
