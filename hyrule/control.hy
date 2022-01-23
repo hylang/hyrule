@@ -2,7 +2,8 @@
   hyrule.macrotools [defmacro/g! defmacro!])
 (import
   hyrule.anaphoric [recur-sym-replace]
-  hyrule.collections [prewalk coll? by2s]
+  hyrule.collections [prewalk by2s]
+  hyrule.iterables [coll?]
   hyrule.misc [inc])
 
 
