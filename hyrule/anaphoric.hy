@@ -277,7 +277,7 @@ variable name, as in ``(print \"My favorite Stephen King book is\" 'it)``."
 
 (defn recur-sym-replace [d form]
   "Recursive symbol replacement."
-  (import hyrule [coll?])
+  (import hyrule.iterables [coll?])
   (cond
     [(isinstance form hy.models.Symbol)
       (.get d form form)]
