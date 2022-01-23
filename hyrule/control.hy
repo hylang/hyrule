@@ -1,8 +1,51 @@
 (require
   hyrule.macrotools [defmacro/g! defmacro!])
 (import
-  hyrule.collections [prewalk coll?]
+  hyrule.anaphoric [recur-sym-replace]
+  hyrule.collections [prewalk coll? by2s]
   hyrule.misc [inc])
+
+
+(defmacro branch [tester #* rest]
+  (_branch tester rest))
+
+(defmacro ebranch [tester #* rest]
+  (_branch tester (+ rest
+    (, 'else '(raise (ValueError "ebranch: No branch matched"))))))
+
+(defn _branch [tester rest]
+  (when (% (len rest) 2)
+    (raise (TypeError "each case-form needs a result-form")))
+  (setv it (hy.gensym "branch-it"))
+  `(cond ~@(gfor [case result] (by2s rest) `[
+    ~(if (= case 'else)
+      'True
+      `(do
+        (setv ~it ~case)
+        ~(recur-sym-replace {'it it} tester)))
+    ~result])))
+
+
+(defmacro case [key #* rest]
+  (_case key rest))
+
+(defmacro ecase [key #* rest]
+  (_case key (+ rest
+    (, 'else '(raise (ValueError "ecase: No test value matched"))))))
+
+(defn _case [key rest]
+  ; The implementation is quite similar to `branch`, but we evaluate
+  ; the key exactly once.
+  (when (% (len rest) 2)
+    (raise (TypeError "each test-form needs a result-form")))
+  (setv x (hy.gensym "case-key"))
+  `(do
+    (setv ~x ~key)
+    (cond ~@(gfor [test-value result] (by2s rest) `[
+      ~(if (= test-value 'else)
+        'True
+        `(= ~x ~test-value))
+      ~result]))))
 
 
 (defmacro cfor [f #* generator]

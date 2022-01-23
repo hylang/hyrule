@@ -1,5 +1,5 @@
 (require
-  hyrule [block cfor do-n lif list-n unless])
+  hyrule [block branch ebranch case ecase cfor do-n lif list-n unless])
 (import
   pytest)
 
@@ -131,6 +131,118 @@
        (+= x "c"))
      (+= x "d"))
    (assert (= x "abd")))
+
+
+(defn test-branch []
+
+  (with [(pytest.raises hy.errors.HyMacroExpansionError)]
+    (hy.eval '(branch)))
+
+  (assert (is (branch 1) None))
+  (assert (is (branch (raise (ValueError))) None))
+  (assert (is (branch (assert False)) None))
+  (assert (= (branch (assert False) else 1) 1))
+
+  (defn f [x]
+    (branch (in (.lower x) it)
+      "aeiou" "vowel"
+      "xyz"   "last"))
+  (assert (= (f "i") "vowel"))
+  (assert (= (f "x") "last"))
+  (assert (is (f "j") None))
+
+  (defn f [x]
+    (branch (is (.get {True False  False None  None True} x "?") it)
+      True  1
+      False 2
+      None  3
+      else  4))
+  (assert (= (f True) 2))
+  (assert (= (f False) 3))
+  (assert (= (f None) 1))
+  (assert (= (f "xyzzy") 4))
+
+  (setv out "")
+  (branch (do (+= out "X") (= it "middle"))
+    "top" (do
+      (+= out "a")
+      (+= out "b"))
+    "middle" (do
+      (+= out "c")
+      (+= out "d"))
+    "bottom" (do
+      (+= out "e")
+      (+= out "f")))
+  (assert (= out "XXcd"))
+
+  (setv out "")
+  ; Clauses after an `else` are allowed, but have no effect.
+  (branch (= it "not here")
+    1    (+= out "a")
+    2    (+= out "b")
+    else (+= out "c")
+    3    (+= out "d")
+    else (+= out "e")
+    else (+= out "f"))
+  (assert (= out "c"))
+
+  (setv tested [])
+  (defn f [x]
+    (setv (cut tested) [])
+    (ebranch (= it x)
+      (do (.append tested 1) 1) "a"
+      (do (.append tested 2) 2) "b"
+      (do (.append tested 3) 3) "c"))
+  (assert (= (f 2) "b"))
+  (assert (= tested [1 2]))
+  (assert (= (f 1) "a"))
+  (assert (= tested [1]))
+  (with [e (pytest.raises ValueError)]
+    (f 4))
+  (assert (= e.value.args (, "ebranch: No branch matched")))
+  (assert (= tested [1 2 3])))
+
+
+(defn test-case []
+
+  (with [(pytest.raises hy.errors.HyMacroExpansionError)]
+    (hy.eval '(case)))
+
+  (assert (is (case 1) None))
+  ; Unlike `branch`, `case` still evaluates its first argument
+  ; when there are no case clauses
+  (setv out "a")
+  (assert (is (case (setv out "b")) None))
+  (assert (= out "b"))
+
+  (defn f [x]
+    (case x
+      1     1
+      "1"   2
+      "a"   3
+      True  4
+      False 5
+      None  6))
+  (assert (= (f 1) 1))
+  (assert (= (f "1") 2))
+  (assert (= (f "a") 3))
+  (assert (= (f True) 1))
+    ; `case` uses `=`, not `is`, and `(= True 1)`.
+  (assert (= (f False) 5))
+  (assert (= (f None) 6))
+  (assert (is (f 2) None))
+
+  (assert (= (case 5  1 "a"  2 "b"  3 "c"  else "z") "z"))
+
+  ; No matter how many cases are checked, the key form is only
+  ; evaluated once.
+  (setv l [])
+  (assert (= "c" (case (do (.append l 1) 3)
+    1 "a"
+    2 "b"
+    3 "c"
+    4 "d")))
+  (assert (= l [1])))
 
 
 (defn test-cfor []
