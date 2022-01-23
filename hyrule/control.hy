@@ -141,48 +141,6 @@
        (sys.exit ~retval))))
 
 
-(defmacro! ifp [o!pred o!expr #* clauses]
-  "Takes a binary predicate ``pred``, an expression ``expr``, and a set of
-  clauses. Each clause can be of the form ``cond res`` or ``cond :>> res``. For
-  each clause, if ``(pred cond expr)`` evaluates to true, returns ``res`` in
-  the first case or ``(res (pred cond expr))`` in the second case. If the last
-  clause is just ``res``, then it is returned as a default, else ``None.``
-
-  Examples:
-    ::
-
-       => (ifp = 4
-       ...   3 :do-something
-       ...   5 :do-something-else
-       ...   :no-match)
-       :no-match
-
-    ::
-
-       => (ifp (fn [x f] (f x)) ':a
-       ...   {:b 1} :>> inc
-       ...   {:a 1} :>> dec)
-       0
-  "
-  (defn emit [pred expr args]
-    (setv n (if (and (> (len args) 1) (= :>> (get args 1))) 3 2)
-          [clause more] [(cut args n) (cut args n None)]
-          n (len clause)
-          test (hy.gensym))
-    (cond
-      [(= 0 n) `(raise (TypeError (+ "no option for " (repr ~expr))))]
-      [(= 1 n) (get clause 0)]
-      [(= 2 n) `(if (~pred ~(get clause 0) ~expr)
-                    ~(get clause -1)
-                    ~(emit pred expr more))]
-      [True `(do
-               (setv ~test (~pred ~(get clause 0) ~expr))
-               (if ~test
-                   (~(get clause -1) ~test)
-                   ~(emit pred expr more)))]))
-  `~(emit g!pred g!expr clauses))
-
-
 (defmacro lif [#* args]
   "Like `if`, but anything that is not None is considered true.
 
