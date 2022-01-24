@@ -3,9 +3,14 @@
 Unreleased
 ==============================
 
+Removals
+------------------------------
+* `ifp` has been removed. Use `branch` instead.
+
 New Features
 ------------------------------
 * New macro `block`.
+* New macros `branch`, `ebranch`, `case`, and `ecase`.
 
 0.1 (released 2022-01-09)
 ==============================
