@@ -8,9 +8,62 @@
 
 
 (defmacro branch [tester #* rest]
+  #[[Evaluate a test form with the symbol ``it`` bound to each of several case
+  forms in turn. If the result is true, the result form associated with the
+  matching case is evaluated and returned; no later cases are evaluated. If no
+  case matches, return ``None``. The general syntax is::
+
+      (branch TEST
+        CASE-1 RESULT-1
+        CASE-2 RESULT-2
+        …)
+
+  For example,
+  ::
+
+      (branch (in (.lower my-char) it)
+        "aeiou" "it's a vowel"
+        "xyz"   "it's one of those last few")
+
+  is equivalent to
+  ::
+
+      (cond
+        [(in (.lower my-char) "aeiou") "it's a vowel"]
+        [(in (.lower my-char) "xyz")   "it's one of those last few"])
+
+  If you miss Common Lisp's ``typecase`` macro, here's how you can use
+  ``branch`` to branch by type in the same way::
+
+     (branch (isinstance my-value it)
+       str           "It's a string"
+       bytes         "It's a bytes object"
+       (, int float) "It's numeric")
+
+  A case form that is exactly the symbol ``else`` is treated specially. In this
+  case, the test form isn't evaluated, and is treated as if it returned true.
+  ::
+
+      (branch (= it my-value)
+        True  "Correct"
+        False "Wrong"
+        else  "Not actually Boolean")
+
+  ``branch`` won't complain if you add more cases after the ``else`` case, even
+  additional ``else`` cases, but they'll all be unreachable.
+
+  If there are no case forms, the test form won't be evaluated, so the whole
+  ``branch`` is a no-op.
+
+  :hy:func:`ebranch` is a convenience macro for when you want the no-match case
+  to raise an error. :hy:func:`case` and :hy:func:`ecase` are convenience
+  macros for the special case of checking equality against a single test
+  value.]]
   (_branch tester rest))
 
 (defmacro ebranch [tester #* rest]
+  #[[As :hy:func:`branch`, but if no case matches, raise ``ValueError`` instead
+  of returning ``None``. The name is an abbreviation for "error branch".]]
   (_branch tester (+ rest
     (, 'else '(raise (ValueError "ebranch: No branch matched"))))))
 
@@ -28,9 +81,39 @@
 
 
 (defmacro case [key #* rest]
+  #[[Like the Common Lisp macro of the same name. Evaluate the first argument,
+  called the key, and compare it with ``=`` to each of several case forms in
+  turn. If the key is equal to a case, the associated result form is evaluated
+  and returned; no later cases are evaluated. If no case matches, return
+  ``None``. The general syntax is::
+
+      (case KEY
+        CASE-1 RESULT-1
+        CASE-2 RESULT-2
+        …)
+
+  For example, you could translate direction names to vectors like this::
+
+      (case direction
+        "north" [ 0  1]
+        "south" [ 0 -1]
+        "east"  [-1  0]
+        "west"  [ 1  0])
+
+  Thus, ``(case KEY …)`` is equivalent to ``(branch (= it KEY) …)``, except
+  ``KEY`` is evaluated exactly once, regardless of the number of cases.
+
+  Like :hy:func:`branch`, ``case`` treats the symbol ``else`` as a default
+  case, and it has an error-raising version, :hy:func:`ecase`.
+
+  ``case`` can't check for collection membership like the Common Lisp version;
+  for that, use ``(branch (in KEY it) …)``. It also can't pattern-match; for
+  that, see :hy:func:`match`.]]
   (_case key rest))
 
 (defmacro ecase [key #* rest]
+  #[[As :hy:func:`case`, but if no case matches, raise ``ValueError`` instead
+  of returning ``None``.]]
   (_case key (+ rest
     (, 'else '(raise (ValueError "ecase: No test value matched"))))))
 
