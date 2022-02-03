@@ -98,7 +98,7 @@ Iterator patterns are specified using round brackets. They are the same as list 
 
 (require
   hyrule.argmove [->>]
-  hyrule.control [unless ifp]
+  hyrule.control [unless branch]
   hyrule.macrotools [defmacro/g!])
 (import
   itertools [starmap chain count]
@@ -169,12 +169,12 @@ Iterator patterns are specified using round brackets. They are the same as list 
     (unless (is gsyms None)
       (.append gsyms dcoll))
     (f dcoll result found binds gsyms))
-  (ifp (fn [x y] (isinstance y x)) binds
+  (branch (isinstance binds it)
        hy.models.Symbol [binds expr]
        hy.models.Dict (dispatch dest-dict)
        hy.models.Expression (dispatch dest-iter)
        hy.models.List (dispatch dest-list)
-       (raise (SyntaxError (+ "Malformed destructure. Unknown binding form: "
+       else (raise (SyntaxError (+ "Malformed destructure. Unknown binding form: "
                              (repr binds))))))
 
 (defn iterable->dict [xs]
@@ -212,12 +212,12 @@ Iterator patterns are specified using round brackets. They are the same as list 
       sym))
   (->> (.items binds)
        (starmap (fn [target lookup]
-                  (ifp found target
+                  (branch (found target it)
                     ':or []
                     ':as [lookup ddict]
                     ':strs (get-as str lookup)
                     ':keys (get-as (fn [x] (hy.models.Keyword (hy.unmangle x))) lookup)
-                    (destructure #* (expand-lookup target lookup) gsyms))))
+                    else (destructure #* (expand-lookup target lookup) gsyms))))
        ((fn [xs] (reduce + xs result)))))
 
 (defn find-magics [bs [keys? False] [as? False]]
@@ -258,7 +258,7 @@ Iterator patterns are specified using round brackets. They are the same as list 
                (destructure t `(.get (dict (enumerate ~dlist)) ~i) gsyms))
         err-msg "Invalid magic option :{} in list destructure"
         mres (lfor [m t] magics
-               (ifp found m
+               (branch (found m it)
                  ':as [t dlist]
                  ':& (destructure t (if (isinstance t hy.models.Dict)
                                       `(dict (zip
@@ -266,7 +266,7 @@ Iterator patterns are specified using round brackets. They are the same as list 
                                         (cut ~dlist ~(+ n 1) None 2)))
                                       `(cut ~dlist ~n None))
                                   gsyms)
-                 (raise (SyntaxError (.format err-msg m.name))))))
+                 else (raise (SyntaxError (.format err-msg m.name))))))
   (reduce + (chain bres mres) result))
 
 (defn dest-iter [diter result found binds gsyms]
@@ -293,7 +293,7 @@ Iterator patterns are specified using round brackets. They are the same as list 
   (reduce +
           (+ (lfor t bs (destructure t `(next ~diter None) gsyms))
              (lfor [m t] magics
-               (ifp found m
+               (branch (found m it)
                  ':& [t diter]
                  ':as [t copy-iter])))
           result))

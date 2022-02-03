@@ -1,8 +1,135 @@
 (require
   hyrule.macrotools [defmacro/g! defmacro!])
 (import
-  hyrule.collections [prewalk coll?]
+  hyrule.anaphoric [recur-sym-replace]
+  hyrule.collections [prewalk by2s]
+  hyrule.iterables [coll?]
   hyrule.misc [inc])
+
+
+(defmacro branch [tester #* rest]
+  #[[Evaluate a test form with the symbol ``it`` bound to each of several case
+  forms in turn. If the result is true, the result form associated with the
+  matching case is evaluated and returned; no later cases are evaluated. If no
+  case matches, return ``None``. The general syntax is::
+
+      (branch TEST
+        CASE-1 RESULT-1
+        CASE-2 RESULT-2
+        …)
+
+  For example,
+  ::
+
+      (branch (in (.lower my-char) it)
+        "aeiou" "it's a vowel"
+        "xyz"   "it's one of those last few")
+
+  is equivalent to
+  ::
+
+      (cond
+        [(in (.lower my-char) "aeiou") "it's a vowel"]
+        [(in (.lower my-char) "xyz")   "it's one of those last few"])
+
+  If you miss Common Lisp's ``typecase`` macro, here's how you can use
+  ``branch`` to branch by type in the same way::
+
+     (branch (isinstance my-value it)
+       str           "It's a string"
+       bytes         "It's a bytes object"
+       (, int float) "It's numeric")
+
+  A case form that is exactly the symbol ``else`` is treated specially. In this
+  case, the test form isn't evaluated, and is treated as if it returned true.
+  ::
+
+      (branch (= it my-value)
+        True  "Correct"
+        False "Wrong"
+        else  "Not actually Boolean")
+
+  ``branch`` won't complain if you add more cases after the ``else`` case, even
+  additional ``else`` cases, but they'll all be unreachable.
+
+  If there are no case forms, the test form won't be evaluated, so the whole
+  ``branch`` is a no-op.
+
+  :hy:func:`ebranch` is a convenience macro for when you want the no-match case
+  to raise an error. :hy:func:`case` and :hy:func:`ecase` are convenience
+  macros for the special case of checking equality against a single test
+  value.]]
+  (_branch tester rest))
+
+(defmacro ebranch [tester #* rest]
+  #[[As :hy:func:`branch`, but if no case matches, raise ``ValueError`` instead
+  of returning ``None``. The name is an abbreviation for "error branch".]]
+  (_branch tester (+ rest
+    (, 'else '(raise (ValueError "ebranch: No branch matched"))))))
+
+(defn _branch [tester rest]
+  (when (% (len rest) 2)
+    (raise (TypeError "each case-form needs a result-form")))
+  (setv it (hy.gensym "branch-it"))
+  `(cond ~@(gfor [case result] (by2s rest) `[
+    ~(if (= case 'else)
+      'True
+      `(do
+        (setv ~it ~case)
+        ~(recur-sym-replace {'it it} tester)))
+    ~result])))
+
+
+(defmacro case [key #* rest]
+  #[[Like the Common Lisp macro of the same name. Evaluate the first argument,
+  called the key, and compare it with ``=`` to each of several case forms in
+  turn. If the key is equal to a case, the associated result form is evaluated
+  and returned; no later cases are evaluated. If no case matches, return
+  ``None``. The general syntax is::
+
+      (case KEY
+        CASE-1 RESULT-1
+        CASE-2 RESULT-2
+        …)
+
+  For example, you could translate direction names to vectors like this::
+
+      (case direction
+        "north" [ 0  1]
+        "south" [ 0 -1]
+        "east"  [-1  0]
+        "west"  [ 1  0])
+
+  Thus, ``(case KEY …)`` is equivalent to ``(branch (= it KEY) …)``, except
+  ``KEY`` is evaluated exactly once, regardless of the number of cases.
+
+  Like :hy:func:`branch`, ``case`` treats the symbol ``else`` as a default
+  case, and it has an error-raising version, :hy:func:`ecase`.
+
+  ``case`` can't check for collection membership like the Common Lisp version;
+  for that, use ``(branch (in KEY it) …)``. It also can't pattern-match; for
+  that, see :hy:func:`match`.]]
+  (_case key rest))
+
+(defmacro ecase [key #* rest]
+  #[[As :hy:func:`case`, but if no case matches, raise ``ValueError`` instead
+  of returning ``None``.]]
+  (_case key (+ rest
+    (, 'else '(raise (ValueError "ecase: No test value matched"))))))
+
+(defn _case [key rest]
+  ; The implementation is quite similar to `branch`, but we evaluate
+  ; the key exactly once.
+  (when (% (len rest) 2)
+    (raise (TypeError "each test-form needs a result-form")))
+  (setv x (hy.gensym "case-key"))
+  `(do
+    (setv ~x ~key)
+    (cond ~@(gfor [test-value result] (by2s rest) `[
+      ~(if (= test-value 'else)
+        'True
+        `(= ~x ~test-value))
+      ~result]))))
 
 
 (defmacro cfor [f #* generator]
@@ -95,48 +222,6 @@
      (setv ~retval ((fn [~@(or args `[#* ~restval])] ~@body) #* sys.argv))
      (if (isinstance ~retval int)
        (sys.exit ~retval))))
-
-
-(defmacro! ifp [o!pred o!expr #* clauses]
-  "Takes a binary predicate ``pred``, an expression ``expr``, and a set of
-  clauses. Each clause can be of the form ``cond res`` or ``cond :>> res``. For
-  each clause, if ``(pred cond expr)`` evaluates to true, returns ``res`` in
-  the first case or ``(res (pred cond expr))`` in the second case. If the last
-  clause is just ``res``, then it is returned as a default, else ``None.``
-
-  Examples:
-    ::
-
-       => (ifp = 4
-       ...   3 :do-something
-       ...   5 :do-something-else
-       ...   :no-match)
-       :no-match
-
-    ::
-
-       => (ifp (fn [x f] (f x)) ':a
-       ...   {:b 1} :>> inc
-       ...   {:a 1} :>> dec)
-       0
-  "
-  (defn emit [pred expr args]
-    (setv n (if (and (> (len args) 1) (= :>> (get args 1))) 3 2)
-          [clause more] [(cut args n) (cut args n None)]
-          n (len clause)
-          test (hy.gensym))
-    (cond
-      [(= 0 n) `(raise (TypeError (+ "no option for " (repr ~expr))))]
-      [(= 1 n) (get clause 0)]
-      [(= 2 n) `(if (~pred ~(get clause 0) ~expr)
-                    ~(get clause -1)
-                    ~(emit pred expr more))]
-      [True `(do
-               (setv ~test (~pred ~(get clause 0) ~expr))
-               (if ~test
-                   (~(get clause -1) ~test)
-                   ~(emit pred expr more)))]))
-  `~(emit g!pred g!expr clauses))
 
 
 (defmacro lif [#* args]
