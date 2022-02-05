@@ -1,7 +1,6 @@
 (require
   hyrule.macrotools [defmacro/g! defmacro!])
 (import
-  hyrule.anaphoric [recur-sym-replace]
   hyrule.collections [prewalk by2s]
   hyrule.iterables [coll?]
   hyrule.misc [inc])
@@ -70,14 +69,14 @@
 (defn _branch [tester rest]
   (when (% (len rest) 2)
     (raise (TypeError "each case-form needs a result-form")))
-  (setv it (hy.gensym "branch-it"))
-  `(cond ~@(gfor [case result] (by2s rest) `[
-    ~(if (= case 'else)
-      'True
-      `(do
-        (setv ~it ~case)
-        ~(recur-sym-replace {'it it} tester)))
-    ~result])))
+  `(let [it None]
+    (cond ~@(gfor [case result] (by2s rest) `[
+      ~(if (= case 'else)
+        'True
+        `(do
+          (setv it ~case)
+          ~tester))
+      ~result]))))
 
 
 (defmacro case [key #* rest]

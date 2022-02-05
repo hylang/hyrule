@@ -200,6 +200,30 @@
     (atest -6) "e")))
   (assert (= tested [0 2 10 -10]))
 
+  ; Test a `branch` nested in the tester of another `branch`.
+  (setv l [])
+  (setv out (branch
+    (do
+      (.append l it)
+      (setv x it)
+      (setv out (branch
+        (do
+          (.append l it)
+          (= (- it 100) x))
+         50 "q"
+        102 "r"
+         60 "z"))
+      (.append l it)
+      out)
+    1 "a"
+    2 "b"
+    3 "c"))
+  (assert (= out "b"))
+  (print l)
+  (assert (= l [
+    1 50 102 60 1
+    2 50 102 2]))
+
   ; Test `ebranch`.
   (defn f [x]
     (setv (cut tested) [])
