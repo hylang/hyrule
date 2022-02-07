@@ -216,10 +216,6 @@
   (assert (= destructured expected)))
 
 (defn test-errors []
-  (with [(pytest.raises TypeError)]
-    (hy.eval (hy.macroexpand '(setv+ [a b] 1))))
-  (with [(pytest.raises AttributeError)]
-    (hy.eval (hy.macroexpand '(setv+ {a :a} 1))))
   (with [(pytest.raises SyntaxError)]
     (destructure '{a b c} {:a 1}))
   (with [(pytest.raises SyntaxError)]
@@ -234,6 +230,103 @@
     (destructure '[a b :& d e :as f] (range 10)))
   (with [(pytest.raises SyntaxError)]
     (destructure '[a b d :as e :& f] (range 10))))
+
+(defn test-failure-to-match []
+  ;; https://github.com/hylang/hyrule/issues/27
+  ;; empty
+  (setv+ [foo]
+        [])
+  (assert (is foo None))
+  ;; empty, missing key
+  (setv+ {foo :bar}
+        {})
+  (assert (is foo None))
+  ;; not empty, missing key
+  (setv+ {foo :bar}
+        {"nothing" "here"})
+  (assert (is foo None))
+  ;; nested twice, missing key
+  (setv+ {{foo :bar} :baz}
+         {:baz {"nothing" "here"}})
+  (assert (is foo None))
+
+  ;; nested once, missing key
+  (setv+ {{foo :bar} :baz}
+         {"nothing" "here"})
+  (assert (is foo None))
+  ;; nested twice, wrong type
+  (setv+ {{foo :bar} :baz}
+         {:baz []})
+  (assert (is foo None))
+
+  ;; shouldn't ignore :or
+  (setv+ {{foo :bar :or {foo "eggs"}} :baz}
+         {:baz {"nothing" "here"}})
+  (assert (= foo "eggs"))
+  ;; shouldn't ignore :or, even if it's false-y
+  (setv+ {{foo :bar :or {foo []}} :baz}
+         {:baz {"nothing" "here"}})
+  (assert (= foo []))
+  ;; shouldn't ignore :or, even if wrong type
+  (setv+ {{foo :bar :or {foo "eggs"}} :baz}
+         {:baz []})
+  (assert (= foo "eggs"))
+
+  ;; wrong type, list only
+  (setv+ [baz [bar [quux [foo]] wibblethwop]]
+          Ellipsis)
+  (assert (is None foo bar baz quux wibblethwop))
+  ;; wrong type, mixed
+  (setv+ {[foo] :bar}
+         {:bar Ellipsis})
+  (assert (is foo None))
+
+  ;; nested, missing structure
+  (setv+ {{{[[{foo :bar}]] :baz} :bacon} :spam}
+         {"nothing" "here"})
+  (assert (is foo None))
+
+  ;; :as pattern after a miss
+  (setv+ [_ :as the-list] 3)
+  (setv+ {_ "key" :as the-dict} 3)
+  (assert (is the-list the-dict None))
+
+  ;; :& pattern after a miss
+  (setv+ [_ :& foo] 3)
+  (assert (is foo None))
+
+  ;; :keys pattern after a miss
+  (setv+ {:keys [foo]} 3)
+  (assert (is foo None))
+  ;; :keys pattern after a partial miss
+  (setv+ {:keys [foo] :as the-dict} {"nothing" "here"})
+  (assert (is foo None))
+  (assert (= the-dict {"nothing" "here"}))
+
+  ;; :strs pattern after a miss
+  (setv+ {:strs [foo]} 3)
+  (assert (is foo None))
+  ;; :strs pattern after a partial miss
+  (setv+ {:strs [foo] :as the-dict} {"nothing" "here"})
+  (assert (is foo None))
+  (assert (= the-dict {"nothing" "here"}))
+
+  ;; tries all the patterns, misses everything
+  (setv+ [foo
+          [bar :as the-list]
+          {baz "key"
+           zot "zot"
+           ;; user wants "text" if zot misses, don't ignore it
+           :or {zot "text"}
+           :keys [quux]
+           :strs [frob]
+           :as the-dict}
+          :& remaining
+          :as everything]
+         None)
+  (assert (is foo bar baz quux frob remaining the-dict the-list everything
+              None))
+  (assert (= zot "text")))
 
 (defn test-defn+ []
   (defn+ foo [[a b] {:keys [c d]} :& {:strs [e f]}]
