@@ -186,13 +186,51 @@
     else (+= out "f"))
   (assert (= out "c"))
 
+  ; Each case is evaluated at most once, even if `it` appears several
+  ; times in the matcher.
   (setv tested [])
+  (defn atest [x]
+    (.append tested x)
+    x)
+  (assert (= "d" (branch (and (> (* it it) 5) (< it 0))
+    (atest 0) "a"
+    (atest 2) "b"
+    (atest 10) "c"
+    (atest -10) "d"
+    (atest -6) "e")))
+  (assert (= tested [0 2 10 -10]))
+
+  ; Test a `branch` nested in the tester of another `branch`.
+  (setv l [])
+  (setv out (branch
+    (do
+      (.append l it)
+      (setv x it)
+      (setv out (branch
+        (do
+          (.append l it)
+          (= (- it 100) x))
+         50 "q"
+        102 "r"
+         60 "z"))
+      (.append l it)
+      out)
+    1 "a"
+    2 "b"
+    3 "c"))
+  (assert (= out "b"))
+  (print l)
+  (assert (= l [
+    1 50 102 60 1
+    2 50 102 2]))
+
+  ; Test `ebranch`.
   (defn f [x]
     (setv (cut tested) [])
     (ebranch (= it x)
-      (do (.append tested 1) 1) "a"
-      (do (.append tested 2) 2) "b"
-      (do (.append tested 3) 3) "c"))
+      (atest 1) "a"
+      (atest 2) "b"
+      (atest 3) "c"))
   (assert (= (f 2) "b"))
   (assert (= tested [1 2]))
   (assert (= (f 1) "a"))
