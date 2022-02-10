@@ -39,6 +39,35 @@ where ``data`` might be defined by
 
 This is similar to unpacking iterables in Python, such as ``a, *b, c = range(10)``, however it also works on dictionaries, and has several special options.
 
+.. warning::
+   Variables which are not found in the expression are silently set to ``None`` if no default value is specified. This is particularly important with ``defn+`` and ``fn+``.
+
+   .. code-block:: hy
+
+      (defn+ some-function [arg1
+                            {subarg2-1 \"key\"
+                             :or {subarg2-1 20}
+                             :as arg2}
+                            [subarg3-1
+                             :& subargs3-2+
+                             :as arg3]]
+        {\"arg1\" arg1  \"arg2\" arg2  \"arg3\" arg3
+         \"subarg2-1\" subarg2-1  \"subarg3-1\" subarg3-1  \"subargs3-2+\" subargs3-2+})
+
+      (some-function 1 {\"key\" 2} [3 4 5])
+      ; => {\"arg1\" 1  \"arg2\" {\"key\" 2}  \"arg3\" [3 4 5]
+      ;     \"subarg2-1\" 2  \"subarg3-1\" 3  \"subargs3-2+\" [4 5]}
+
+      (some-function 1 2 [])
+      ; => {\"arg1\" 1  \"arg2\" None  \"arg3\" []
+      ;     \"subarg2-1\" 20  \"subarg3-1\" None  \"subargs3-2+\" []}
+
+      (some-function)
+      ; => {\"arg1\" None  \"arg2\" None  \"arg3\" None
+      ;     \"subarg2-1\" 20  \"subarg3-1\" None  \"subargs3-2+\" None}
+
+   Note that variables with a default value from an ``:or`` special option will fallback to their default value instead of being silently set to ``None``.
+
 Patterns
 ========
 
