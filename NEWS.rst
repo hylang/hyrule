@@ -12,6 +12,12 @@ New Features
 * New macro `block`.
 * New macros `branch`, `ebranch`, `case`, and `ecase`.
 
+Bug Fixes
+------------------------------
+* Destructuring macros now consistently return `None` in case of
+  failing to match a certain pattern, instead of sometimes returning
+  `None` and sometimes raising an exception.
+
 0.1 (released 2022-01-09)
 ==============================
 

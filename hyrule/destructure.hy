@@ -39,6 +39,35 @@ where ``data`` might be defined by
 
 This is similar to unpacking iterables in Python, such as ``a, *b, c = range(10)``, however it also works on dictionaries, and has several special options.
 
+.. warning::
+   Variables which are not found in the expression are silently set to ``None`` if no default value is specified. This is particularly important with ``defn+`` and ``fn+``.
+
+   .. code-block:: hy
+
+      (defn+ some-function [arg1
+                            {subarg2-1 \"key\"
+                             :or {subarg2-1 20}
+                             :as arg2}
+                            [subarg3-1
+                             :& subargs3-2+
+                             :as arg3]]
+        {\"arg1\" arg1  \"arg2\" arg2  \"arg3\" arg3
+         \"subarg2-1\" subarg2-1  \"subarg3-1\" subarg3-1  \"subargs3-2+\" subargs3-2+})
+
+      (some-function 1 {\"key\" 2} [3 4 5])
+      ; => {\"arg1\" 1  \"arg2\" {\"key\" 2}  \"arg3\" [3 4 5]
+      ;     \"subarg2-1\" 2  \"subarg3-1\" 3  \"subargs3-2+\" [4 5]}
+
+      (some-function 1 2 [])
+      ; => {\"arg1\" 1  \"arg2\" None  \"arg3\" []
+      ;     \"subarg2-1\" 20  \"subarg3-1\" None  \"subargs3-2+\" []}
+
+      (some-function)
+      ; => {\"arg1\" None  \"arg2\" None  \"arg3\" None
+      ;     \"subarg2-1\" 20  \"subarg3-1\" None  \"subargs3-2+\" None}
+
+   Note that variables with a default value from an ``:or`` special option will fallback to their default value instead of being silently set to ``None``.
+
 Patterns
 ========
 
@@ -201,11 +230,15 @@ Iterator patterns are specified using round brackets. They are the same as list 
   (setv binds (iterable->dict binds)
         default (iterable->dict (.get binds ':or '{})))
   (defn expand-lookup [target key]
-    [target `(.get ~ddict
-                   ~(if (isinstance key hy.models.Keyword)
-                        `(quote ~key) key)
-                   ~(if (isinstance target hy.models.Symbol)
-                        (.get default target)))])
+    [target `(if (hasattr ~ddict "get")
+               (.get ~ddict
+                     ~(if (isinstance key hy.models.Keyword)
+                          `(quote ~key) key)
+                     ~(if (isinstance target hy.models.Symbol)
+                          (.get default target)))
+               ~@(when (and (isinstance target hy.models.Symbol)
+                            (not (is (.get default target) None)))
+                   [(.get default target)]))])
   (defn get-as [to-key targets]
     (lfor t targets
           sym (expand-lookup t (to-key t))
@@ -214,7 +247,7 @@ Iterator patterns are specified using round brackets. They are the same as list 
        (starmap (fn [target lookup]
                   (branch (found target it)
                     ':or []
-                    ':as [lookup ddict]
+                    ':as [lookup `(if (hasattr ~ddict "get") ~ddict None)]
                     ':strs (get-as str lookup)
                     ':keys (get-as (fn [x] (hy.models.Keyword (hy.unmangle x))) lookup)
                     else (destructure #* (expand-lookup target lookup) gsyms))))
@@ -251,20 +284,27 @@ Iterator patterns are specified using round brackets. They are the same as list 
   ``(destructure '[a b [c :& d :as q] :& {:keys [e f]} :as full]
                  [1 2 [3 4 5] :e 6 :f 7])``
   "
-  (.append result `(list ~(.pop result)))
+  (.append result `(try
+                     (list ~(.pop result))
+                     (except [e TypeError]
+                       None)))
   (setv [bs magics] (find-magics binds)
         n (len bs)
         bres (lfor [i t] (enumerate bs)
-               (destructure t `(.get (dict (enumerate ~dlist)) ~i) gsyms))
+               (destructure t `(.get (dict (enumerate (or ~dlist []))) ~i) gsyms))
         err-msg "Invalid magic option :{} in list destructure"
         mres (lfor [m t] magics
                (branch (found m it)
                  ':as [t dlist]
                  ':& (destructure t (if (isinstance t hy.models.Dict)
-                                      `(dict (zip
-                                        (cut ~dlist ~n None 2)
-                                        (cut ~dlist ~(+ n 1) None 2)))
-                                      `(cut ~dlist ~n None))
+                                      `(if (not (is ~dlist None))
+                                           (dict (zip
+                                                   (cut ~dlist ~n None 2)
+                                                   (cut ~dlist ~(+ n 1) None 2)))
+                                           None)
+                                      `(if (not (is ~dlist None))
+                                           (cut ~dlist ~n None)
+                                           None))
                                   gsyms)
                  else (raise (SyntaxError (.format err-msg m.name))))))
   (reduce + (chain bres mres) result))
