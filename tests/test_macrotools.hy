@@ -12,9 +12,9 @@
       (with-gensyms [a]
         `(do
            (setv ~a ~expr)
-           (cond [(> ~a 0) ~pos]
-                 [(= ~a 0) ~zero]
-                 [(< ~a 0) ~neg]))))
+           (cond (> ~a 0) ~pos
+                 (= ~a 0) ~zero
+                 (< ~a 0) ~neg))))
 
     (print (nif (inc -1) 1 0 -1))
     ")
@@ -36,9 +36,9 @@
   (setv macro1 "(defmacro/g! nif [expr pos zero neg]
         `(do
            (setv ~g!res ~expr)
-           (cond [(> ~g!res 0) ~pos]
-                 [(= ~g!res 0) ~zero]
-                 [(< ~g!res 0) ~neg])))
+           (cond (> ~g!res 0) ~pos
+                 (= ~g!res 0) ~zero
+                 (< ~g!res 0) ~neg)))
 
     (print (nif (inc -1) 1 0 -1))
     ")
@@ -66,9 +66,9 @@
   (setv macro1 "(defmacro! nif [expr pos zero neg]
         `(do
            (setv ~g!res ~expr)
-           (cond [(> ~g!res 0) ~pos]
-                 [(= ~g!res 0) ~zero]
-                 [(< ~g!res 0) ~neg])))
+           (cond (> ~g!res 0) ~pos
+                 (= ~g!res 0) ~zero
+                 (< ~g!res 0) ~neg)))
 
     (print (nif (inc -1) 1 0 -1))
     ")

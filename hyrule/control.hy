@@ -28,8 +28,8 @@
   ::
 
       (cond
-        [(in (.lower my-char) "aeiou") "it's a vowel"]
-        [(in (.lower my-char) "xyz")   "it's one of those last few"])
+        (in (.lower my-char) "aeiou") "it's a vowel"
+        (in (.lower my-char) "xyz")   "it's one of those last few")
 
   If you miss Common Lisp's ``typecase`` macro, here's how you can use
   ``branch`` to branch by type in the same way::
@@ -70,13 +70,15 @@
   (when (% (len rest) 2)
     (raise (TypeError "each case-form needs a result-form")))
   `(let [it None]
-    (cond ~@(gfor [case result] (by2s rest) `[
-      ~(if (= case 'else)
-        'True
-        `(do
-          (setv it ~case)
-          ~tester))
-      ~result]))))
+    (cond ~@(sum
+      (gfor [case result] (by2s rest) [
+        (if (= case 'else)
+          'True
+          `(do
+            (setv it ~case)
+            ~tester))
+        result])
+      []))))
 
 
 (defmacro case [key #* rest]
@@ -124,11 +126,13 @@
   (setv x (hy.gensym "case-key"))
   `(do
     (setv ~x ~key)
-    (cond ~@(gfor [test-value result] (by2s rest) `[
-      ~(if (= test-value 'else)
-        'True
-        `(= ~x ~test-value))
-      ~result]))))
+    (cond ~@(sum
+      (gfor [test-value result] (by2s rest) [
+        (if (= test-value 'else)
+          'True
+          `(= ~x ~test-value))
+        result])
+      []))))
 
 
 (defmacro cfor [f #* generator]
@@ -416,12 +420,12 @@
 (defn block-walker [x tags BR]
   (cond
 
-    [(and (isinstance x hy.models.Expression) x
+    (and (isinstance x hy.models.Expression) x
         (= (get x 0) 'block))
-      (block-f (cut x 1 None) tags BR)]
+      (block-f (cut x 1 None) tags BR)
 
-    [(and (isinstance x hy.models.Expression) x
-        (in (get x 0) ['block-ret 'block-ret-from]))
+    (and (isinstance x hy.models.Expression) x
+        (in (get x 0) ['block-ret 'block-ret-from])) (do
       (setv block-ret-from? (= (get x 0) 'block-ret-from))
       (if block-ret-from?
         (unless (in (len x) [2 3])
@@ -437,13 +441,13 @@
         ~(get tags tag)
         ~(if (> (len x) (if block-ret-from? 2 1))
           (get x -1)
-          'None)))]
+          'None))))
 
-    [(coll? x)
-      ((type x) (gfor  elem x  (block-walker elem tags BR)))]
+    (coll? x)
+      ((type x) (gfor  elem x  (block-walker elem tags BR)))
 
-    [True
-      x]))
+    True
+      x))
 
 (defclass BlockRet [Exception]
   (setv __init__ (fn [self block-name value]

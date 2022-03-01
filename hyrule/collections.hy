@@ -201,21 +201,22 @@
 
 (defn _parse-indexing [sym]
     (cond
-      [(and (isinstance sym hy.models.Expression) (= (get sym 0) :))
-       `(slice ~@(cut sym 1 None))]
+      (and (isinstance sym hy.models.Expression) (= (get sym 0) :))
+        `(slice ~@(cut sym 1 None))
 
-      [(= sym '...)
-       'Ellipsis]
+      (= sym '...)
+        'Ellipsis
 
-      [(and (isinstance sym (, hy.models.Keyword hy.models.Symbol))
+      (and (isinstance sym (, hy.models.Keyword hy.models.Symbol))
             (in ":" (str sym)))
-       (try
-          `(slice ~@(lfor
-            index (.split (str sym) ":")
-            (if index (int index))))
-          (except [ValueError] sym))]
+        (try
+           `(slice ~@(lfor
+             index (.split (str sym) ":")
+             (if index (int index))))
+           (except [ValueError] sym))
 
-      [True sym]))
+      True
+        sym))
 
 
 (defn postwalk [f form]
@@ -371,13 +372,14 @@
        97
   "
   (cond
-   [(isinstance form hy.models.Expression)
-    (outer (hy.models.Expression (map inner form)))]
-   [(or (isinstance form (, hy.models.Sequence list)))
-    ((type form) (outer (hy.models.Expression (map inner form))))]
-   [(coll? form)
-    (walk inner outer (list form))]
-   [True (outer form)]))
+    (isinstance form hy.models.Expression)
+      (outer (hy.models.Expression (map inner form)))
+    (or (isinstance form (, hy.models.Sequence list)))
+      ((type form) (outer (hy.models.Expression (map inner form))))
+    (coll? form)
+      (walk inner outer (list form))
+    True
+      (outer form)))
 
 (defn by2s [x]
   #[[Returns the given iterable in pairs.
