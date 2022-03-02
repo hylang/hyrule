@@ -228,33 +228,30 @@
 
 
 (defmacro lif [#* args]
-  "Like `if`, but anything that is not None is considered true.
+  #[[A "Lispy if" similar to :hy:func:`if` and :hy:func:`cond
+  <hy.core.macros.cond>`. Its most notable property is that it tests
+  the condition with ``(is-not condition None)`` instead of ``(bool
+  condition)``, so values such as the integer 0, the empty string, and
+  :py:keyword:`False` are considered true, not false. The general
+  syntax is
+  ::
 
-  For those that prefer a more Lispy ``if`` clause, we have
-  ``lif``. This *only* considers ``None`` to be false! All other
-  \"false-ish\" Python values are considered true.
+      (lif
+        condition1 result1
+        condition2 result2
+        …
+        else-value)
 
-  Examples:
-    ::
+  which is equivalent to
+  ::
 
-       => (lif True \"true\" \"false\")
-       \"true\"
+      (cond
+        (is-not condition1 None) result1
+        (is-not condition2 None) result2
+        …
+        True                     else-value)
 
-    ::
-
-       => (lif False \"true\" \"false\")
-       \"true\"
-
-    ::
-
-       => (lif 0 \"true\" \"false\")
-       \"true\"
-
-    ::
-
-       => (lif None \"true\" \"false\")
-       \"false\"
-  "
+  When no condition matches and there is no else-value, the result is ``None``.]]
   (setv n (len args))
   (when n
         (if (= n 1)
@@ -333,18 +330,13 @@
 
 
 (defmacro unless [test #* body]
-  "Execute `body` when `test` is false
+  #[[Shorthand for ``(when (not test) …)``, i.e., ``(if (not test) (do
+  …) None)``. See :hy:func:`if`.
+  ::
 
-  The ``unless`` macro is a shorthand for writing an ``if`` statement that checks if
-  the given conditional is ``False``. The following shows the expansion of this macro.
-
-  Examples:
-    ::
-
-       => (unless conditional statement)
-       (if conditional
-         None
-         (do statement))"
+      (unless ok
+        (print "Failed.")
+        (exit 1))]]
   `(when (not ~test) ~@body))
 
 
