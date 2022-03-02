@@ -8,16 +8,16 @@
 (defn tco-sum [x y]
   (loop [[x x] [y y]]
         (cond
-         [(> y 0) (recur (inc x) (dec y))]
-         [(< y 0) (recur (dec x) (inc y))]
-         [True x])))
+          (> y 0) (recur (inc x) (dec y))
+          (< y 0) (recur (dec x) (inc y))
+          True x)))
 
 
 (defn non-tco-sum [x y]
   (cond
-   [(> y 0) (inc (non-tco-sum x (dec y)))]
-   [(< y 0) (dec (non-tco-sum x (inc y)))]
-   [True x]))
+    (> y 0) (inc (non-tco-sum x (dec y)))
+    (< y 0) (dec (non-tco-sum x (inc y)))
+    True x))
 
 
 (defn test-loop []

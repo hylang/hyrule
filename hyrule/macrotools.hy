@@ -70,10 +70,10 @@
        42
   "
   (defn extract-o!-sym [arg]
-    (cond [(and (isinstance arg hy.models.Symbol) (.startswith arg "o!"))
-           arg]
-          [(and (isinstance args hy.models.List) (.startswith (get arg 0) "o!"))
-           (get arg 0)]))
+    (cond (and (isinstance arg hy.models.Symbol) (.startswith arg "o!"))
+            arg
+          (and (isinstance args hy.models.List) (.startswith (get arg 0) "o!"))
+            (get arg 0)))
   (setv os (lfor  x (map extract-o!-sym args)  :if x  x)
         gs (lfor s os (hy.models.Symbol (+ "g!" (cut s 2 None)))))
 
@@ -109,19 +109,19 @@
       (-= quote-level x)
       `(~head ~@res))
     (if (and (isinstance form hy.models.Expression) form)
-        (cond [quote-level
-               (cond [(in (get form 0) '[unquote unquote-splice])
-                      (+quote -1)]
-                     [(= (get form 0) 'quasiquote) (+quote)]
-                     [True (traverse form)])]
-              [(= (get form 0) 'quote) form]
-              [(= (get form 0) 'quasiquote) (+quote)]
-              [(= (get form 0) (hy.models.Symbol "require"))
+        (cond quote-level
+               (cond (in (get form 0) '[unquote unquote-splice])
+                       (+quote -1)
+                     (= (get form 0) 'quasiquote) (+quote)
+                     True (traverse form))
+              (= (get form 0) 'quote) form
+              (= (get form 0) 'quasiquote) (+quote)
+              (= (get form 0) (hy.models.Symbol "require")) (do
                (ast-compiler.compile form)
-               (return)]
-              [(in (get form 0) '[except unpack-mapping])
-               (hy.models.Expression [(get form 0) #* (traverse (cut form 1 None))])]
-              [True (traverse (hy.macros.macroexpand form ast-compiler.module ast-compiler :result-ok False))])
+               (return))
+              (in (get form 0) '[except unpack-mapping])
+               (hy.models.Expression [(get form 0) #* (traverse (cut form 1 None))])
+              True (traverse (hy.macros.macroexpand form ast-compiler.module ast-compiler :result-ok False)))
         (if (coll? form)
             (traverse form)
             form)))

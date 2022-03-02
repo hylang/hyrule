@@ -126,16 +126,17 @@ The differences that do exist are as follows:
   (when (or (and (issubclass typ list) (is r list.__repr__))
             (and (issubclass typ tuple) (is r tuple.__repr__)))
     (cond
-      [(issubclass typ list)
-       (if object
-          (setv format "[%s]")
-          (return (, "[]" True False)))]
+      (issubclass typ list)
+        (if object
+           (setv format "[%s]")
+           (return (, "[]" True False)))
 
-      [(= (len object) 1) (setv format "(, %s)")]
+      (= (len object) 1)
+        (setv format "(, %s)")
 
-      [True (if object
+      True (if object
                 (setv format "(, %s)")
-                (return (, "(,)" True False)))])
+                (return (, "(,)" True False))))
     (setv objid (id object))
     (when (and maxlevels (>= level maxlevels))
       (return (, (% format "...") False (in objid context))))

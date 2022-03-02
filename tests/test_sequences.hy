@@ -11,8 +11,8 @@
 
 (defn test-indexing-sequence []
   (defseq shorty [n]
-    (cond [(< n 10) n]
-          [True (end-sequence)]))
+    (cond (< n 10) n
+          True (end-sequence)))
   (setv 0-to-9 (list (range 10)))
   (assert (= (get shorty 0)
              (get 0-to-9 0))
@@ -27,8 +27,8 @@
 
 (defn test-slicing-sequence []
   (defseq shorty [n]
-    (cond [(< n 10) n]
-          [True (end-sequence)]))
+    (cond (< n 10) n
+          True (end-sequence)))
   (setv 0-to-9 (list (range 10)))
   (assert (= (get shorty 0)
              (get 0-to-9 0))
@@ -49,10 +49,10 @@
 
 (defn test-recursive-sequence []
   (defseq fibonacci [n]
-    (cond [(= n 0) 0]
-          [(= n 1) 1]
-          [True (+ (get fibonacci (- n 1))
-                   (get fibonacci (- n 2)))]))
+    (cond (= n 0) 0
+          (= n 1) 1
+          True (+ (get fibonacci (- n 1))
+                  (get fibonacci (- n 2)))))
   (assert (= (get fibonacci 0)
              0)
           "first element of fibonacci didn't match")
@@ -81,11 +81,11 @@
     (defn next-possible-prime [n]
       "next possible prime after nth prime"
       (inc (get primes (dec n))))
-    (cond [(= n 0) 2]
-          [True (do (setv guess (next-possible-prime n))
+    (cond (= n 0) 2
+          True (do (setv guess (next-possible-prime n))
                     (while (divisible? guess (previous-primes n))
                       (setv guess (inc guess)))
-                    guess)]))
+                    guess)))
   (assert (= (list (cut primes 10))
              [2 3 5 7 11 13 17 19 23 29])
           "prime sequence didn't match"))

@@ -11,8 +11,8 @@ sequence::
 
    (seq [n]
         \"sequence of 5 integers\"
-        (cond [(< n 5) n]
-              [True (end-sequence)]))
+        (cond (< n 5) n
+              True (end-sequence)))
 
 This creates the following sequence: ``[0 1 2 3 4]``. For such a sequence,
 ``len`` returns the amount of items in the sequence and negative indexing is
@@ -25,10 +25,10 @@ be defined as::
 
    (defseq fibonacci [n]
      \"infinite sequence of fibonacci numbers\"
-     (cond [(= n 0) 0]
-           [(= n 1) 1]
-           [True (+ (get fibonacci (- n 1))
-                    (get fibonacci (- n 2)))]))
+     (cond (= n 0) 0
+           (= n 1) 1
+           True (+ (get fibonacci (- n 1))
+                   (get fibonacci (- n 2)))))
 
 This results in the sequence ``[0 1 1 2 3 5 8 13 21 34 ...]``.
 "
