@@ -383,10 +383,10 @@
 
 (defn by2s [x]
   #[[Returns the given iterable in pairs.
-  (list (by2s (range 6))) => [(, 0 1) (, 2 3) (, 4 5)] #]]
-(setv x (iter x))
-(while True
-  (try
-    (yield (, (next x) (next x)))
-    (except [StopIteration]
-      (break)))))
+    (list (by2s (range 6))) => [(, 0 1) (, 2 3) (, 4 5)] #]]
+  (setv x (iter x))
+  (while True
+    (try
+      (yield (, (next x) (next x)))
+      (except [StopIteration]
+        (break)))))
