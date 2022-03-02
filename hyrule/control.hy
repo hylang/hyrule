@@ -223,7 +223,7 @@
   `(when (= __name__ "__main__")
      (import sys)
      (setv ~retval ((fn [~@(or args `[#* ~restval])] ~@body) #* sys.argv))
-     (if (isinstance ~retval int)
+     (when (isinstance ~retval int)
        (sys.exit ~retval))))
 
 
@@ -256,12 +256,12 @@
        \"false\"
   "
   (setv n (len args))
-  (if n
-      (if (= n 1)
-          (get args 0)
-          `(if (is-not ~(get args 0) None)
-               ~(get args 1)
-               (lif ~@(cut args 2 None))))))
+  (when n
+        (if (= n 1)
+            (get args 0)
+            `(if (is-not ~(get args 0) None)
+                 ~(get args 1)
+                 (lif ~@(cut args 2 None))))))
 
 
 (defmacro list-n [count-form #* body]
@@ -345,7 +345,7 @@
        (if conditional
          None
          (do statement))"
-  `(if (not ~test) (do ~@body)))
+  `(when (not ~test) ~@body))
 
 
 (defmacro block [#* body]

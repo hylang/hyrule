@@ -151,10 +151,10 @@ The differences that do exist are as follows:
     (for [o object]
       (setv (, orepr oreadable? orecur?) (_safe-repr o context maxlevels level sort-dicts))
       (append orepr)
-      (if (not oreadable?)
-          (setv readable? False))
-      (if orecur?
-          (setv recursive? True)))
+      (when (not oreadable?)
+            (setv readable? False))
+      (when orecur?
+            (setv recursive? True)))
     (del (get context objid))
     (return (, (% format (.join " " components))
                readable?
@@ -341,12 +341,12 @@ The differences that do exist are as follows:
                          (= i (dec (len lines))))
                 (-= max-width2 allowance))
               (if (> (len (hy.repr candidate)) max-width2)
-                  (do (if current
-                          (chunks.append (hy.repr current)))
+                  (do (when current
+                            (chunks.append (hy.repr current)))
                       (setv current part))
                   (setv current candidate)))
-            (if current
-                (chunks.append (hy.repr current))))))
+            (when current
+                  (chunks.append (hy.repr current))))))
     (when (= (len chunks) 1)
       (write rep)
       (return))

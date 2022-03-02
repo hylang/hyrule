@@ -77,10 +77,9 @@
   "
   (setv seen (set) citer (iter coll))
   (for [val citer]
-    (if (not-in val seen)
-      (do
-       (yield val)
-       (.add seen val)))))
+    (when (not-in val seen)
+      (yield val)
+      (.add seen val))))
 
 
 (defn drop-last [n coll]
