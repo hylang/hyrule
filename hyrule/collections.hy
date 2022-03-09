@@ -68,8 +68,8 @@
 
   .. note:: ``assoc`` modifies the datastructure in place and returns ``None``.
   "
-  (if (% (len other-kvs) 2)
-      (raise (ValueError "`assoc` takes an odd number of arguments")))
+  (when (% (len other-kvs) 2)
+        (raise (ValueError "`assoc` takes an odd number of arguments")))
   (setv c (if other-kvs
             (hy.gensym "c")
             coll))
@@ -212,7 +212,7 @@
         (try
            `(slice ~@(lfor
              index (.split (str sym) ":")
-             (if index (int index))))
+             (when index (int index))))
            (except [ValueError] sym))
 
       True
@@ -383,10 +383,10 @@
 
 (defn by2s [x]
   #[[Returns the given iterable in pairs.
-  (list (by2s (range 6))) => [(, 0 1) (, 2 3) (, 4 5)] #]]
-(setv x (iter x))
-(while True
-  (try
-    (yield (, (next x) (next x)))
-    (except [StopIteration]
-      (break)))))
+    (list (by2s (range 6))) => [(, 0 1) (, 2 3) (, 4 5)] #]]
+  (setv x (iter x))
+  (while True
+    (try
+      (yield (, (next x) (next x)))
+      (except [StopIteration]
+        (break)))))

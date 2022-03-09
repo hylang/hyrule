@@ -189,12 +189,12 @@ Iterator patterns are specified using round brackets. They are the same as list 
       result [dcoll expr]
       seen #{})
     (defn found [magic target]
-      (if (= magic target)
-        (if (in magic seen)
+      (when (= magic target)
+        (when (in magic seen)
           (raise (SyntaxError (.format "Duplicate :{} in destructure."
-                                       magic.name)))
-          (do (.add seen magic)
-            True))))
+                                       magic.name))))
+         (.add seen magic)
+         True))
     (unless (is gsyms None)
       (.append gsyms dcoll))
     (f dcoll result found binds gsyms))
@@ -234,11 +234,11 @@ Iterator patterns are specified using round brackets. They are the same as list 
                (.get ~ddict
                      ~(if (isinstance key hy.models.Keyword)
                           `(quote ~key) key)
-                     ~(if (isinstance target hy.models.Symbol)
-                          (.get default target)))
-               ~@(when (and (isinstance target hy.models.Symbol)
-                            (not (is (.get default target) None)))
-                   [(.get default target)]))])
+                     ~(when (isinstance target hy.models.Symbol)
+                            (.get default target)))
+               ~(when (and (isinstance target hy.models.Symbol)
+                           (not (is (.get default target) None)))
+                   (.get default target)))])
   (defn get-as [to-key targets]
     (lfor t targets
           sym (expand-lookup t (to-key t))
@@ -254,8 +254,8 @@ Iterator patterns are specified using round brackets. They are the same as list 
        ((fn [xs] (reduce + xs result)))))
 
 (defn find-magics [bs [keys? False] [as? False]]
-  (setv x (if bs (get bs 0))
-        y (if (> (len bs) 1) (get bs 1)))
+  (setv x (when bs (get bs 0))
+        y (when (> (len bs) 1) (get bs 1)))
   (if (is x None)
     [[] []]
     (if (isinstance x hy.models.Keyword)
@@ -387,8 +387,8 @@ Iterator patterns are specified using round brackets. They are the same as list 
 
 (defmacro let+ [args #* body]
   "let macro with full destructuring with `args`"
-  (if (% (len args) 2)
-      (raise (ValueError "let bindings must be paired")))
+  (when (% (len args) 2)
+        (raise (ValueError "let bindings must be paired")))
   `(let ~(lfor [bs expr] (by2s args)
                sym (destructure bs expr)
            sym)

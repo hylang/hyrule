@@ -76,7 +76,7 @@ variable name, as in ``(print \"My favorite Stephen King book is\" 'it)``."
        2
        3"
   (rit `(for [~it ~xs]
-    (if (not ~(R form))
+    (when (not ~(R form))
       (break))
     ~@(R body))))
 
@@ -262,11 +262,11 @@ variable name, as in ``(print \"My favorite Stephen King book is\" 'it)``."
                                inc))
                 (hy.models.Symbol (+ "%" (str i))))
         ;; generate the #* parameter only if '%* is present in expr
-        ~@(if (in '%* %symbols)
-              '(#* %*))
+        ~@(when (in '%* %symbols)
+                '(#* %*))
         ;; similarly for #** and %**
-        ~@(if (in '%** %symbols)
-              '(#** %**))]
+        ~@(when (in '%** %symbols)
+                '(#** %**))]
      ~expr))
 
 
