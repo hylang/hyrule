@@ -37,7 +37,7 @@ variable name, as in ``(print \"My favorite Stephen King book is\" 'it)``."
 
 (defmacro ap-if [test-form then-form [else-form None]]
   "As :ref:`if <if>`, but the result of the test form is named ``it`` in
-  the subsequent forms. As with ``if``, the else-clause is optional.
+  the subsequent forms. The else-clause is optional.
 
   Examples:
     ::
