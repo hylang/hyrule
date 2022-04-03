@@ -20,20 +20,6 @@ variable name, as in ``(print \"My favorite Stephen King book is\" 'it)``."
   hyrule.macrotools [defmacro!]
   hyrule.argmove [->])
 
-;;; Macro to help write anaphoric macros
-
-(defmacro rit [#* body]
-  "Supply `it` as a gensym and R as a function to replace `it` with the
-  given gensym throughout expressions."
-  `(do
-    (setv it (hy.gensym))
-    (defn R [form]
-      "Replace `it` with a gensym throughout `form`."
-      (recur-sym-replace {'it it} form))
-    ~@body))
-
-
-;;; These macros make writing functional programs more concise
 
 (defmacro ap-if [test-form then-form [else-form None]]
   "As :ref:`if <if>`, but the result of the test form is named ``it`` in
@@ -46,9 +32,8 @@ variable name, as in ``(print \"My favorite Stephen King book is\" 'it)``."
        => (ap-if (.get os.environ \"PYTHONPATH\")
        ...   (print \"Your PYTHONPATH is\" it))
   "
-  (rit `(do
-     (setv ~it ~test-form)
-     (if ~it ~(R then-form) ~(R else-form)))))
+  `(let [it ~test-form]
+     (if it ~then-form ~else-form)))
 
 
 (defmacro ap-each [xs #* body]
@@ -61,7 +46,7 @@ variable name, as in ``(print \"My favorite Stephen King book is\" 'it)``."
        1
        2
        3"
-  (rit `(for [~it ~xs] ~@(R body))))
+  `(let [it None] (for [it ~xs] ~@body)))
 
 
 (defmacro ap-each-while [xs form #* body]
@@ -75,10 +60,11 @@ variable name, as in ``(print \"My favorite Stephen King book is\" 'it)``."
        1
        2
        3"
-  (rit `(for [~it ~xs]
-    (when (not ~(R form))
-      (break))
-    ~@(R body))))
+  `(let [it None]
+    (for [it ~xs]
+      (when (not ~form)
+        (break))
+      ~@body)))
 
 
 (defmacro ap-map [form xs]
@@ -144,8 +130,9 @@ variable name, as in ``(print \"My favorite Stephen King book is\" 'it)``."
        => (ap-dotimes 3 (.append n it))
        => n
        [0 1 2]"
-  (rit `(for [~it (range ~n)]
-    ~@(R body))))
+  `(let [it None]
+    (for [it (range ~n)]
+      ~@body)))
 
 
 (defmacro ap-first [form xs]
@@ -176,11 +163,11 @@ variable name, as in ``(print \"My favorite Stephen King book is\" 'it)``."
        => (ap-last (> it 5) (range 10))
        9"
   (setv x (hy.gensym))
-  (rit `(do
+  `(let [it None]
     (setv ~x None)
-    (for  [~it ~xs  :if ~(R form)]
-      (setv ~x ~it))
-    ~x)))
+    (for  [it ~xs  :if ~form]
+      (setv ~x it))
+    ~x))
 
 
 (defmacro! ap-reduce [form o!xs [initial-value None]]
@@ -202,20 +189,15 @@ variable name, as in ``(print \"My favorite Stephen King book is\" 'it)``."
 
        => (ap-reduce (+ it acc) (range 10))
        45"
-  (setv
-    it (hy.gensym)
-    acc (hy.gensym))
-  (defn R [form]
-    (recur-sym-replace {'it it  'acc acc} form))
-  `(do
-    (setv ~acc ~(if (is initial-value None)
+  `(let [acc None  it None]
+    (setv acc ~(if (is initial-value None)
       `(do
         (setv ~g!xs (iter ~g!xs))
         (next ~g!xs))
       initial-value))
-    (for [~it ~g!xs]
-      (setv ~acc ~(R form)))
-    ~acc))
+    (for [it ~g!xs]
+      (setv acc ~form))
+    acc))
 
 
 (defmacro "#%" [expr]
@@ -268,20 +250,3 @@ variable name, as in ``(print \"My favorite Stephen King book is\" 'it)``."
         ~@(when (in '%** %symbols)
                 '(#** %**))]
      ~expr))
-
-
-;;; --------------------------------------------------
-;;; Subroutines
-;;; --------------------------------------------------
-
-
-(defn recur-sym-replace [d form]
-  "Recursive symbol replacement."
-  (import hyrule.iterables [coll?])
-  (cond
-    (isinstance form hy.models.Symbol)
-      (.get d form form)
-    (coll? form)
-      ((type form) (gfor  x form  (recur-sym-replace d x)))
-    True
-      form))
