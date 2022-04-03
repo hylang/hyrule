@@ -90,7 +90,7 @@ variable name, as in ``(print \"My favorite Stephen King book is\" 'it)``."
 
        => (list (ap-map (* it 2) [1 2 3]))
        [2 4 6]"
-  (rit `(gfor  ~it ~xs  ~(R form))))
+  `(gfor  it ~xs  ~form))
 
 
 (defmacro ap-map-when [predfn rep xs]
@@ -109,7 +109,7 @@ variable name, as in ``(print \"My favorite Stephen King book is\" 'it)``."
 
        => (list (ap-map-when (fn [x] (= (% x 2) 0)) (* it 2) [1 2 3 4]))
        [1 4 3 8]"
-  (rit `(gfor  ~it ~xs  (if (~predfn ~it) ~(R rep) ~it))))
+  `(gfor  it ~xs  (if (~predfn it) ~rep it)))
 
 
 (defmacro ap-filter [form xs]
@@ -120,7 +120,7 @@ variable name, as in ``(print \"My favorite Stephen King book is\" 'it)``."
 
        => (list (ap-filter (> (* it 2) 6) [1 2 3 4 5]))
        [4 5]"
-  (rit `(gfor  ~it ~xs  :if ~(R form)  ~it)))
+  `(gfor  it ~xs  :if ~form  it))
 
 
 (defmacro ap-reject [form xs]
@@ -131,7 +131,7 @@ variable name, as in ``(print \"My favorite Stephen King book is\" 'it)``."
 
        => (list (ap-reject (> (* it 2) 6) [1 2 3 4 5]))
        [1 2 3]"
-  (rit `(gfor  ~it ~xs  :if (not ~(R form))  ~it)))
+  `(gfor  it ~xs  :if (not ~form)  it))
 
 
 (defmacro ap-dotimes [n #* body]
@@ -158,9 +158,9 @@ variable name, as in ``(print \"My favorite Stephen King book is\" 'it)``."
 
        => (ap-first (> it 5) (range 10))
        6"
-  (rit `(next
-    (gfor  ~it ~xs  :if ~(R form)  ~it)
-    None)))
+  `(next
+    (gfor  it ~xs  :if ~form  it)
+    None))
 
 
 (defmacro ap-last [form xs]
