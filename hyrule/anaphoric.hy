@@ -6,15 +6,7 @@ concise and easy to read.
     deliberately captures some form supplied to the macro which may be
     referred to by an anaphor (an expression referring to another).
 
-    -- Wikipedia (https://en.wikipedia.org/wiki/Anaphoric_macro)
-
-These macros are implemented by replacing any use of the designated
-anaphoric symbols (``it``, in most cases) with a gensym. Consequently,
-it's unwise to nest these macros where symbol replacement is happening.
-Symbol replacement typically takes place in ``body`` or ``form``
-parameters, where the output of the expression may be returned. It is also
-recommended to avoid using an affected symbol as something other than a
-variable name, as in ``(print \"My favorite Stephen King book is\" 'it)``."
+    -- Wikipedia (https://en.wikipedia.org/wiki/Anaphoric_macro)"
 
 (require
   hyrule.macrotools [defmacro!]
