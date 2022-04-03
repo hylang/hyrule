@@ -19,6 +19,22 @@
   (assert (= out 3))
   (assert (= it "orig"))
 
+  ; Nested `it`s are unaffected.
+  (setv out (ap-if (+ "a" "b") (do
+    (defn myfun []
+      (setv it "xyz")
+      it)
+    (+ (myfun) it))))
+  (assert (= out "xyzab"))
+  (assert (= it "orig"))
+
+  ; Quoted `it`s are unaffected.
+  (assert (=
+    (ap-if "King"
+      (+ "My favorite Stephen " (str it) " book is " (str 'it)))
+    "My favorite Stephen King book is it"))
+  (assert (= it "orig"))
+
   (ap-if
     (->> [1 2 3 4 5]
       (ap-filter (= (% it 2) 0))
