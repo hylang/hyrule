@@ -11,6 +11,9 @@ New Features
 ------------------------------
 * New macro `block`.
 * New macros `branch`, `ebranch`, `case`, and `ecase`.
+* The macros of `hyrule.anaphoric` are now much smarter in deciding
+  what instances of the symbol `it` to replace, so you can now quote
+  or locally rebind `it` without issues.
 
 Bug Fixes
 ------------------------------
