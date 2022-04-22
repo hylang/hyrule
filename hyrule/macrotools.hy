@@ -30,8 +30,8 @@
 
   (setv [docstring body] (if (and (isinstance (get body 0) str)
                                   (> (len body) 1))
-                             (, (get body 0) (tuple (rest body)))
-                             (, None body)))
+                             #((get body 0) (tuple (rest body)))
+                             #(None body)))
 
   `(defmacro ~name [~@args]
      ~docstring
@@ -79,12 +79,12 @@
 
   (setv [docstring body] (if (and (isinstance (get body 0) str)
                                   (> (len body) 1))
-                             (, (get body 0) (tuple (rest body)))
-                             (, None body)))
+                             #((get body 0) (tuple (rest body)))
+                             #(None body)))
 
   `(defmacro/g! ~name ~args
      ~docstring
-     `(do (setv ~@(sum (zip ~gs ~os) (,)))
+     `(do (setv ~@(sum (zip ~gs ~os) #()))
           ~@~body)))
 
 

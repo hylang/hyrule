@@ -37,7 +37,7 @@
      (branch (isinstance my-value it)
        str           "It's a string"
        bytes         "It's a bytes object"
-       (, int float) "It's numeric")
+       #(int float) "It's numeric")
 
   A case form that is exactly the symbol ``else`` is treated specially. In this
   case, the test form isn't evaluated, and is treated as if it returned true.
@@ -64,7 +64,7 @@
   #[[As :hy:func:`branch`, but if no case matches, raise ``ValueError`` instead
   of returning ``None``. The name is an abbreviation for "error branch".]]
   (_branch tester (+ rest
-    (, 'else '(raise (ValueError "ebranch: No branch matched"))))))
+    #('else '(raise (ValueError "ebranch: No branch matched"))))))
 
 (defn _branch [tester rest]
   (when (% (len rest) 2)
@@ -116,7 +116,7 @@
   #[[As :hy:func:`case`, but if no case matches, raise ``ValueError`` instead
   of returning ``None``.]]
   (_case key (+ rest
-    (, 'else '(raise (ValueError "ecase: No test value matched"))))))
+    #('else '(raise (ValueError "ecase: No test value matched"))))))
 
 (defn _case [key rest]
   ; The implementation is quite similar to `branch`, but we evaluate
@@ -146,7 +146,7 @@
 
   ::
      => (cfor tuple x (range 10) :if (% x 2) x)
-     (, 1 3 5 7 9)
+     #(1 3 5 7 9)
 
   The equivalent in python would be:
 

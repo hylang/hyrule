@@ -37,7 +37,7 @@
 (defn test-of []
   (assert (= (of str) str))
   (assert (= (of List int) (get List int)))
-  (assert (= (of Dict str str) (get Dict (, str str)))))
+  (assert (= (of Dict str str) (get Dict #(str str)))))
 
 
 (defn test-parse-args []

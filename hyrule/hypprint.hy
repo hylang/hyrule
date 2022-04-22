@@ -94,13 +94,13 @@ The differences that do exist are as follows:
   ;; Level and recursive protected dict hy-repr
   (when (and (issubclass typ dict) (is r dict.__repr__))
     (unless object
-      (return (, "{}" True False)))
+      (return #("{}" True False)))
 
     (setv objid (id object))
     (when (and maxlevels (>= level maxlevels))
-      (return (, "{...}" False (in objid context))))
+      (return #("{...}" False (in objid context))))
     (when (in objid context)
-      (return (, (_recursion object) False True)))
+      (return #((_recursion object) False True)))
 
     (setv (get context objid) 1
           readable? True
@@ -109,16 +109,16 @@ The differences that do exist are as follows:
           append components.append)
     (+= level 1)
 
-    (for [(, k v) (sorted (.items object)
+    (for [#(k v) (sorted (.items object)
                           :key (if sort-dicts _safe-tuple (constantly 1)))]
-      (setv (, krepr kreadable? krecur?) (_safe-repr k context maxlevels level sort-dicts)
-            (, vrepr vreadable? vrecur?) (_safe-repr v context maxlevels level sort-dicts))
-      (append (% "%s %s" (, krepr vrepr)))
+      (setv #(krepr kreadable? krecur?) (_safe-repr k context maxlevels level sort-dicts)
+            #(vrepr vreadable? vrecur?) (_safe-repr v context maxlevels level sort-dicts))
+      (append (% "%s %s" #(krepr vrepr)))
       (setv readable? (and readable? kreadable? vreadable?))
       (when (or krecur? vrecur?)
         (setv recursive? True)))
     (del (get context objid))
-    (return (, (% "{%s}" (.join "  " components))
+    (return #((% "{%s}" (.join "  " components))
                readable?
                recursive?)))
 
@@ -129,19 +129,19 @@ The differences that do exist are as follows:
       (issubclass typ list)
         (if object
            (setv format "[%s]")
-           (return (, "[]" True False)))
+           (return #("[]" True False)))
 
       (= (len object) 1)
-        (setv format "(, %s)")
+        (setv format "#(%s)")
 
       True (if object
-                (setv format "(, %s)")
-                (return (, "(,)" True False))))
+                (setv format "#(%s)")
+                (return #("#()" True False))))
     (setv objid (id object))
     (when (and maxlevels (>= level maxlevels))
-      (return (, (% format "...") False (in objid context))))
+      (return #((% format "...") False (in objid context))))
     (when (in objid context)
-      (return (, (_recursion object) False True)))
+      (return #((_recursion object) False True)))
     (setv (get context objid) 1
           readable? True
           recursive? False
@@ -149,19 +149,19 @@ The differences that do exist are as follows:
           append components.append)
     (+= level 1)
     (for [o object]
-      (setv (, orepr oreadable? orecur?) (_safe-repr o context maxlevels level sort-dicts))
+      (setv #(orepr oreadable? orecur?) (_safe-repr o context maxlevels level sort-dicts))
       (append orepr)
       (when (not oreadable?)
             (setv readable? False))
       (when orecur?
             (setv recursive? True)))
     (del (get context objid))
-    (return (, (% format (.join " " components))
+    (return #((% format (.join " " components))
                readable?
                recursive?)))
 
   (when (in typ hy.core.hy-repr._registry)
-    (return (, (hy.repr object) True False)))
+    (return #((hy.repr object) True False)))
 
   (if PY3_8
       (_safe-py-repr object context maxlevels level sort-dicts)
@@ -222,7 +222,7 @@ The differences that do exist are as follows:
           indent (+ indent self._indent-per-level)
           delimnl (+ "\n" (* " " indent))
           last-index (dec (len items)))
-    (for [(, i (, key ent)) (enumerate items)]
+    (for [#(i #(key ent)) (enumerate items)]
       (setv last? (= i last-index)
             rep (self._repr key context level))
       (write rep)
@@ -285,7 +285,7 @@ The differences that do exist are as follows:
   (setv _dispatch {#** PyPrettyPrinter._dispatch})
 
   (assoc _dispatch tuple.__repr__ (fn [self object stream indent allowance context level]
-    (stream.write "(, ")
+    (stream.write "#(")
     (setv endchar ")")
     (self._format-items object stream (+ indent 2) (inc allowance) context level)
     (stream.write endchar)))
@@ -322,7 +322,7 @@ The differences that do exist are as follows:
     (+= allowance 2)
     (setv max-width (- self._width indent)
           max-width1 max-width)
-    (for [(, i line) (enumerate lines)]
+    (for [#(i line) (enumerate lines)]
       (setv rep (hy.repr line))
       (when (= i (len line))
         (-= max-width1 allowance))
@@ -335,7 +335,7 @@ The differences that do exist are as follows:
             (parts.pop)
             (setv max-width2 max-width
                   current "")
-            (for [(, j part) (enumerate parts)]
+            (for [#(j part) (enumerate parts)]
               (setv candidate (+ current part))
               (when (and (= j (dec (len parts)))
                          (= i (dec (len lines))))
@@ -351,7 +351,7 @@ The differences that do exist are as follows:
       (write rep)
       (return))
     (write "(+ ")
-    (for [(, i rep) (enumerate chunks)]
+    (for [#(i rep) (enumerate chunks)]
       (when (> i 0)
         (write (+ "\n" (* " " (+ indent 1)))))
       (write rep))

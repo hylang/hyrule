@@ -76,7 +76,7 @@
   `(setv ~@(+ (if other-kvs
                 [c coll]
                 [])
-              (lfor [i x] (enumerate (+ (, k1 v1) other-kvs))
+              (lfor [i x] (enumerate (+ #(k1 v1) other-kvs))
                     (if (% i 2) x `(get ~c ~x))))))
 
 
@@ -107,7 +107,7 @@
     numpy multidimensional slicing:
     ::
 
-       => (setv a (.reshape (np.arange 36) (, 6 6)))
+       => (setv a (.reshape (np.arange 36) #(6 6)))
        => a
        array([[ 0,  1,  2,  3,  4,  5],
               [ 6,  7,  8,  9, 10, 11],
@@ -115,9 +115,9 @@
               [18, 19, 20, 21, 22, 23],
               [24, 25, 26, 27, 28, 29],
               [30, 31, 32, 33, 34, 35]])
-       => (ncut a (, 0 1 2 3 4) (, 1 2 3 4 5))
+       => (ncut a #(0 1 2 3 4) #(1 2 3 4 5))
        array([ 1,  8, 15, 22, 29])
-       => (ncut a 3: (, 0 2 5))
+       => (ncut a 3: #(0 2 5))
        array([[18, 20, 23],
               [24, 26, 29],
               [30, 32, 35]])
@@ -139,7 +139,7 @@
 
        => (setv abc:def -2)
        => (hy.macroexpand '(ncut a abc:def (: (sum [1 2 3]) None abc:def)))
-       (get a (, abc:def (slice (sum [1 2 3]) None abc:def)))
+       (get a #(abc:def (slice (sum [1 2 3]) None abc:def)))
 
     Pandas allows extensive slicing along single or multiple axes:
     ::
@@ -195,7 +195,7 @@
      - `Numpy <https://numpy.org/doc/stable/reference/arrays.indexing.html>`_
   "
   `(get ~seq ~(if keys
-               `(, ~@(map _parse-indexing (, key1 #* keys)))
+               `#(~@(map _parse-indexing #(key1 #* keys)))
                (_parse-indexing key1))))
 
 
@@ -207,7 +207,7 @@
       (= sym '...)
         'Ellipsis
 
-      (and (isinstance sym (, hy.models.Keyword hy.models.Symbol))
+      (and (isinstance sym #(hy.models.Keyword hy.models.Symbol))
             (in ":" (str sym)))
         (try
            `(slice ~@(lfor
@@ -374,7 +374,7 @@
   (cond
     (isinstance form hy.models.Expression)
       (outer (hy.models.Expression (map inner form)))
-    (or (isinstance form (, hy.models.Sequence list)))
+    (or (isinstance form #(hy.models.Sequence list)))
       ((type form) (outer (hy.models.Expression (map inner form))))
     (coll? form)
       (walk inner outer (list form))
@@ -383,10 +383,10 @@
 
 (defn by2s [x]
   #[[Returns the given iterable in pairs.
-    (list (by2s (range 6))) => [(, 0 1) (, 2 3) (, 4 5)] #]]
+    (list (by2s (range 6))) => [#(0 1) #(2 3) #(4 5)] #]]
   (setv x (iter x))
   (while True
     (try
-      (yield (, (next x) (next x)))
+      (yield #((next x) (next x)))
       (except [StopIteration]
         (break)))))

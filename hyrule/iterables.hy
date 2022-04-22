@@ -53,7 +53,7 @@
   "
   (and
     (isinstance coll Iterable)
-    (not (isinstance coll (, str bytes)))))
+    (not (isinstance coll #(str bytes)))))
 
 
 (defn distinct [coll]
@@ -128,7 +128,7 @@
 
     ::
 
-       => (flatten [\"foo\" (, 1 2) [1 [2 3] 4] \"bar\"])
+       => (flatten [\"foo\" #(1 2) [1 [2 3] 4] \"bar\"])
        [\"foo\" 1 2 1 2 3 4 \"bar\"]
   "
   (if (coll? coll)

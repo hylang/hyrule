@@ -204,7 +204,7 @@ concise and easy to read.
     ::
 
        => (#%[%1 %6 42 [%2 %3] %* %4] 1 2 3 4 555 6 7 8)
-       [1 6 42 [2 3] (, 7 8) 4]
+       [1 6 42 [2 3] #(7 8) 4]
 
     ::
 
@@ -231,7 +231,7 @@ concise and easy to read.
         ~@(gfor i (range 1 (-> (lfor a %symbols
                                      :if (.isdigit (cut a 1 None))
                                      (int (cut a 1 None)))
-                               (or (, 0))
+                               (or #(0))
                                max
                                inc))
                 (hy.models.Symbol (+ "%" (str i))))
