@@ -192,7 +192,7 @@ concise and easy to read.
     acc))
 
 
-(defmacro "#%" [expr]
+(defreader %
   "Makes an expression into a function with an implicit ``%`` parameter list.
 
   A ``%i`` symbol designates the (1-based) *i* th parameter (such as ``%3``).
@@ -223,6 +223,7 @@ concise and easy to read.
     symbol and by the maximum ``%i`` symbol found *anywhere* in the expression,
     so nesting of ``#%`` forms is not recommended."
   (import hyrule [flatten inc])
+  (setv expr (.parse-one-form &reader))
   (setv %symbols (sfor a (flatten [expr])
                        :if (and (isinstance a hy.models.Symbol)
                                 (.startswith a '%))

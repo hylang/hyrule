@@ -1,6 +1,6 @@
 (require
   hyrule [->>]
-  hyrule.anaphoric *)
+  hyrule.anaphoric * :readers [%])
 (import
   hy.errors [HyMacroExpansionError]
   hy.pyops *

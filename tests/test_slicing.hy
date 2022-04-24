@@ -1,5 +1,5 @@
 (require
-  hyrule ["#:" ncut])
+  hyrule [ncut] :readers [:])
 (import
   pytest
   hy.errors [HyMacroExpansionError HySyntaxError]

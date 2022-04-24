@@ -7,4 +7,6 @@ import hy
 hy.macros.require('hyrule.hy_init',
    # The Python equivalent of `(require hyrule.hy-init *)`
    None, assignments = 'ALL', prefix = '')
+hy.macros.require_reader('hyrule.anaphoric', None, assignments = {'%', '%'})
+hy.macros.require_reader('hyrule.collections', None, assignments = {':', ':'})
 from hyrule.hy_init import *

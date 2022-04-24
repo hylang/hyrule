@@ -3,7 +3,7 @@
   hyrule.iterables [coll?])
 
 
-(defmacro "#:" [key]
+(defreader :
   "Shorthand tag macro for constructing slices using Python's sugared form.
 
   Examples:
@@ -29,6 +29,7 @@
        => #:(\"colname\" 1 2)
        (slice \"colname\" 1 2)
   "
+  (setv key (.parse-one-form &reader))
   (if (isinstance key hy.models.Expression) (_parse-indexing `(: ~@key))
       (_parse-indexing key)))
 
