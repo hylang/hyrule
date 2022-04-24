@@ -3,22 +3,22 @@
   hyrule.iterables [coll?])
 
 
-(defreader :
+(defreader s
   "Shorthand tag macro for constructing slices using Python's sugared form.
 
   Examples:
     ::
 
-       => #: 1:4:2
+       => #s 1:4:2
        (slice 1 4 2)
-       => (get [1 2 3 4 5] #: 2::2)
+       => (get [1 2 3 4 5] #s 2::2)
        [3 5]
 
     Numpy makes use of ``Ellipsis`` in its slicing semantics so they can also be
     constructed with this macro in their sugared ``...`` form.
     ::
 
-       => #: ...
+       => #s ...
        Ellipsis
 
     Slices can technically also contain strings (something pandas makes use of
@@ -26,7 +26,7 @@
     to construct these slices we have to use the form ``(...)``:
     ::
 
-       => #:(\"colname\" 1 2)
+       => #s(\"colname\" 1 2)
        (slice \"colname\" 1 2)
   "
   (setv key (.parse-one-form &reader))

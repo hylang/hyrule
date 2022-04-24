@@ -1,5 +1,5 @@
 (require
-  hyrule [ncut] :readers [:])
+  hyrule [ncut] :readers [s])
 (import
   pytest
   hy.errors [HyMacroExpansionError HySyntaxError]
@@ -26,20 +26,20 @@
 
 
 (defn test-slice-bar-macro []
-  (assert (= #: 1 1))
-  (assert (= #: [1 2] [1 2]))
+  (assert (= #s 1 1))
+  (assert (= #s [1 2] [1 2]))
 
-  (assert (= #: ::1 (slice None None 1)))
-  (assert (= #: 1:-4:2 (slice 1 -4 2)))
+  (assert (= #s ::1 (slice None None 1)))
+  (assert (= #s 1:-4:2 (slice 1 -4 2)))
 
-  (assert (= #: ... Ellipsis))
+  (assert (= #s ... Ellipsis))
 
-  (assert (= (hy.eval (hy-parse "#: 1:[1 2]:2")) :2))
-  (assert (= (hy.eval (hy-parse "#: 1:[1 2]")) [1 2]))
+  (assert (= (hy.eval (hy-parse "#s 1:[1 2]:2")) :2))
+  (assert (= (hy.eval (hy-parse "#s 1:[1 2]")) [1 2]))
 
   (with [(pytest.raises TypeError)]
     ;; slice takes at most 3 args
-    (hy.eval (hy-parse "#: 1:2:3:4")))
+    (hy.eval (hy-parse "#s 1:2:3:4")))
 
   (with [(pytest.raises NameError)]
-    (hy.eval (hy-parse "#: 1:abc:2"))))
+    (hy.eval (hy-parse "#s 1:abc:2"))))
