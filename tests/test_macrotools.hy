@@ -7,7 +7,6 @@
 (defn test-with-gensym []
   (import ast)
   (import hy.compiler [hy-compile])
-  (import hy.lex [hy-parse])
   (setv macro1 "(defmacro nif [expr pos zero neg]
       (with-gensyms [a]
         `(do
@@ -20,8 +19,8 @@
     ")
   ;; expand the macro twice, should use a different
   ;; gensym each time
-  (setv _ast1 (hy-compile (hy-parse macro1) __name__))
-  (setv _ast2 (hy-compile (hy-parse macro1) __name__))
+  (setv _ast1 (hy-compile (hy.read-module macro1) __name__))
+  (setv _ast2 (hy-compile (hy.read-module macro1) __name__))
   (setv s1 (ast.unparse _ast1))
   (setv s2 (ast.unparse _ast2))
   (assert (in (hy.mangle "_a\uffff") s1))
@@ -32,7 +31,6 @@
 (defn test-defmacro/g! []
   (import ast)
   (import hy.compiler [hy-compile])
-  (import hy.lex [hy-parse])
   (setv macro1 "(defmacro/g! nif [expr pos zero neg]
         `(do
            (setv ~g!res ~expr)
@@ -44,8 +42,8 @@
     ")
   ;; expand the macro twice, should use a different
   ;; gensym each time
-  (setv _ast1 (hy-compile (hy-parse macro1) __name__))
-  (setv _ast2 (hy-compile (hy-parse macro1) __name__))
+  (setv _ast1 (hy-compile (hy.read-module macro1) __name__))
+  (setv _ast2 (hy-compile (hy.read-module macro1) __name__))
   (setv s1 (ast.unparse _ast1))
   (setv s2 (ast.unparse _ast2))
   (assert (in (hy.mangle "_res\uffff") s1))
@@ -55,14 +53,13 @@
   ;; defmacro/g! didn't like numbers initially because they
   ;; don't have a startswith method and blew up during expansion
   (setv macro2 "(defmacro/g! two-point-zero [] `(+ (float 1) 1.0))")
-  (assert (hy-compile (hy-parse macro2) __name__)))
+  (assert (hy-compile (hy.read-module macro2) __name__)))
 
 
 (defn test-defmacro! []
   ;; defmacro! must do everything defmacro/g! can
   (import ast)
   (import hy.compiler [hy-compile])
-  (import hy.lex [hy-parse])
   (setv macro1 "(defmacro! nif [expr pos zero neg]
         `(do
            (setv ~g!res ~expr)
@@ -74,8 +71,8 @@
     ")
   ;; expand the macro twice, should use a different
   ;; gensym each time
-  (setv _ast1 (hy-compile (hy-parse macro1) __name__))
-  (setv _ast2 (hy-compile (hy-parse macro1) __name__))
+  (setv _ast1 (hy-compile (hy.read-module macro1) __name__))
+  (setv _ast2 (hy-compile (hy.read-module macro1) __name__))
   (setv s1 (ast.unparse _ast1))
   (setv s2 (ast.unparse _ast2))
   (assert (in (hy.mangle "_res\uffff") s1))
@@ -85,7 +82,7 @@
   ;; defmacro/g! didn't like numbers initially because they
   ;; don't have a startswith method and blew up during expansion
   (setv macro2 "(defmacro! two-point-zero [] `(+ (float 1) 1.0))")
-  (assert (hy-compile (hy-parse macro2) __name__))
+  (assert (hy-compile (hy.read-module macro2) __name__))
 
   (defmacro! foo! [o!foo] `(do ~g!foo ~g!foo))
   ;; test that o! becomes g!
