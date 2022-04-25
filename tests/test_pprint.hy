@@ -13,7 +13,7 @@
 
 (defn test-basic []
   (setv pp (PrettyPrinter))
-  (for [safe (, 2 2.0 2j "abc" [3] (, 2 2) {3 3} b"def"
+  (for [safe #(2 2.0 2j "abc" [3] #(2 2) {3 3} b"def"
                 (bytearray b"ghi") True False None (large-list-a) (large-list-b))]
     (assert (not (recursive? safe)))
     (assert (readable? safe))
@@ -31,7 +31,7 @@
         (get d 0) (get d 1))
   (setv pp (PrettyPrinter))
 
-  (for [icky (, a b d (, d d))]
+  (for [icky #(a b d #(d d))]
     (assert (recursive? icky))
     (assert (not (readable? icky)))
     (assert (pp.isrecursive icky))
@@ -42,7 +42,7 @@
   (del (cut a None))
   (del (cut b None))
 
-  (for [safe (, a b d (, d d))]
+  (for [safe #(a b d #(d d))]
     (assert (not (recursive? safe)))
     (assert (readable? safe))
     (assert (not (pp.isrecursive safe)))
@@ -50,7 +50,7 @@
 
 (defn test-unreadable []
   (setv pp (PrettyPrinter))
-  (for [unreadable (, (type 3) pytest recursive?)]
+  (for [unreadable #((type 3) pytest recursive?)]
     (assert (not (recursive? unreadable)))
     (assert (not (readable? unreadable)))
     (assert (not (pp.isrecursive unreadable)))
@@ -81,7 +81,7 @@
 
   ;; Tuples
   (setv o (tuple (range 100))
-        exp (% "(, %s)" (.join "\n   " (map str o))))
+        exp (% "#(%s)" (.join "\n   " (map str o))))
   (assert (= (pformat o) exp))
 
   ;; Indent paramater
@@ -113,12 +113,12 @@
  {1 [1 2 3]
   2 [12 34]}
  "abc def ghi"
- (, "ab cd ef")
+ #("ab cd ef")
  #{1 23}
  [[[[[1 2 3]
      "1 2"]]]]]]FOO])
 
-  (setv o (hy.eval (hy.read-str exp)))
+  (setv o (hy.eval (hy.read exp)))
   (assert (= (pformat o :width 16) exp))
   (assert (= (pformat o :width 17) exp))
   (assert (= (pformat o :width 22) exp))
@@ -133,7 +133,7 @@
  (+ "abc "
     "def "
     "ghi")
- (, (+ "ab "
+ #((+ "ab "
        "cd "
        "ef"))
  #{1 23}
@@ -143,14 +143,14 @@
      "1 2"]]]]]]FOO])))
 
 (defn test-depth []
-  (setv nested-tuple (, 1 (, 2 (, 3 (, 4 (, 5 6)))))
+  (setv nested-tuple #(1 #(2 #(3 #(4 #(5 6)))))
         nested-dict {1 {2 {3 {4 {5 {6 6}}}}}}
         nested-list [1 [2 [3 [4 [5 [6 []]]]]]])
   (assert (= (pformat nested-tuple) (hy.repr nested-tuple)))
   (assert (= (pformat nested-dict) (hy.repr nested-dict)))
   (assert (= (pformat nested-list) (hy.repr nested-list)))
 
-  (assert (= (pformat nested-tuple :depth 1) "(, 1 (, ...))"))
+  (assert (= (pformat nested-tuple :depth 1) "#(1 #(...))"))
   (assert (= (pformat nested-dict :depth 1) "{1 {...}}"))
   (assert (= (pformat nested-list :depth 1) "[1 [...]]")))
 

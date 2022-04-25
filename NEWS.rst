@@ -7,6 +7,10 @@ Removals
 ------------------------------
 * `ifp` has been removed. Use `branch` instead.
 
+Other Breaking Changes
+------------------------------
+* The reader macro (formerly tag macro) `:` is now named `s`.
+
 New Features
 ------------------------------
 * New macro `block`.

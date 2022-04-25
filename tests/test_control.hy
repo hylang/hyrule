@@ -237,7 +237,7 @@
   (assert (= tested [1]))
   (with [e (pytest.raises ValueError)]
     (f 4))
-  (assert (= e.value.args (, "ebranch: No branch matched")))
+  (assert (= e.value.args #("ebranch: No branch matched")))
   (assert (= tested [1 2 3])))
 
 
@@ -284,7 +284,7 @@
 
 
 (defn test-cfor []
-  (assert (= (cfor tuple x (range 10) :if (% x 2) x) (, 1 3 5 7 9)))
+  (assert (= (cfor tuple x (range 10) :if (% x 2) x) #(1 3 5 7 9)))
   (assert (= (cfor all x [1 3 8 5] (< x 10))) True)
   (assert (= (cfor dict x "ABCD" [x True])
              {"A" True  "B" True  "C" True  "D" True})))

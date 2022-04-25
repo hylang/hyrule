@@ -1,6 +1,6 @@
 (require
   hyrule [->>]
-  hyrule.anaphoric *)
+  hyrule.anaphoric * :readers [%])
 (import
   hy.errors [HyMacroExpansionError]
   hy.pyops *
@@ -192,12 +192,12 @@
   ;; test ordering
   (assert (= (#%(/ %1 %2) 2 4) 0.5))
   (assert (= (#%(/ %2 %1) 2 4) 2))
-  (assert (= (#%(identity (, %5 %4 %3 %2 %1)) 1 2 3 4 5) (, 5 4 3 2 1)))
-  (assert (= (#%(identity (, %1 %2 %3 %4 %5)) 1 2 3 4 5) (, 1 2 3 4 5)))
-  (assert (= (#%(identity (, %1 %5 %2 %3 %4)) 1 2 3 4 5) (, 1 5 2 3 4)))
+  (assert (= (#%(identity #(%5 %4 %3 %2 %1)) 1 2 3 4 5) #(5 4 3 2 1)))
+  (assert (= (#%(identity #(%1 %2 %3 %4 %5)) 1 2 3 4 5) #(1 2 3 4 5)))
+  (assert (= (#%(identity #(%1 %5 %2 %3 %4)) 1 2 3 4 5) #(1 5 2 3 4)))
   ;; test #*
   (assert (= (#%(sum %*) 1 2 3) 6))
-  (assert (= (#%(identity (, %1 %*)) 10 1 2 3) (, 10 (, 1 2 3))))
+  (assert (= (#%(identity #(%1 %*)) 10 1 2 3) #(10 #(1 2 3))))
   ;; no parameters
   (assert (= (#%(list)) []))
   (assert (= (#%(identity "Hy!")) "Hy!"))
@@ -206,22 +206,22 @@
   ;; test skipped parameters
   (assert (= (#%(identity [%3 %1]) 1 2 3) [3 1]))
   ;; test nesting
-  (assert (= (#%(identity [%1 (, %2 [%3] "Hy" [%*])]) 1 2 3 4 5)
-             [1 (, 2 [3] "Hy" [(, 4 5)])]))
+  (assert (= (#%(identity [%1 #(%2 [%3] "Hy" [%*])]) 1 2 3 4 5)
+             [1 #(2 [3] "Hy" [#(4 5)])]))
   ;; test arg as function
   (assert (= (#%(%1 2 4) +) 6))
   (assert (= (#%(%1 2 4) -) -2))
   (assert (= (#%(%1 2 4) /) 0.5))
   ;; test #* #**
-  (assert (= (#%(, %* %**) 1 2 :a 'b)
-             (, (, 1 2)
+  (assert (= (#% #(%* %**) 1 2 :a 'b)
+             #(#(1 2)
                 (dict :a 'b))))
   ;; test f-strings
   ;; https://github.com/hylang/hy/issues/1938
   (assert (= (#% f"->{(- %2 %1)}" 4 7) "->3"))
   ;; test other expression types
   (assert (= (#% %* 1 2 3)
-             (, 1 2 3)))
+             #(1 2 3)))
   (assert (= (#% %** :foo 2)
              (dict :foo 2)))
   (assert (= (#%[%3 %2 %1] 1 2 3)

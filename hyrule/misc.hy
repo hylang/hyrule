@@ -124,7 +124,7 @@
   - ``(of T)`` will simply become ``T``.
   - ``(of T x)`` will become ``(get T x)``.
   - ``(of T x y ...)`` (where the ``...`` represents zero or more arguments) will become
-    ``(get T (, x y ...))``.
+    ``(get T #(x y ...))``.
 
   Examples:
     ::
@@ -161,7 +161,7 @@
     (not args) base
     (if (= (len args) 1)
         `(get ~base ~@args)
-        `(get ~base (, ~@args)))))
+        `(get ~base #(~@args)))))
 
 
 (defn parse-args [spec [args None] #** parser-args]

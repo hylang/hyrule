@@ -78,7 +78,7 @@ Dictionary patterns are specified using dictionaries, where the keys corresponds
 
 .. code-block:: hy
 
-    (setv+ {a :a b \"b\" c (, 1 0)} {:a 1 \"b\" 2 (, 1 0) 3})
+    (setv+ {a :a b \"b\" c #(1 0)} {:a 1 \"b\" 2 #(1 0) 3})
     [a b c] ; => [1 2 3]
 
 The keys can also be one of the following 4 special options: ``:or``, ``:as``, ``:keys``, ``:strs``.
