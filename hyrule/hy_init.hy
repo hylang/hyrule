@@ -1,7 +1,7 @@
 (require
-  hyrule.anaphoric *
+  hyrule.anaphoric * :readers *
   hyrule.argmove *
-  hyrule.collections *
+  hyrule.collections * :readers *
   hyrule.control *
   hyrule.destructure *
   hyrule.macrotools *
