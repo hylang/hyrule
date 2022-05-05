@@ -231,4 +231,6 @@
   (assert (= (#% #{%3 %2 %1} 1 3 2)
              #{3 1 2}))  ; sets are not ordered.
   (assert (= (#% "%1")
-             "%1")))
+             "%1"))
+  ;; https://github.com/hylang/hyrule/issues/36
+  (assert (= (#% %1.real 1) 1)))
