@@ -108,8 +108,8 @@
   (setv+ {a :a b :b c :c} {:a 1 :c 3})
   (assert (= [a b c] [1 None 3]))
   ;; constructed keys
-  (setv+ {foo (frozenset [0 1])  bar #(0 1)  baz 1/3}
-      {(frozenset [0 1]) "spam"  #(0 1) "eggs"  1/3 "bacon"})
+  (setv+ {foo (frozenset [0 1])  bar #(0 1)  baz .3}
+      {(frozenset [0 1]) "spam"  #(0 1) "eggs"  .3 "bacon"})
   (assert (= [foo bar baz]
              ["spam" "eggs" "bacon"]))
   ;; mangling
