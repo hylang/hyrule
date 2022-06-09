@@ -1,18 +1,41 @@
 #!/usr/bin/env python
 
 import setuptools
+from setuptools.command.install import install
 
 with open('README.rst', 'r') as o:
     long_description = o.read()
 
+
+class install(install):
+    def run(self):
+        super().run()
+        import py_compile
+
+        import hy  # for compile hooks
+
+        for path in set(self.get_outputs()):
+            if path.endswith(".hy"):
+                py_compile.compile(
+                    path,
+                    invalidation_mode=py_compile.PycInvalidationMode.CHECKED_HASH,
+                )
+
+
+# both setup_requires and install_requires
+# since we need to compile .hy files during setup
+requires = [
+    'hy @ git+https://github.com/hylang/hy@master#egg=hy',
+]
+
+
 setuptools.setup(
     name = 'hyrule',
     version = None,
-    install_requires = [
-        'hy @ git+https://github.com/hylang/hy@master#egg=hy-1.0'],
+    setup_requires=['wheel'] + requires,
+    install_requires=requires,
     packages = setuptools.find_packages(),
-    package_data = {
-        'hyrule': ['*.hy', '__pycache__/*']},
+    package_data={'': ['*.hy']},
     author = "Paul Tagliamonte",
     author_email = "tag@pault.ag",
     description = 'A utility library for the Hy programming language',
@@ -33,4 +56,5 @@ setuptools.setup(
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
-        "Programming Language :: Python :: 3.10"])
+        "Programming Language :: Python :: 3.10"],
+    cmdclass={'install': install})

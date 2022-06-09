@@ -25,6 +25,7 @@ Bug Fixes
   failing to match a certain pattern, instead of sometimes returning
   `None` and sometimes raising an exception.
 * `#%` reader macro now parses `%i` names from dotted symbols.
+* Hyrule now pre-compiles .hy files during setup/installation.
 
 0.1 (released 2022-01-09)
 ==============================
