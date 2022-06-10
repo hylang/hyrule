@@ -3,7 +3,6 @@
 (import
   sys
   shlex
-  os
   subprocess [Popen PIPE]
   pytest)
 
