@@ -1,9 +1,7 @@
 (require
   hyrule [ncut] :readers [s])
 (import
-  pytest
-  hy.errors [HyMacroExpansionError HySyntaxError]
-  hy.lex [exceptions])
+  pytest)
 
 
 (defn test-ncuts-slicing []

@@ -1,7 +1,5 @@
 (require
   hyrule [assoc])
-(import
-  itertools [count islice])
 
 
 (defn test-assoc []
