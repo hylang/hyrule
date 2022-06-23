@@ -1,7 +1,7 @@
 .. default-role:: code
 
-Unreleased
-==============================
+0.2 (released 2022-06-23; uses Hy 0.24.0)
+==================================================
 
 Removals
 ------------------------------
@@ -24,11 +24,11 @@ Bug Fixes
 * Destructuring macros now consistently return `None` in case of
   failing to match a certain pattern, instead of sometimes returning
   `None` and sometimes raising an exception.
-* `#%` reader macro now parses `%i` names from dotted symbols.
-* Hyrule now pre-compiles .hy files during setup/installation.
+* `#%` now parses `%i` names from dotted symbols.
+* The Hy code is now precompiled during installation.
 
-0.1 (released 2022-01-09)
-==============================
+0.1 (released 2022-01-09; uses Hy 1.0a4)
+==================================================
 
 This is the first release of Hyrule per se. The one change below is
 described relative to the ancestors of Hyrule in Hy 1.0a3.
