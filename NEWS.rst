@@ -1,5 +1,10 @@
 .. default-role:: code
 
+0.2.1 (released 2022-11-08; uses Hy 0.24.0 or 0.25.*)
+======================================================
+
+Changed `setup.py` to declare compatibility with the new Hy release.
+
 0.2 (released 2022-06-23; uses Hy 0.24.0)
 ==================================================
 
