@@ -25,13 +25,13 @@ class install(install):
 # both setup_requires and install_requires
 # since we need to compile .hy files during setup
 requires = [
-    'hy @ git+https://github.com/hylang/hy@master#egg=hy',
+    'hy >= 0.24.0, < 0.26'
 ]
 
 
 setuptools.setup(
     name = 'hyrule',
-    version = None,
+    version = '0.2.1',
     setup_requires=['wheel'] + requires,
     install_requires=requires,
     packages = setuptools.find_packages(),
