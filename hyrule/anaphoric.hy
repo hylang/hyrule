@@ -191,6 +191,33 @@ concise and easy to read.
       (setv acc ~form))
     acc))
 
+(defmacro ap-when [test-form #* body]
+  "As :ref:`when <when>`, but the result of the test form is named ``it`` in
+  the subsequent forms.
+
+  Examples:
+    ::
+
+       => (import os)
+       => (ap-when (.get os.environ \"PYTHONPATH\")
+       ...   (print \"Your PYTHONPATH is\" it)
+       ...   it)
+  "
+  `(let [it ~test-form]
+     (when it ~@body)))
+
+(defmacro ap-with [form #* body]
+  "As :ref:`with <with>`, but the result of the form is named ``it`` in
+  the subsequent forms.
+
+  Examples:
+    ::
+
+       => (ap-with (open \"/proc/cpuinfo\")
+       ...   (lfor line it line))
+  "
+  `(with [it ~form]
+     ~@body))
 
 (defreader %
   "Makes an expression into a function with an implicit ``%`` parameter list.

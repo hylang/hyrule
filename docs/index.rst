@@ -17,7 +17,8 @@ Reference
 
 .. hy:automodule:: hyrule.anaphoric
   :macros: #%, ap-if, ap-each, ap-each-while, ap-map, ap-map-when,
-    ap-filter, ap-reject, ap-dotimes, ap-first, ap-last, ap-reduce
+    ap-filter, ap-reject, ap-dotimes, ap-first, ap-last, ap-reduce,
+    ap-when, ap-with
 
 ``argmove`` — Macros for calls with unusual argument placement 
 ----------------------------------------------------------------------
