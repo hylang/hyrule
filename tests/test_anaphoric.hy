@@ -2,6 +2,7 @@
   hyrule [->>]
   hyrule.anaphoric * :readers [%])
 (import
+  pytest
   hy.pyops *
   hyrule [inc])
 
@@ -184,6 +185,19 @@
       (ap-map (+ 2 it))
       (ap-reduce (* acc it)))
     60)))
+
+(defn test-ap-when []
+  (ap-when True (assert (is it True)))
+  (ap-when False (assert False))
+  (assert (= (ap-when (+ 1 1)
+                      (+ it 1)
+                      (+ it 10))
+             12)))
+
+(defn test-ap-with []
+  (ap-with (pytest.raises KeyError)
+    (raise KeyError))
+  (assert (in "KeyError" (str it))))
 
 (defn test-tag-fn []
   (defn identity [x]
