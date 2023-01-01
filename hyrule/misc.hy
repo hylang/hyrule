@@ -20,16 +20,16 @@
     ::
 
         => (print (comment <h1>Surprise!</h1>
-        ...                <p>You'd be surprised what's grammatically valid in Hy.</p>
-        ...                <p>(Keep delimiters in balance, and you're mostly good to go.)</p>)
+        ...                <p>You'd be surprised what's grammatically valid in Hy</p>
+        ...                <p>(Keep delimiters in balance, and you're mostly good to go)</p>)
         ...        \"Hy\")
         None Hy
 
     ::
 
         => (print #_(comment <h1>Surprise!</h1>
-        ...                  <p>You'd be surprised what's grammatically valid in Hy.</p>
-        ...                  <p>(Keep delimiters in balance, and you're mostly good to go.)</p>))
+        ...                  <p>You'd be surprised what's grammatically valid in Hy</p>
+        ...                  <p>(Keep delimiters in balance, and you're mostly good to go)</p>))
         ...        \"Hy\")
         Hy"
   None)
