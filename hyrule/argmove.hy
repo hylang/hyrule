@@ -135,7 +135,7 @@
   Examples:
     ::
 
-       => (doto [] (.append 1) (.append 2) .reverse)
+       => (doto [] (.append 1) (.append 2) (.reverse))
        [2 1]
 
     ::
