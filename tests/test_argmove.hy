@@ -25,7 +25,7 @@
 
 
 (defn test-threading-two []
-  (assert (= (-> "a b c d" .upper (.replace "A" "X") .split)
+  (assert (= (-> "a b c d" (.upper) (.replace "A" "X") (.split))
              ["X" "B" "C" "D"])))
 
 
@@ -57,5 +57,5 @@
   (assert (= collection [1 2 3]))
   (setv res (doto (set) (.add 2) (.add 1)))
   (assert (= res (set [1 2])))
-  (setv res (doto [] (.append 1) (.append 2) .reverse))
+  (setv res (doto [] (.append 1) (.append 2) (.reverse)))
   (assert (= res [2 1])))

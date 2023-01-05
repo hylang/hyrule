@@ -26,7 +26,6 @@ The differences that do exist are as follows:
 ;; Adapted from: https://github.com/python/cpython/blob/3.9/Lib/pprint.py
 
 (require
-  hyrule.argmove [->]
   hyrule.collections [assoc]
   hyrule.control [unless])
 
@@ -172,13 +171,13 @@ The differences that do exist are as follows:
 
 (defn _wrap-bytes-repr [object width allowance]
   (setv current b""
-        _last (-> object len (// CHUNK-SIZE) (* CHUNK-SIZE)))
+        _last (* (// (len object) CHUNK-SIZE) CHUNK-SIZE))
   (for [i (range 0 (len object) CHUNK-SIZE)]
     (setv part (cut object i (+ i CHUNK-SIZE))
           candidate (+ current part))
     (when (= i _last)
       (-= width allowance))
-    (if (-> candidate hy.repr len (> width))
+    (if (> (len (hy.repr candidate)) width)
         (do (when current (yield (hy.repr current)))
             (setv current part))
         (setv current candidate)))

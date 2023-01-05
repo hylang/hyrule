@@ -15,8 +15,8 @@
 
 
 (defn test-comment []
-  (assert (is None (comment <h1>This is merely a comment.</h1>
-                            <p> Move along. (Nothing to see here.)</p>))))
+  (assert (is None (comment <h1>This is merely a comment</h1>
+                            <p> Move along (nothing to see here)</p>))))
 
 
 (defn test-dec []
