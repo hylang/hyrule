@@ -72,7 +72,8 @@
   (with [exc (pytest.raises UnboundLocalError)]
     (smacrolet [b c]
       b))
-  (assert (in "local variable 'c' referenced before assignment" (str exc)))
+  (assert (or (in "cannot access local variable 'c' where it is not associated with a value" (str exc))
+              (in "local variable 'c' referenced before assignment" (str exc))))
   (assert (not-in "b" (locals)))
 
   (setv c 42)
