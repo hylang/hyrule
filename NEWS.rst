@@ -1,6 +1,6 @@
 .. default-role:: code
 
-Unreleased
+0.3.0 (released 2023-02-08; uses Hy 0.26.*)
 ======================================================
 
 New Features
