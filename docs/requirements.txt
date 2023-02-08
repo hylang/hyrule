@@ -1,4 +1,4 @@
-Pygments >= 1.6
-Sphinx >= 4.2.0
-sphinx_rtd_theme
+Pygments >= 2
+Sphinx == 5.0.2
+sphinx_rtd_theme >= 1
 git+https://github.com/hylang/sphinxcontrib-hydomain.git
