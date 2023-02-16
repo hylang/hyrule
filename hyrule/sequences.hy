@@ -37,6 +37,8 @@ This results in the sequence ``[0 1 1 2 3 5 8 13 21 34 ...]``.
   itertools [islice]
   hyrule.misc [inc])
 
+(require hyrule.macrotools [defmacro/g!])
+
 (defclass Sequence []
   "Container for construction of lazy sequences."
 
@@ -94,21 +96,25 @@ This results in the sequence ``[0 1 1 2 3 5 8 13 21 34 ...]``.
      "string representation of this sequence"
      (.__str__ self)))
 
-(defmacro seq [param #* seq-code]
+(defmacro/g! seq [param #* seq-code]
   "Creates a sequence defined in terms of ``n``.
 
   Examples:
     => (seq [n] (* n n))
   "
-  `(Sequence (fn ~param (do ~@seq-code))))
+  `(do
+     (import hyrule.sequences [Sequence :as ~g!Sequence])
+     (~g!Sequence (fn ~param (do ~@seq-code)))))
 
-(defmacro defseq [seq-name param #* seq-code]
+(defmacro/g! defseq [seq-name param #* seq-code]
   "Creates a sequence defined in terms of ``n`` and assigns it to a given name.
 
   Examples:
     => (defseq numbers [n] n)
   "
-  `(setv ~seq-name (Sequence (fn ~param (do ~@seq-code)))))
+  `(do
+     (import hyrule.sequences [Sequence :as ~g!Sequence])
+     (setv ~seq-name (~g!Sequence (fn ~param (do ~@seq-code))))))
 
 (defn end-sequence []
   "Signals the end of a sequence when an iterator reaches the given point of the sequence.
