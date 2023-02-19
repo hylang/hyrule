@@ -1,7 +1,7 @@
 (require
   hyrule [seq defseq])
 (import
-  hyrule [Sequence end-sequence inc dec rest])
+  hyrule [end-sequence inc dec rest])
 
 
 (defn test-infinite-sequence []

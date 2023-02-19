@@ -1,5 +1,13 @@
 .. default-role:: code
 
+Unreleased
+======================================================
+
+Bug Fixes
+------------------------------
+* Macros `seq` and `defseq` no longer throw an excpetion if `Sequence` is not
+  imported.
+
 0.3.0 (released 2023-02-08; uses Hy 0.26.*)
 ======================================================
 
