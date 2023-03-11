@@ -43,10 +43,8 @@ This results in the sequence ``[0 1 1 2 3 5 8 13 21 34 ...]``.
   "Container for construction of lazy sequences."
 
   (defn __init__ [self func]
-    "initialize a new sequence with a function to compute values"
     (setv (. self func) func)
-    (setv (. self cache) [])
-    (setv (. self high-water) -1))
+    (setv (. self cache) []))
 
   (defn __getitem__ [self n]
     "get nth item of sequence"
@@ -57,15 +55,11 @@ This results in the sequence ``[0 1 1 2 3 5 8 13 21 34 ...]``.
          ; Call (len) to force the whole
          ; sequence to be evaluated.
          (len self))
-       (if (<= n (. self high-water))
-         (get (. self cache) n)
-         (do (while (< (. self high-water) n)
-               (setv (. self high-water) (inc (. self high-water)))
-               (.append (. self cache) (.func self (. self high-water))))
-             (get self n))))))
+          (while (<= (len self.cache) n)
+            (.append self.cache (.func self (len self.cache))))
+          (get self.cache n))))
 
    (defn __iter__ [self]
-     "create iterator for this sequence"
      (setv index 0)
      (try (while True
             (yield (get self index))
@@ -74,13 +68,12 @@ This results in the sequence ``[0 1 1 2 3 5 8 13 21 34 ...]``.
             (return))))
 
    (defn __len__ [self]
-     "length of the sequence, dangerous for infinite sequences"
-     (setv index (. self high-water))
+    (setv index (len self.cache))
      (try (while True
             (get self index)
             (setv index (inc index)))
           (except [IndexError]
-            (len (. self cache)))))
+                 (len self.cache))))
 
    (setv max-items-in-repr 10)
 
