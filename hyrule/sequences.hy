@@ -46,7 +46,7 @@ This results in the sequence ``[0 1 1 2 3 5 8 13 21 34 ...]``.
     (setv (. self cache) []))
 
   (defn __getitem__ [self n]
-    (if (isinstance n slice) 
+    (if (isinstance n slice)
       (do
         (when (= n.step 0) (raise (ValueError "slice step cannot be zero")))
         ; If any of the components are negative, the full Sequence must be
