@@ -1,50 +1,74 @@
 (require
-  hyrule [seq defseq])
+ hyrule [seq defseq])
 (import
-  hyrule [end-sequence inc dec rest])
+ hyrule [end-sequence inc dec rest])
 
 
-(defn test-infinite-sequence []
+(defn test-infinite-sequence-slice []
   (assert (= (list (cut (seq [n] n) 5))
              [0 1 2 3 4])))
 
 
+(defn test-len-finite-sequence []
+  (defseq shorty [n]
+    (if (< n 10) n (end-sequence)))
+
+  (assert (= (len shorty) 10) "Sequence length did not match"))
+
+
+(defn test-list-finite-sequence []
+  (defseq shorty [n]
+    (if (< n 10) n (end-sequence)))
+  
+  (setv 0-to-9 (list (range 10)))
+
+  (assert (= (list shorty)
+             0-to-9)
+          "Sequence collected to list did not match"))
+
+
 (defn test-indexing-sequence []
   (defseq shorty [n]
-    (cond (< n 10) n
-          True (end-sequence)))
+    (if (< n 10) n (end-sequence)))
   (setv 0-to-9 (list (range 10)))
-  (assert (= (get shorty 0)
-             (get 0-to-9 0))
-          "getting first element failed")
-  (assert (= (get shorty 5)
-             (get 0-to-9 5))
-          "getting 5th element failed")
-  (assert (= (get shorty -1)
-             (get 0-to-9 -1))
-          "getting element -1 failed"))
+
+  (for [i (range -10 10)]
+       (assert (= (get shorty i) 
+                  (get 0-to-9 i))
+               f"Element {i} did not match")))
 
 
 (defn test-slicing-sequence []
   (defseq shorty [n]
-    (cond (< n 10) n
-          True (end-sequence)))
+    (if (< n 10) n (end-sequence)))
   (setv 0-to-9 (list (range 10)))
-  (assert (= (get shorty 0)
-             (get 0-to-9 0))
-          "getting first failed")
-  (assert (= (list (rest shorty))
-             (list (rest 0-to-9)))
-          "getting rest failed")
-  (assert (= (list (cut shorty 2 6))
-             (list (cut 0-to-9 2 6)))
-          "cutting 2-6 failed")
-  (assert (= (list (cut shorty 2 8 2))
-             (list (cut 0-to-9 2 8 2)))
-          "cutting 2-8-2 failed")
-  (assert (= (list (cut shorty 8 2 -2))
-             (list (cut 0-to-9 8 2 -2)))
-          "negative cut failed"))
+
+  (for [i (range -10 10)]
+    ; start only
+    (assert (= (list (cut shorty i None None))
+               (cut 0-to-9 i None None)))
+    ; stop only
+    (assert (= (list (cut shorty None i None))
+               (cut 0-to-9 None i None)))
+    ; step only
+    (when i (assert (= (list (cut shorty None None i))    
+                       (cut 0-to-9 None None i))))
+
+    (for [j (range -10 10)]
+      ; start and stop
+      (assert (= (list (cut shorty i j None))
+                 (cut 0-to-9 i j None)))
+      ; stop and step
+      (when j  (assert (= (list (cut shorty None i j))   
+                          (cut 0-to-9 None i j))))
+      ; start and step
+      (when j (assert (= (list (cut shorty i None j))   
+                         (cut 0-to-9 i None j))))
+      
+      (for [k (range -10 10)]
+        ; start, stop, and step
+        (when k (assert (= (list (cut shorty i j k)) 
+                           (cut 0-to-9 i j k))))))))
 
 
 (defn test-recursive-sequence []
@@ -64,7 +88,7 @@
           "40th element of fibonacci didn't match")
   (assert (= (list (cut fibonacci 9))
              [0 1 1 2 3 5 8 13 21])
-          "taking 8 elements of fibonacci didn't match"))
+          "taking 9 elements of fibonacci didn't match"))
 
 
 (defn test-nested-functions []
@@ -72,20 +96,20 @@
     "infinite sequence of prime numbers"
     (defn divisible? [n prevs]
       "is n divisible by any item in prevs?"
-      (any (map (fn [x]
-                  (not (% n x)))
-                prevs)))
+      (any (map (fn [x] (not (% n x))) prevs))) 
     (defn previous-primes [n]
       "previous prime numbers"
       (cut primes (dec n)))
     (defn next-possible-prime [n]
       "next possible prime after nth prime"
       (inc (get primes (dec n))))
-    (cond (= n 0) 2
-          True (do (setv guess (next-possible-prime n))
-                    (while (divisible? guess (previous-primes n))
-                      (setv guess (inc guess)))
-                    guess)))
+    
+    (if (= n 0) 2
+        (do (setv guess (next-possible-prime n))
+            (while (divisible? guess (previous-primes n))
+              (setv guess (inc guess)))
+            guess)))
+
   (assert (= (list (cut primes 10))
              [2 3 5 7 11 13 17 19 23 29])
           "prime sequence didn't match"))
