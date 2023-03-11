@@ -11,8 +11,7 @@ sequence::
 
    (seq [n]
         \"sequence of 5 integers\"
-        (cond (< n 5) n
-              True (end-sequence)))
+        (if (< n 5) n (end-sequence)))
 
 This creates the following sequence: ``[0 1 2 3 4]``. For such a sequence,
 ``len`` returns the amount of items in the sequence and negative indexing is
@@ -34,8 +33,8 @@ This results in the sequence ``[0 1 1 2 3 5 8 13 21 34 ...]``.
 "
 
 (import
-  itertools [islice]
-  hyrule.misc [inc])
+ itertools [islice]
+ hyrule.misc [inc])
 
 (require hyrule.macrotools [defmacro/g!])
 
@@ -47,47 +46,56 @@ This results in the sequence ``[0 1 1 2 3 5 8 13 21 34 ...]``.
     (setv (. self cache) []))
 
   (defn __getitem__ [self n]
-    "get nth item of sequence"
-    (if (hasattr n "start")
-    (gfor x (range (or n.start 0) n.stop (or n.step 1))
-         (get self x))
-    (do (when (< n 0)
-         ; Call (len) to force the whole
-         ; sequence to be evaluated.
-         (len self))
+    (if (isinstance n slice) 
+      (do
+        (when (= n.step 0) (raise (ValueError "slice step cannot be zero")))
+        ; If any of the components are negative, the full Sequence must be
+        ; evaluated so it can be iterated in reverse or with reference to the
+        ; end of the Sequence
+        (if (or (and (not? None n.start) (< n.start 0))
+                (and (not? None n.stop) (< n.stop 0))
+                (and (not? None n.step) (< n.step 0)))
+          (do
+            ; Force evaluation of the Sequence
+            (len self)
+            (iter (get self.cache n)))
+          (islice (iter self) n.start n.stop n.step)))
+
+      (do (when (< n 0)
+            ; Call (len) to force the whole
+            ; sequence to be evaluated.
+            (len self))
           (while (<= (len self.cache) n)
             (.append self.cache (.func self (len self.cache))))
           (get self.cache n))))
 
-   (defn __iter__ [self]
-     (setv index 0)
-     (try (while True
-            (yield (get self index))
-            (setv index (inc index)))
-          (except [IndexError]
-            (return))))
+  (defn __iter__ [self]
+    (setv index 0)
+    (try (while True
+           (yield (get self index))
+           (setv index (inc index)))
+         (except [IndexError]
+                 (return))))
 
-   (defn __len__ [self]
+  (defn __len__ [self]
     (setv index (len self.cache))
-     (try (while True
-            (get self index)
-            (setv index (inc index)))
-          (except [IndexError]
+    (try (while True
+           (get self index)
+           (setv index (inc index)))
+         (except [IndexError]
                  (len self.cache))))
 
-   (setv max-items-in-repr 10)
+  (setv max-items-in-repr 10)
 
-   (defn __str__ [self]
-     "string representation of this sequence"
-     (setv items (list (islice self (inc self.max-items-in-repr))))
-     (.format (if (> (len items) self.max-items-in-repr)
-                "[{0}, ...]"
-                "[{0}]")
-              (.join ", " (map str items))))
+  (defn __str__ [self]
+    (setv items (list (islice self (inc self.max-items-in-repr))))
+    (.format (if (> (len items) self.max-items-in-repr)
+               "[{0}, ...]"
+               "[{0}]")
+             (.join ", " (map str items))))
 
-   (defn __repr__ [self]
-     "string representation of this sequence"
-     (.__str__ self)))
+  (defn __repr__ [self]
+    (.__str__ self)))
 
 (defmacro/g! seq [param #* seq-code]
   "Creates a sequence defined in terms of ``n``.
