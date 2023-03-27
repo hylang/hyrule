@@ -49,17 +49,32 @@ This results in the sequence ``[0 1 1 2 3 5 8 13 21 34 ...]``.
     (if (isinstance n slice)
       (do
         (when (= n.step 0) (raise (ValueError "slice step cannot be zero")))
-        ; If any of the components are negative, the full Sequence must be
-        ; evaluated so it can be iterated in reverse or with reference to the
-        ; end of the Sequence
-        (if (or (and (not? None n.start) (< n.start 0))
-                (and (not? None n.stop) (< n.stop 0))
-                (and (not? None n.step) (< n.step 0)))
+        (cond
+          ; If start, stop, and step are all positive or None, islice can be used
+          (and (or (is None n.start) (>= n.start 0))
+               (or (is None n.stop) (>= n.stop 0))
+               (or (is None n.step) (> n.step 0)))
+          (islice (iter self) n.start n.stop n.step)
+
+          ; There must be at least one negative
+          ; If start or stop is negative, the Sequence must be evaluated to the end
+          ; Additionally, if start is None, 
+          (or (and (not? None n.start) (< n.start 0))
+              (and (not? None n.stop) (< n.stop 0)))
           (do
-            ; Force evaluation of the Sequence
             (len self)
             (iter (get self.cache n)))
-          (islice (iter self) n.start n.stop n.step)))
+
+          ; step must be negative
+          ; - all None or positive ruled out first
+          ; - negative start and stop ruled out second
+          True
+          (do
+            ; If start is None, evaluate the whole Sequence
+            (if (is None n.start)
+              (len self)
+              (get self n.start))
+            (iter (get self.cache n)))))
 
       (do (when (< n 0)
             ; Call (len) to force the whole
