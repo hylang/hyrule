@@ -98,8 +98,8 @@
       (case direction
         "north" [ 0  1]
         "south" [ 0 -1]
-        "east"  [-1  0]
-        "west"  [ 1  0])
+        "east"  [ 1  0]
+        "west"  [-1  0])
 
   Thus, ``(case KEY …)`` is equivalent to ``(branch (= it KEY) …)``, except
   ``KEY`` is evaluated exactly once, regardless of the number of cases.
