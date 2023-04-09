@@ -37,7 +37,7 @@ The differences that do exist are as follows:
                 _safe-tuple
                 _safe-key]
         hy.core.hy-repr
-        hy._compat [PY3_8 PY3_10]
+        hy._compat [PY3_10]
         hyrule.misc [inc dec constantly])
 
 (setv __all__ ["pprint" "pformat" "saferepr" "PrettyPrinter" "is_readable" "is_recursive" "pp"])
@@ -162,9 +162,7 @@ The differences that do exist are as follows:
   (when (in typ hy.core.hy-repr._registry)
     (return #((hy.repr object) True False)))
 
-  (if PY3_8
-      (_safe-py-repr object context maxlevels level sort-dicts)
-      (_safe-py-repr object context maxlevels level)))
+  (_safe-py-repr object context maxlevels level sort-dicts))
 
 
 (setv CHUNK-SIZE 4)
@@ -198,8 +196,6 @@ The differences that do exist are as follows:
      sort-dicts: If True, dict keys are sorted. (only available for python >= 3.8)"
   (defn __init__ [self [indent 1] [width 80] [depth None] [stream None]
                   * [compact False] [sort-dicts True]]
-    (when (and (not PY3_8) (not sort-dicts))
-        (raise (ValueError "sort-dicts is not available for python versions < 3.8")))
     (setv self._sort-dicts True)
     (.__init__ (super)
                :indent indent
@@ -207,7 +203,7 @@ The differences that do exist are as follows:
                :depth depth
                :stream stream
                :compact compact
-               #** (if PY3_8 {"sort_dicts" sort-dicts} {})))
+               :sort-dicts sort-dicts))
 
   (defn format [self object context maxlevels level]
     "Format object for a specific context, returning a string
