@@ -1,6 +1,5 @@
 (import
   pytest
-  hy._compat [PY3_8]
   hyrule [PrettyPrinter pformat recursive? readable?])
 
 (defn large-list-b []
@@ -193,8 +192,5 @@
 
 (defn test-sort-dicts []
   (setv d (dict.fromkeys "cba"))
-  (if PY3_8
-      (assert (= (pformat d :sort-dicts False)
-                 #[[{"c" None  "b" None  "a" None}]]))
-      (with [e (pytest.raises ValueError)]
-        (pformat d :sort-dicts False))))
+  (assert (= (pformat d :sort-dicts False)
+             #[[{"c" None  "b" None  "a" None}]])))

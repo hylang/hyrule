@@ -8,7 +8,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python: [3.7, 3.8, 3.9, '3.10', 3.11, pypy-3.7]
+        python: [3.8, 3.9, '3.10', 3.11, 3.12-dev, pypy-3.9]
 
     name: ${{ matrix.python }}
     runs-on: ubuntu-latest
@@ -22,6 +22,8 @@ jobs:
     - uses: actions/setup-python@v2
       with:
         python-version: ${{ matrix.python }}
+    - run: pip install git+https://github.com/hylang/hy@master
+        # Test on Hy `master`, not the latest Hy release.
     - run: pip install . && rm -r hyrule
         # We want to be sure we're testing the installed version,
         # instead of running from the source tree.
