@@ -306,7 +306,11 @@
   (assert (= n 10))
 
   (do-n 2 (+= n 1) (+= n 2) (break))
-  (assert (= n 13)))
+  (assert (= n 13))
+
+  (setv r Inf)
+  (do-n r (+= n 1) (when (= n 20) (break)))
+  (assert (= n 20)))
 
 
 (defn test-lif []
@@ -331,7 +335,11 @@
   (assert (= (list-n 4 1) [1 1 1 1]))
 
   (setv l (list (range 10)))
-  (assert (= (list-n 3 (.pop l)) [9 8 7])))
+  (assert (= (list-n 3 (.pop l)) [9 8 7]))
+
+  (assert (=
+    (list-n Inf (when (< (len l) 3) (break)) (.pop l))
+    [6 5 4 3 2])))
 
 
 (defn test-unless []

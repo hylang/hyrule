@@ -3,6 +3,11 @@
 Unreleased
 ======================================================
 
+
+New Features
+------------------------------
+* `do-n` and `list-n` now allow the count to be `Inf`.
+
 Bug Fixes
 ------------------------------
 * Macros `seq` and `defseq` no longer throw an excpetion if `Sequence` is not
