@@ -169,25 +169,31 @@
 
 
 (defn _do-n [count-form body]
-  `(for [~(hy.gensym) (range ~count-form)]
-    ~@body))
+  (setv count (hy.gensym))
+  `(do
+    (setv ~count ~count-form)
+    (for [~(hy.gensym)
+        (if (= ~count Inf)
+          (hy.M.itertools.repeat None)
+          (range ~count))]
+      ~@body)))
 
 
 (defmacro do-n [count-form #* body]
-  "Execute `body` a number of times equal to `count-form` and return
+  #[[Execute `body` a number of times equal to `count-form` and return
   ``None``. (To collect return values, use :hy:macro:`list-n`
-  instead.) Negative values of the count are treated as 0.
+  instead.)
 
-  This macro is implemented as a :hy:func:`for` loop, so you can use
-  :hy:func:`break` and :hy:func:`continue` in the body.
+  The macro is implemented as a :hy:func:`for` loop over a
+  :func:`range` call, with the attendent consequences for negative
+  counts, :hy:func:`break`, etc. As an exception, if the count is
+  `Inf`, the loop is run over an infinite iterator instead. ::
 
-  ::
-
-     => (do-n 3 (print \"hi\"))
+     => (do-n 3 (print "hi"))
      hi
      hi
-     hi
-  "
+     hi]]
+
   (_do-n count-form body))
 
 
