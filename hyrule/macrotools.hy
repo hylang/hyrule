@@ -158,3 +158,34 @@
   `(do
     (setv ~@syms)
     ~@body))
+
+
+(defreader /
+  #[[Sugar for :hy:class:`hy.M`, to access modules without needing to explicitly import them first.
+  Unlike ``hy.M``, ``#/`` cannot be used if the module name is only known at runtime.
+
+  Examples:
+
+    Access modules and their elements directly by name:
+
+    ::
+
+      => (type #/ re)
+      <class 'module'>
+      => #/ os.curdir
+      "."
+      => (#/ re.search r"[a-z]+" "HAYneedleSTACK")
+      <re.Match object; :span #(3 9) :match "needle">
+
+    Like ``hy.M``, separate submodule names with ``/``:
+
+    ::
+
+      => (#/ os/path.basename "path/to/file")
+      "file"]]
+  (.slurp-space hy.&reader)
+  (setv [mod #* ident] (.split (.read-ident hy.&reader) ".")
+        imp `(hy.M ~(hy.mangle (.replace mod "/" "."))))
+  (if ident
+    `(. ~imp ~@(map hy.models.Symbol ident))
+    imp))

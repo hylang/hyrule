@@ -59,6 +59,7 @@ Reference
 .. hy:automodule:: hyrule.macrotools
   :members: macroexpand-all
   :macros: defmacro/g!, defmacro!, with-gensyms
+  :readers: /
 
 ``pprint`` — Pretty-printing data structures
 ----------------------------------------------------------------------

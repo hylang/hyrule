@@ -1,6 +1,8 @@
 (require
-  hyrule [defmacro! defmacro/g! with-gensyms ->])
+  hyrule [defmacro! defmacro/g! with-gensyms ->]
+         :readers [/])
 (import
+  pytest
   hyrule [macroexpand-all])
 
 
@@ -123,3 +125,40 @@
 
   (assert (= (get (macroexpand-all '(require-macro)) -1)
              '(setv blah 1))))
+
+(defn test-slash-import []
+  (defmacro no-name [name]
+    `(with [(pytest.raises NameError)] ~name))
+
+  (assert (= (#/ math.sqrt 4) 2))
+  (assert (= (.sqrt #/ math 4) 2))
+  (no-name math)
+  (no-name sqrt)
+
+  (setv math (type "Dummy" #() {"sqrt" "hello"}))
+  (assert (= (#/ math.sqrt 4) 2))
+  (assert (= math.sqrt "hello"))
+
+  (defmacro frac [a b]
+    `(#/ fractions.Fraction ~a ~b))
+  (assert (= (* 6 (frac 1 3)) 2))
+  (no-name fractions)
+  (no-name Fraction)
+
+  (assert (= #/ tests/resources/✈.🚆 "🚗"))
+
+  ;; ensure `tests.resources` is currently in scope
+  (import tests.resources)
+
+  ;; delete tests.resources and all submodules
+  (for [mod (.copy #/ sys.modules)]
+    (when (.startswith mod "tests.resources.")
+      (del (get #/ sys.modules mod))))
+  (del (get #/ sys.modules "tests.resources"))
+  (del tests.resources)
+
+  ;; ensure the module is gone
+  (with [(pytest.raises AttributeError)] #/ tests.resources)
+
+  ;; check that we can directly access submodules
+  (assert (= (type #/ tests/resources/macros) #/ types.ModuleType)))
