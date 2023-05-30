@@ -7,6 +7,7 @@ Unreleased
 New Features
 ------------------------------
 * `do-n` and `list-n` now allow the count to be `Inf`.
+* New reader macro `#/` that wraps `hy.M` for easy imports in macros.
 
 Bug Fixes
 ------------------------------

@@ -4,7 +4,7 @@
   hyrule.collections * :readers *
   hyrule.control *
   hyrule.destructure *
-  hyrule.macrotools *
+  hyrule.macrotools * :readers *
   hyrule.misc *
   hyrule.sequences *)
 (import
