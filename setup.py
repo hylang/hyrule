@@ -34,7 +34,7 @@ setuptools.setup(
     version = None,
     setup_requires=['wheel'] + requires,
     install_requires=requires,
-    packages = setuptools.find_packages(),
+    packages = setuptools.find_packages(exclude = ["tests*"]),
     package_data={'': ['*.hy']},
     author = "Paul Tagliamonte",
     author_email = "tag@pault.ag",
