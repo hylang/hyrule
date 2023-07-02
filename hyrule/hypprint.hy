@@ -40,7 +40,7 @@ The differences that do exist are as follows:
         hy._compat [PY3_10]
         hyrule.misc [inc dec constantly])
 
-(setv __all__ ["pprint" "pformat" "saferepr" "PrettyPrinter" "is_readable" "is_recursive" "pp"])
+(export [pprint pformat saferepr PrettyPrinter readable? recursive? pp])
 
 (if PY3_10
   (defn _safe-py-repr [object context maxlevels level sort-dicts]

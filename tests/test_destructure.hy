@@ -116,8 +116,8 @@
   (setv+ {:keys [a? -b? c->d]} {:a? 1 :-b? 2 :c->d 3})
   (assert (= [a? -b? c->d]
              [1 2 3]))
-  (setv+ {:strs [hello? is_hello]} {"hello?" 1 "is_hello" 2})
-  (assert (= [hello? is_hello] [2 2]))
+  (setv+ {:strs [☘ hyx_XshamrockX]} {"☘" 1 "hyx_XshamrockX" 2})
+  (assert (= [☘ hyx_XshamrockX] [2 2]))
   ;; nested
   (setv+ {a :a  {b :b  {c :c} :y } :x} {:a 11  :x {:b 22  :y {:c 33}}})
   (assert (= [a b c]

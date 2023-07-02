@@ -150,7 +150,7 @@
 
   The equivalent in python would be:
 
-     >>> tuple(x for x in range(10) if is_odd(x))
+     >>> tuple(x for x in range(10) if x % 2)
 
   Some other common functions that take iterables::
 
