@@ -1,18 +1,16 @@
 .. default-role:: code
 
-Unreleased
+0.4.0 (released 2023-07-06; uses Hy 0.27.*)
 ======================================================
-
 
 New Features
 ------------------------------
 * `do-n` and `list-n` now allow the count to be `Inf`.
-* New reader macro `#/` that wraps `hy.M` for easy imports in macros.
+* New reader macro `/` that wraps `hy.M` for easy imports in macros.
 
 Bug Fixes
 ------------------------------
-* Macros `seq` and `defseq` no longer throw an excpetion if `Sequence` is not
-  imported.
+* `seq` and `defseq` no longer crash if `Sequence` is not imported.
 
 0.3.0 (released 2023-02-08; uses Hy 0.26.*)
 ======================================================
