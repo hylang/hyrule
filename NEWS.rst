@@ -11,6 +11,7 @@ New Features
 Bug Fixes
 ------------------------------
 * `seq` and `defseq` no longer crash if `Sequence` is not imported.
+* `->`, `->>`, and `doto` now properly handle bare symbols with leading dot.
 
 0.3.0 (released 2023-02-08; uses Hy 0.26.*)
 ======================================================
