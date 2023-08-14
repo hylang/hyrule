@@ -39,7 +39,8 @@
 
 (defn test-defmacro! []
 
-  (defmacro! foo! [o!foo] `(do ~g!foo ~g!foo))
+  (defmacro! foo! [o!foo]
+    `(do ~g!foo ~g!foo))
   ;; test that o! becomes g!
   (assert (= "Hy" (foo! "Hy")))
   ;; test that o! is evaluated once only
@@ -47,7 +48,8 @@
   (foo! (+= foo 1))
   (assert (= 41 foo))
   ;; test optional args
-  (defmacro! bar! [o!a [o!b 1]] `(do ~g!a ~g!a ~g!b ~g!b))
+  (defmacro! bar! [o!a [o!b 1]]
+    `(do ~g!a ~g!a ~g!b ~g!b))
   ;; test that o!s are evaluated once only
   (bar! (+= foo 1) (+= foo 1))
   (assert (= 43 foo))
