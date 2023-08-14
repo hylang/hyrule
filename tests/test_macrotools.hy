@@ -6,85 +6,38 @@
   hyrule [macroexpand-all])
 
 
-(defn test-with-gensym []
-  (import ast)
-  (import hy.compiler [hy-compile])
-  (setv macro1 "(defmacro nif [expr pos zero neg]
-      (with-gensyms [a]
-        `(do
-           (setv ~a ~expr)
-           (cond (> ~a 0) ~pos
-                 (= ~a 0) ~zero
-                 (< ~a 0) ~neg))))
+(defmacro example--with-gensyms []
+  (with-gensyms [a]
+    `(setv ~a 1)))
+(defmacro/g! example--defmacro/g! []
+  `(setv ~g!res 1))
+(defmacro! example--defmacro! []
+  `(setv ~g!res 1))
 
-    (print (nif (inc -1) 1 0 -1))
-    ")
-  ;; expand the macro twice, should use a different
-  ;; gensym each time
-  (setv _ast1 (hy-compile (hy.read-many macro1) __name__))
-  (setv _ast2 (hy-compile (hy.read-many macro1) __name__))
-  (setv s1 (ast.unparse _ast1))
-  (setv s2 (ast.unparse _ast2))
-  (assert (in (hy.mangle "_a\uffff") s1))
-  (assert (in (hy.mangle "_a\uffff") s2))
-  (assert (not (= s1 s2))))
+(defn test-gensym-tools []
+  (defn check []
+    ; `C` should have two distinct attributes.
+    (assert (=
+      (len (sfor  a (dir C)  :if (not (.startswith a "__"))  a))
+      2)))
+
+  (defclass C [] (example--with-gensyms) (example--with-gensyms))
+  (check)
+  (defclass C [] (example--defmacro/g!) (example--defmacro/g!))
+  (check)
+  (defclass C [] (example--defmacro!) (example--defmacro!))
+  (check))
 
 
 (defn test-defmacro/g! []
-  (import ast)
-  (import hy.compiler [hy-compile])
-  (setv macro1 "(defmacro/g! nif [expr pos zero neg]
-        `(do
-           (setv ~g!res ~expr)
-           (cond (> ~g!res 0) ~pos
-                 (= ~g!res 0) ~zero
-                 (< ~g!res 0) ~neg)))
-
-    (print (nif (inc -1) 1 0 -1))
-    ")
-  ;; expand the macro twice, should use a different
-  ;; gensym each time
-  (setv _ast1 (hy-compile (hy.read-many macro1) __name__))
-  (setv _ast2 (hy-compile (hy.read-many macro1) __name__))
-  (setv s1 (ast.unparse _ast1))
-  (setv s2 (ast.unparse _ast2))
-  (assert (in (hy.mangle "_res\uffff") s1))
-  (assert (in (hy.mangle "_res\uffff") s2))
-  (assert (not (= s1 s2)))
-
   ;; defmacro/g! didn't like numbers initially because they
   ;; don't have a startswith method and blew up during expansion
-  (setv macro2 "(defmacro/g! two-point-zero [] `(+ (float 1) 1.0))")
-  (assert (hy-compile (hy.read-many macro2) __name__)))
+  (defmacro/g! two-point-zero []
+    `(+ (float 1) 1.0))
+  (assert (= (two-point-zero) 2.0)))
 
 
 (defn test-defmacro! []
-  ;; defmacro! must do everything defmacro/g! can
-  (import ast)
-  (import hy.compiler [hy-compile])
-  (setv macro1 "(defmacro! nif [expr pos zero neg]
-        `(do
-           (setv ~g!res ~expr)
-           (cond (> ~g!res 0) ~pos
-                 (= ~g!res 0) ~zero
-                 (< ~g!res 0) ~neg)))
-
-    (print (nif (inc -1) 1 0 -1))
-    ")
-  ;; expand the macro twice, should use a different
-  ;; gensym each time
-  (setv _ast1 (hy-compile (hy.read-many macro1) __name__))
-  (setv _ast2 (hy-compile (hy.read-many macro1) __name__))
-  (setv s1 (ast.unparse _ast1))
-  (setv s2 (ast.unparse _ast2))
-  (assert (in (hy.mangle "_res\uffff") s1))
-  (assert (in (hy.mangle "_res\uffff") s2))
-  (assert (not (= s1 s2)))
-
-  ;; defmacro/g! didn't like numbers initially because they
-  ;; don't have a startswith method and blew up during expansion
-  (setv macro2 "(defmacro! two-point-zero [] `(+ (float 1) 1.0))")
-  (assert (hy-compile (hy.read-many macro2) __name__))
 
   (defmacro! foo! [o!foo] `(do ~g!foo ~g!foo))
   ;; test that o! becomes g!
