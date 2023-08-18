@@ -183,8 +183,8 @@
 
       => (#/ os/path.basename "path/to/file")
       "file"]]
-  (.slurp-space hy.&reader)
-  (setv [mod #* ident] (.split (.read-ident hy.&reader) ".")
+  (.slurp-space &reader)
+  (setv [mod #* ident] (.split (.read-ident &reader) ".")
         imp `(hy.M ~(hy.mangle (.replace mod "/" "."))))
   (if ident
     `(. ~imp ~@(map hy.models.Symbol ident))
