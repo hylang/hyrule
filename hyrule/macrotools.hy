@@ -81,11 +81,14 @@
                                   (> (len body) 1))
                              #((get body 0) (tuple (rest body)))
                              #(None body)))
+  (setv dg (hy.gensym))
 
-  `(defmacro/g! ~name ~args
-     ~docstring
-     `(do (setv ~@(sum (zip ~gs ~os) #()))
-          ~@~body)))
+  `(do
+     (require hyrule.macrotools [defmacro/g! :as ~dg])
+     (~dg ~name ~args
+       ~docstring
+       `(do (setv ~@(sum (zip ~gs ~os) #()))
+            ~@~body))))
 
 
 (defn macroexpand-all [form [ast-compiler None]]
