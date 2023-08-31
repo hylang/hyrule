@@ -18,8 +18,8 @@ jobs:
         # testing PyPy.
 
     steps:
-    - uses: actions/checkout@v2
-    - uses: actions/setup-python@v2
+    - uses: actions/checkout@v3
+    - uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python }}
     # Install dependencies. Test on Hy `master`, not the latest Hy
