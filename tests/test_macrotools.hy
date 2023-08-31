@@ -60,6 +60,11 @@
 (defmacro foo-walk []
   42)
 
+(defmacro require-macro []
+    `(do
+       (require tests.resources.macros [test-macro :as my-test-macro])
+       (my-test-macro)))
+
 (defn test-macroexpand-all []
   ;; make sure a macro from the current module works
   (assert (= (macroexpand-all '(foo-walk))
@@ -72,11 +77,6 @@
              'f"{42}"))
   (assert (= (macroexpand-all 'f"{(-> 1 a)}")
              'f"{(a 1)}"))
-
-  (defmacro require-macro []
-    `(do
-       (require tests.resources.macros [test-macro :as my-test-macro])
-       (my-test-macro)))
 
   (assert (= (get (macroexpand-all '(require-macro)) -1)
              '(setv blah 1))))
