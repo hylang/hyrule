@@ -2,6 +2,15 @@
   hyrule.iterables [rest])
 
 
+(eval-and-compile
+  (defn _dotted [node]
+    "Helper function to turn '.name forms into '(.name) forms"
+    (if (and (isinstance node hy.models.Expression)
+             (= (cut node 2) '(. None)))
+      `(~node)
+      node)))
+
+
 (defmacro -> [head #* args]
   "Thread `head` first through the `rest` of the forms.
 
@@ -17,7 +26,8 @@
        10 5
   "
   (setv ret head)
-  (for [node args]
+  (for [node args
+       :setv node (_dotted node)]
     (setv ret (if (isinstance node hy.models.Expression)
                   `(~(get node 0) ~ret ~@(rest node))
                   `(~node ~ret))))
@@ -39,7 +49,8 @@
        5 10
   "
   (setv ret head)
-  (for [node args]
+  (for [node args
+       :setv node (_dotted node)]
     (setv ret (if (isinstance node hy.models.Expression)
                   `(~@node ~ret)
                   `(~node ~ret))))
@@ -149,6 +160,7 @@
   "
   (setv f (hy.gensym))
   (defn build-form [expression]
+    (setv expression (_dotted expression))
     (if (isinstance expression hy.models.Expression)
       `(~(get expression 0) ~f ~@(rest expression))
       `(~expression ~f)))
