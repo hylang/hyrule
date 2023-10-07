@@ -6,7 +6,7 @@
   (defn _dotted [node]
     "Helper function to turn '.name forms into '(.name) forms"
     (if (and (isinstance node hy.models.Expression)
-             (= (cut node 2) '(. None)))
+             (= (get node 0) '.))
       `(~node)
       node)))
 
