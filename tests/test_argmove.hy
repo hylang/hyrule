@@ -6,6 +6,10 @@
              ["X" "B" "C" "D"])))
 
 
+(defn test-bare-dotted []
+  (assert (= (-> "a b c d" str.upper) "A B C D")))
+
+
 (defn test-tail-threading []
   (assert (= (.split (.join ", " (* 10 ["foo"])))
              (->> ["foo"] (* 10) (.join ", ") .split))))
