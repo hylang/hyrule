@@ -7,7 +7,15 @@
 
 
 (defn test-bare-dotted []
-  (assert (= (-> "a b c d" str.upper) "A B C D")))
+
+  (assert (= (-> "a b c d" str.upper) "A B C D"))
+
+  (defclass C)
+  (setv foo (C))
+  (setv foo.bar (C))
+  (setv foo.bar.baz (C))
+  (setv foo.bar.baz.quux (fn [x] (* x 10)))
+  (assert (= (-> 3 foo.bar.baz.quux) 30)))
 
 
 (defn test-tail-threading []
