@@ -164,8 +164,8 @@
 
 
 (defreader /
-  #[[Sugar for :hy:class:`hy.M`, to access modules without needing to explicitly import them first.
-  Unlike ``hy.M``, ``#/`` cannot be used if the module name is only known at runtime.
+  #[[Sugar for :hy:class:`hy.I`, to access modules without needing to explicitly import them first.
+  Unlike ``hy.I``, ``#/`` cannot be used if the module name is only known at runtime.
 
   Examples:
 
@@ -180,7 +180,7 @@
       => (#/ re.search r"[a-z]+" "HAYneedleSTACK")
       <re.Match object; :span #(3 9) :match "needle">
 
-    Like ``hy.M``, separate submodule names with ``/``:
+    Like ``hy.I``, separate submodule names with ``/``:
 
     ::
 
@@ -188,7 +188,7 @@
       "file"]]
   (.slurp-space &reader)
   (setv [mod #* ident] (.split (.read-ident &reader) ".")
-        imp `(hy.M ~(hy.mangle (.replace mod "/" "."))))
+        imp `(hy.I ~(hy.mangle (.replace mod "/" "."))))
   (if ident
     `(. ~imp ~@(map hy.models.Symbol ident))
     imp))

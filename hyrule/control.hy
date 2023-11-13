@@ -174,7 +174,7 @@
     (setv ~count ~count-form)
     (for [~(hy.gensym)
         (if (= ~count Inf)
-          (hy.M.itertools.repeat None)
+          (hy.I.itertools.repeat None)
           (range ~count))]
       ~@body)))
 

@@ -274,7 +274,7 @@
     False
     (or a b)))
 
-(defmacro smacrolet [bindings #* body]
+(defmacro smacrolet [_hy_compiler bindings #* body]
   "symbol macro let.
 
   Replaces symbols in body, but only where it would be a valid let binding. The
@@ -302,7 +302,7 @@
   (when (% (len bindings) 2)
     (raise (ValueError "bindings must be paired")))
 
-  (setv scope (.scope.create &compiler ScopeLet))
+  (setv scope (.scope.create _hy_compiler ScopeLet))
   (for [[target value] (by2s bindings)]
     (when (not (isinstance value hy.models.Symbol))
       (raise (ValueError "Bind target value must be a Symbol")))
@@ -312,4 +312,4 @@
       (raise (ValueError "Bind target must not contain a dot")))
     (.add scope target (str value)))
   (with [scope]
-    (.compile &compiler `(do ~@body))))
+    (.compile _hy_compiler `(do ~@body))))
