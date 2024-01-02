@@ -1,5 +1,10 @@
 .. default-role:: code
 
+0.5.0 (released 2024-01-05; uses Hy 0.28.*)
+======================================================
+
+No user-visible changes beyond compatibility with new Hy versions.
+
 0.4.0 (released 2023-07-06; uses Hy 0.27.*)
 ======================================================
 
