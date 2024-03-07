@@ -91,6 +91,7 @@ Reference
 .. hy:autofunction:: drop-last
 .. hy:autofunction:: flatten
 .. hy:autofunction:: rest
+.. hy:autofunction:: thru
 
 ``macrotools`` — Tools for writing and handling macros
 ----------------------------------------------------------------------

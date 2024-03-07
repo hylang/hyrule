@@ -161,3 +161,20 @@
        []
   "
   (islice coll 1 None))
+
+
+(defn thru [a [b None] [step 1]]
+  "A doubly inclusive version of :py:class:`range`. It takes the same
+  arguments as ``range``, but includes the endpoint (given a
+  compatible start point and step size). ::
+
+    (thru 3)
+      ; => [0 1 2 3]
+    (thru 0 10 2)
+      ; => [0 2 4 6 8 10]
+    (thru 0 9 2)
+      ; => [0 2 4 6 8]"
+
+  (when (is b None)
+    (setv [a b] [0 a]))
+  (range a (+ b (if (> step 0) 1 -1)) step))
