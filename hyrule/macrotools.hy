@@ -4,6 +4,151 @@
   hyrule.collections [walk])
 
 
+(defmacro defmacro-kwargs [name params #* body]
+
+  #[=[Define a macro that can take keyword arguments. When the macro
+  is called, :hy:func:`match-fn-params` is used to match the
+  arguments against ``params``, and the parameters are assigned to
+  local variables that can be used in the macro body. ::
+
+    (defmacro-kwargs do10times [form [print-iteration 'False]]
+      (setv i (hy.gensym))
+      `(for [~i (range 10)]
+        (when ~print-iteration
+          (print "Now on iteration:" ~i))
+        ~form))
+
+    (setv x [])
+    (do10times
+      (.append x 1))
+    ; Nothing is printed.
+    (do10times
+      :print-iteration (> (len x) 17)
+      (.append x 1))
+    ; Iterations 8 and 9 are printed.]=]
+
+  (setv [ps p-rest p-kwargs] (parse-fn-params params))
+  (setv docstring None)
+  (when (and body (isinstance (get body 0) hy.models.String))
+    (setv [docstring #* body] body))
+  (setv g (hy.gensym))
+  `(defmacro ~name [#* ~g]
+    ~@(if docstring [docstring] [])
+    (setv ~g (hy.I.hyrule.match-fn-params ~g '~params))
+    ~@(gfor
+      k [
+        #* (.keys ps)
+        #* (if p-rest [p-rest] [])
+        #* (if p-kwargs [p-kwargs] [])]
+      `(setv ~(hy.models.Symbol k) (get ~g ~k)))
+    ~@body))
+
+(defn match-fn-params [args params]
+  #[[Match an iterable of arguments against a parameter list in the
+  style of a :hy:func:`defn` lambda list. The parameter-list syntax
+  here is somewhat restricted: annotations are forbiddden, ``/`` and
+  ``*`` aren't recognized, and nothing is allowed after ``#* args``
+  other than ``#** kwargs``. Return a dictionary of the parameters and
+  their values. ::
+
+    (match-fn-params
+      [1 :foo "x"]
+      '[a [b 2] [c 3] #* args #** kwargs])
+    ; => {"a" 1  "b" 2  "c" 3  "args" #()  "kwargs" {"foo" "x"}}
+
+  If a default argument is a :ref:`model <hy:models>`, it's evaluated.
+  The evaluation occurs in a minimal environment, with no access to
+  surrounding global or local Python-level objects or macros. If this
+  is too restrictive, use ``None`` as the default value and compute the
+  real default value in other code.
+
+  This function exists mostly to implement :hy:macro:`defmacro-kwargs`.]]
+
+  (setv [ps p-rest p-kwargs] (parse-fn-params params))
+
+  ; Loop over `args`.
+  (setv  args (list args)  collected-rest []  collected-kwargs {}  i-pos 0)
+  (while args
+    (setv x (.pop args 0))
+    (cond
+
+      (and
+          (isinstance x hy.models.Expression)
+          x
+          (isinstance (get x 0) hy.models.Symbol)
+          (in (hy.mangle (get x 0)) ["unpack_iterable" "unpack_mapping"]))
+        ; Unpacking would require evaluating the elements of `args`, which we
+        ; want to avoid.
+        (raise (TypeError "unpacking is not allowed in `args`"))
+
+      (isinstance x hy.models.Keyword) (do
+        ; A keyword argument
+        (setv x (hy.mangle x.name))
+        (when (or
+            (in x collected-kwargs)
+            (and (in x ps) (is-not (get ps x "value") None)))
+          (raise (TypeError (+ "keyword argument repeated: " x))))
+        (setv v (.pop args 0))
+        (cond
+          (in x ps)
+            (setv (get ps x "value") v)
+          p-kwargs
+            (setv (get collected-kwargs x) v)
+          True
+            (raise (TypeError f"unexpected keyword argument '{x}'"))))
+
+      True (do
+        ; A positional argument
+        (cond
+          (< i-pos (len ps)) (do
+            (setv [k d] (get (list (.items ps)) i-pos))
+            (if (is (get d "value") None)
+              (setv (get d "value") x)
+              (raise (TypeError f"got multiple values for argument '{k}'"))))
+          p-rest
+            (.append collected-rest x)
+          True
+            (raise (TypeError f"takes {(len ps)} positional arguments but more were given")))
+        (+= i-pos 1))))
+
+  ; Return the result.
+  (dict
+    #** (dfor
+      [p d] (.items ps)
+      p (cond
+        (is-not (get d "value") None)
+          (get d "value")
+        (is-not (get d "default") None)
+          (get d "default")
+        True
+          (raise (TypeError f"missing a required positional argument: '{p}'"))))
+    #** (if p-rest {p-rest (tuple collected-rest)} {})
+    #** (if p-kwargs {p-kwargs collected-kwargs} {})))
+
+(defn parse-fn-params [params]
+  "A subroutine for `defmacro-kwargs` and `match-params`."
+  (import
+    funcparserlib.parser [maybe many]
+    hy.model-patterns [SYM FORM sym brackets pexpr])
+
+  (setv msym (>> SYM hy.mangle))
+  (defn pvalue [root wanted]
+    (>> (pexpr (+ (sym root) wanted)) (fn [x] (get x 0))))
+  (setv [ps p-rest p-kwargs] (.parse
+    (+
+      (many (| msym (brackets msym FORM)))
+      (maybe (pvalue "unpack-iterable" msym))
+      (maybe (pvalue "unpack-mapping" msym)))
+    params))
+  (setv ps (dfor
+    p ps
+    :setv [k dv] (if (isinstance p hy.models.List) p [p None])
+    k (dict :value None :default (if (isinstance dv hy.models.Object)
+     (hy.eval dv {} :macros {})
+     dv))))
+  [ps p-rest p-kwargs])
+
+
 (defmacro defmacro/g! [name args #* body]
   "Like `defmacro`, but symbols prefixed with 'g!' are gensymed.
 

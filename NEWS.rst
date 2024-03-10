@@ -5,6 +5,8 @@ Unreleased
 
 New Features
 ------------------------------
+* New macro `defmacro-kwargs`.
+* New macro `parse-fn-params`.
 * New function `sign`.
 * New function `thru`.
 

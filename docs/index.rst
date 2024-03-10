@@ -98,10 +98,12 @@ Reference
 .. hy:automodule:: hyrule.macrotools
 
 .. hy:autotag:: /
+.. hy:automacro:: defmacro-kwargs
 .. hy:automacro:: defmacro/g!
 .. hy:automacro:: defmacro!
 .. hy:autofunction:: macroexpand-all
 .. hy:autofunction:: map-model
+.. hy:autofunction:: match-fn-params
 .. hy:automacro:: with-gensyms
 
 ``pprint`` — Pretty-printing data structures
