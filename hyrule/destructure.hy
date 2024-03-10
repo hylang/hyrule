@@ -7,18 +7,14 @@ their arguments.
 Introduction
 ============
 
-Destructuring allows one to easily peek inside a data structure and assign names to values within. For example,
-
-.. code-block:: hy
+Destructuring allows one to easily peek inside a data structure and assign names to values within. For example, ::
 
     (setv+ {[{name :name [weapon1 weapon2] :weapons} :as all-players] :players
             map-name :map
             :keys [tasks-remaining tasks-completed]}
            data)
 
-would be equivalent to
-
-.. code-block:: hy
+would be equivalent to ::
 
     (setv map-name (.get data ':map)
           tasks-remaining (.get data ':tasks-remaining)
@@ -28,9 +24,7 @@ would be equivalent to
           weapon1 (get (.get (get all-players 0) ':weapons) 0)
           weapon2 (get (.get (get all-players 0) ':weapons) 1))
 
-where ``data`` might be defined by
-
-.. code-block:: hy
+where ``data`` might be defined by ::
 
     (setv data {:players [{:name Joe :weapons [:sword :dagger]}
                           {:name Max :weapons [:axe :crossbow]}]
@@ -40,9 +34,7 @@ where ``data`` might be defined by
 This is similar to unpacking iterables in Python, such as ``a, *b, c = range(10)``, however it also works on dictionaries, and has several special options.
 
 .. warning::
-   Variables which are not found in the expression are silently set to ``None`` if no default value is specified. This is particularly important with ``defn+`` and ``fn+``.
-
-   .. code-block:: hy
+   Variables which are not found in the expression are silently set to ``None`` if no default value is specified. This is particularly important with ``defn+`` and ``fn+``. ::
 
       (defn+ some-function [arg1
                             {subarg2-1 \"key\"
@@ -74,9 +66,7 @@ Patterns
 Dictionary Pattern
 ------------------
 
-Dictionary patterns are specified using dictionaries, where the keys corresponds to the symbols which are to be bound, and the values correspond to which key needs to be looked up in the expression for the given symbol.
-
-.. code-block:: hy
+Dictionary patterns are specified using dictionaries, where the keys corresponds to the symbols which are to be bound, and the values correspond to which key needs to be looked up in the expression for the given symbol. ::
 
     (setv+ {a :a b \"b\" c #(1 0)} {:a 1 \"b\" 2 #(1 0) 3})
     [a b c] ; => [1 2 3]
@@ -88,9 +78,7 @@ The keys can also be one of the following 4 special options: ``:or``, ``:as``, `
 - ``:keys`` takes a list of variable names which are looked up as keywords in the expression.
 - ``:strs`` is the same as ``:keys`` but uses strings instead.
 
-The ordering of the special options and the variable names doesn't matter, however each special option can be used at most once.
-
-.. code-block:: hy
+The ordering of the special options and the variable names doesn't matter, however each special option can be used at most once. ::
 
     (setv+ {:keys [a b] :strs [c d] :or {b 2 d 4} :as full} {:a 1 :b 2 \"c\" 3})
     [a b c d full] ; => [1 2 3 4 {:a 1 :b 2 \"c\" 3}]
@@ -107,9 +95,7 @@ There are 2 special options: ``:&`` and ``:as``.
 - ``:&`` takes a pattern which is bound to the rest of the expression. This pattern can be anything, including a dictionary, which allows for keyword arguments.
 - ``:as`` takes a variable name which is bound to the entire expression.
 
-If the special options are present, they must be last, with ``:&`` preceding ``:as`` if both are present.
-
-.. code-block:: hy
+If the special options are present, they must be last, with ``:&`` preceding ``:as`` if both are present. ::
 
     (setv+ [a b :& rest :as full] (range 5))
     [a b rest full] ; => [0 1 [2 3 4] [0 1 2 3 4]]

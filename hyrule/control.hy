@@ -185,7 +185,7 @@
   instead.)
 
   The macro is implemented as a :hy:func:`for` loop over a
-  :func:`range` call, with the attendent consequences for negative
+  :py:class:`range` call, with the attendent consequences for negative
   counts, :hy:func:`break`, etc. As an exception, if the count is
   `Inf`, the loop is run over an infinite iterator instead. ::
 
@@ -211,7 +211,7 @@
 
   If you want fancy command-line arguments, you can use the standard Python
   module :mod:`argparse` in the usual way, because ``defmain`` doesn't change
-  ``sys.argv``. See also :hy:func:`parse-args <hyrule.misc.parse-args>`.
+  ``sys.argv``. See also :hy:func:`parse-args`.
   ::
 
       (import argparse)
@@ -238,7 +238,7 @@
   <hy.core.macros.cond>`. Its most notable property is that it tests
   the condition with ``(is-not condition None)`` instead of ``(bool
   condition)``, so values such as the integer 0, the empty string, and
-  :py:keyword:`False` are considered true, not false. The general
+  ``False`` are considered true, not false. The general
   syntax is
   ::
 
