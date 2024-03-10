@@ -126,6 +126,52 @@
   (expand form))
 
 
+(defn map-model [x f]
+  #[[Recursively apply a callback to some code. The unary function ``f`` is called on the object ``x``, converting it to a :ref:`model <hy:models>` first if it isn't one already. If the return value isn't ``None``, it's converted to a model and used as the result. But if the return value is ``None``, and ``x`` isn't a :ref:`sequential model <hy:hysequence>`, then ``x`` is used as the result instead. ::
+
+     (defn f [x]
+       (when (= x 'b)
+         'B))
+     (map-model 'a f)  ; => 'a
+     (map-model 'b f)  ; => 'B
+
+  Recursive descent occurs when ``f`` returns ``None`` and ``x`` is sequential. Then ``map-model`` is called on all the elements of ``x`` and the results are bound up in the same model type as ``x``. ::
+
+    (map-model '[a [b c] d] f)  ; => '[a [B c] d]
+
+  The typical use of ``map-model`` is to write a macro that replaces models of a selected kind, however deeply they're nested in a tree of models. ::
+
+    (defmacro lowercase-syms [#* body]
+      "Evaluate `body` with all symbols downcased."
+      (hy.I.hyrule.map-model `(do ~@body) (fn [x]
+        (when (isinstance x hy.models.Symbol)
+          (hy.models.Symbol (.lower (str x)))))))
+    (lowercase-syms
+      (SETV FOO 15)
+      (+= FOO (ABS -5)))
+    (print foo)  ; => 20
+
+  That's why the parameters of ``map-model`` are backwards compared to ``map``: in user code, ``x`` is typically a symbol or other simple form whereas ``f`` is a multi-line anonymous function.]]
+
+  (when (not (isinstance x hy.models.Object))
+    (setv x (hy.as-model x)))
+  (cond
+    (is-not (setx value (f x)) None)
+      (hy.as-model value)
+    (isinstance x hy.models.Sequence)
+      ((type x)
+        (gfor  elem x  (map-model elem f))
+        #** (cond
+          (isinstance x hy.models.FString)
+            {"brackets" x.brackets}
+          (isinstance x hy.models.FComponent)
+            {"conversion" x.conversion}
+          True
+            {}))
+    True
+      x))
+
+
 (defmacro with-gensyms [args #* body]
   "Execute `body` with `args` as bracket of names to gensym for use in macros.
 
