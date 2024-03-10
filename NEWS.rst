@@ -5,6 +5,7 @@ Unreleased
 
 New Features
 ------------------------------
+* New function `sign`.
 * New function `thru`.
 
 0.5.0 (released 2024-01-05; uses Hy 0.28.*)

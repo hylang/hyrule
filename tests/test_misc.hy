@@ -3,7 +3,7 @@
 (import
   pytest
   typing [List Dict]
-  hyrule [constantly dec inc parse-args xor])
+  hyrule [constantly dec inc parse-args sign xor])
 
 
 (defn test-constantly []
@@ -67,6 +67,19 @@
   ; Of two distinct false values, the second is returned.
   (assert (= (xor False 0) 0))
   (assert (= (xor 0 False) False)))
+
+
+(defn test-sign []
+  (assert (= (sign -9) -1))
+  (assert (= (sign -0.1) -1))
+  (assert (= (sign 0) 0))
+  (assert (= (sign (hy.I.fractions.Fraction 2 3) 1)))
+  (assert (= (sign (hy.I.decimal.Decimal 7.1) 1)))
+  (with [(pytest.raises TypeError)]
+    (sign "3"))
+  (with [(pytest.raises TypeError)]
+    (sign 3j)))
+
 
 (defn test-smacrolet []
   (with [exc (pytest.raises UnboundLocalError)]

@@ -256,6 +256,26 @@
      (print (.getvalue ~g!hy-s))))
 
 
+(do-mac (do
+  (setv code "
+      (cond
+        (< x 0) -1
+        (> x 0)  1
+        (= x 0)  0
+        True     (raise TypeError))")
+
+  `(defn sign [x]
+    ~f"Return -1 for negative ``x``, 1 for positive ``x``, and 0 for
+    ``x`` equal to 0. The implementation is exactly ::
+
+    {code}
+
+    with the corresponding consequences for special cases like negative
+    zero and NaN."
+
+      ~(hy.read code))))
+
+
 (defn xor [a b]
   "Perform exclusive or between `a` and `b`.
 
