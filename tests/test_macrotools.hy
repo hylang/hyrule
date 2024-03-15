@@ -80,6 +80,15 @@
   (assert (= (bar! 2) 1)))
 
 
+(defn test-defmacro!-returns []
+  ;; https://github.com/hylang/hyrule/issues/76
+  (defmacro! m [o!n]
+    (return `(+ ~g!n ~g!n ~g!n)))
+  (setv x 1)
+  (defn f [] (nonlocal x) (+= x 1) x)
+  (assert (= (m (f)) 6)))
+
+
 (defmacro foo-walk []
   42)
 
