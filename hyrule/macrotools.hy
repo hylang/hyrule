@@ -149,40 +149,15 @@
   [ps p-rest p-kwargs])
 
 
-(defmacro defmacro/g! [name args #* body]
-  "Like `defmacro`, but symbols prefixed with 'g!' are gensymed.
-
-  ``defmacro/g!`` is a special version of ``defmacro`` that is used to
-  automatically generate :hy:func:`gensyms <hy.gensym>` for
-  any symbol that starts with
-  ``g!``.
-
-  For example, ``g!a`` would become ``(hy.gensym \"a\")``."
-  (setv syms (list
-              (distinct
-               (filter (fn [x]
-                         (and (hasattr x "startswith")
-                              (.startswith x "g!")))
-                       (flatten body))))
-        gensyms [])
-  (for [sym syms]
-    (.extend gensyms [sym `(hy.gensym ~(cut sym 2 None))]))
-
-  (setv [docstring body] (if (and (isinstance (get body 0) str)
-                                  (> (len body) 1))
-                             #((get body 0) (tuple (rest body)))
-                             #(None body)))
-
-  `(defmacro ~name [~@args]
-     ~docstring
-     (setv ~@gensyms)
-     ~@body))
-
-
 (defmacro defmacro! [name args #* body]
-  "Like `defmacro/g!`, with automatic once-only evaluation for 'o!' params.
+  "Like `defmacro`, but with automatic gensyms and once-only evaluation.
 
-  Such 'o!' params are available within `body` as the equivalent 'g!' symbol.
+  ``defmacro!`` automatically generates :hy:func:`gensyms <hy.gensym>` for
+  any symbol that starts with ``g!``.
+  For example, ``g!a`` would become ``(hy.gensym \"a\")``.
+
+  Additionally, any params prefixed with ``o!`` are evaluated just once;
+  they are then available within `body` with a ``g!`` prefix.
 
   Examples:
     ::
@@ -197,7 +172,7 @@
 
     ::
 
-       => (defmacro/g! triple-2 [n] `(do (setv ~g!n ~n) (+ ~g!n ~g!n ~g!n)))
+       => (defmacro! triple-2 [n] `(do (setv ~g!n ~n) (+ ~g!n ~g!n ~g!n)))
        => (triple-2 (expensive-get-number))  ; avoid repeats with a gensym
        spam
        42
@@ -205,7 +180,7 @@
     ::
 
        => (defmacro! triple-3 [o!n] `(+ ~g!n ~g!n ~g!n))
-       => (triple-3 (expensive-get-number))  ; easier with defmacro!
+       => (triple-3 (expensive-get-number))  ; easier with `o!` prefix
        spam
        42
   "
