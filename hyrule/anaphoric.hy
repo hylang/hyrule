@@ -192,8 +192,8 @@ concise and easy to read.
     acc))
 
 (defmacro ap-when [test-form #* body]
-  "As :ref:`when <when>`, but the result of the test form is named ``it`` in
-  the subsequent forms.
+  "As :hy:func:`when <hy.core.macros.when>`, but the result of the test
+  form is named ``it`` in the subsequent forms.
 
   Examples:
     ::

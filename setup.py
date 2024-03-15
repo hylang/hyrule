@@ -49,5 +49,6 @@ setuptools.setup(
         "Development Status :: 4 - Beta",
         "License :: DFSG approved",
         "License :: OSI Approved :: MIT License",  # Really "Expat". Ugh.
-        "Operating System :: OS Independent"],
+        "Operating System :: OS Independent",
+        "Programming Language :: Hy"],
     cmdclass={'install': install})

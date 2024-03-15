@@ -12,12 +12,7 @@
   any symbol that starts with
   ``g!``.
 
-  For example, ``g!a`` would become ``(hy.gensym \"a\")``.
-
-  .. seealso::
-
-    Section :ref:`using-gensym`
-  "
+  For example, ``g!a`` would become ``(hy.gensym \"a\")``."
   (setv syms (list
               (distinct
                (filter (fn [x]
@@ -149,12 +144,7 @@
        ...   (setv a (hy.gensym)
        ...         b (hy.gensym)
        ...         c (hy.gensym))
-       ...   ...)
-
-  .. seealso::
-
-     Section :ref:`using-gensym`
-  "
+       ...   ...)"
   (setv syms [])
   (for [arg args]
     (.extend syms [arg `(hy.gensym '~arg)]))

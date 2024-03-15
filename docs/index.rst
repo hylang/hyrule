@@ -14,73 +14,127 @@ Reference
 
 ``anaphoric`` — Anaphoric macros
 ----------------------------------------------------------------------
-
 .. hy:automodule:: hyrule.anaphoric
-  :macros: ap-if, ap-each, ap-each-while, ap-map, ap-map-when,
-    ap-filter, ap-reject, ap-dotimes, ap-first, ap-last, ap-reduce,
-    ap-when, ap-with
-  :readers: %
+
+.. hy:autotag:: %
+.. hy:automacro:: ap-if
+.. hy:automacro:: ap-each
+.. hy:automacro:: ap-each-while
+.. hy:automacro:: ap-map
+.. hy:automacro:: ap-map-when
+.. hy:automacro:: ap-filter
+.. hy:automacro:: ap-reject
+.. hy:automacro:: ap-dotimes
+.. hy:automacro:: ap-first
+.. hy:automacro:: ap-last
+.. hy:automacro:: ap-reduce
+.. hy:automacro:: ap-when
+.. hy:automacro:: ap-with
 
 ``argmove`` — Macros for calls with unusual argument placement 
 ----------------------------------------------------------------------
-
 .. hy:automodule:: hyrule.argmove
-  :macros: ->, ->>, as->, doto
+
+.. hy:automacro:: ->
+.. hy:automacro:: ->>
+.. hy:automacro:: as->
+.. hy:automacro:: doto
 
 ``collections`` — Tools for data structures
 ----------------------------------------------------------------------
-
 .. hy:automodule:: hyrule.collections
-  :macros: assoc
-  :readers: s
+
+.. hy:automacro:: assoc
+.. hy:automacro:: ncut
+.. hy:autofunction:: postwalk
+.. hy:autofunction:: prewalk
+.. hy:autotag:: s
+.. hy:autofunction:: walk
 
 ``control`` — Control structures
 ----------------------------------------------------------------------
-
 .. hy:automodule:: hyrule.control
-  :macros: block, branch, ebranch, case, ecase, cfor, defmain, do-n,
-    ifp, lif, list-n, loop, unless
+
+.. hy:automacro:: block
+.. hy:automacro:: branch
+.. hy:automacro:: case
+.. hy:automacro:: cfor
+.. hy:automacro:: defmain
+.. hy:automacro:: do-n
+.. hy:automacro:: ebranch
+.. hy:automacro:: ecase
+.. hy:automacro:: ifp
+.. hy:automacro:: lif
+.. hy:automacro:: list-n
+.. hy:automacro:: loop
+.. hy:automacro:: unless
 
 ``destructure`` — Macros for destructuring collections
 ----------------------------------------------------------------------
-
 .. hy:automodule:: hyrule.destructure
-  :macros: defn+, defn/a+, dict=:, fn+, fn/a+, let+, setv+
+
+.. hy:automacro:: defn+
+.. hy:automacro:: defn/a+
+.. hy:automacro:: dict=:
+.. hy:automacro:: fn+
+.. hy:automacro:: fn/a+
+.. hy:automacro:: let+
+.. hy:automacro:: setv+
 
 ``iterables`` — Tools for iterable objects
 ----------------------------------------------------------------------
-
 .. hy:automodule:: hyrule.iterables
-  :members: butlast, coll?, distinct, drop-last, flatten, rest
+
+.. hy:autofunction:: butlast
+.. hy:autofunction:: coll?
+.. hy:autofunction:: distinct
+.. hy:autofunction:: drop-last
+.. hy:autofunction:: flatten
+.. hy:autofunction:: rest
 
 ``macrotools`` — Tools for writing and handling macros
 ----------------------------------------------------------------------
-
 .. hy:automodule:: hyrule.macrotools
-  :members: macroexpand-all
-  :macros: defmacro/g!, defmacro!, with-gensyms
-  :readers: /
+
+.. hy:autotag:: /
+.. hy:automacro:: defmacro/g!
+.. hy:automacro:: defmacro!
+.. hy:autofunction:: macroexpand-all
+.. hy:automacro:: with-gensyms
 
 ``pprint`` — Pretty-printing data structures
 ----------------------------------------------------------------------
-
 .. hy:automodule:: hyrule.hypprint
-  :members: PrettyPrinter, pformat, pp, pprint, saferepr,
-      readable?, recursive?
+
+.. hy:autoclass:: PrettyPrinter
+.. hy:autofunction:: pformat
+.. hy:autofunction:: pp
+.. hy:autofunction:: pprint
+.. hy:autofunction:: readable?
+.. hy:autofunction:: recursive?
+.. hy:autofunction:: saferepr
 
 ``sequences`` — Lazy, indexable iterables
 ----------------------------------------------------------------------
-
 .. hy:automodule:: hyrule.sequences
-  :members: end-sequence
-  :macros: defseq, seq
+
+.. hy:automacro:: defseq
+.. hy:autofunction:: end-sequence
+.. hy:automacro:: seq
 
 ``misc`` — Everything else
 ----------------------------------------------------------------------
+.. hy:automodule:: misc
 
-.. hy:automodule:: hyrule.misc
-  :members: constantly, dec, inc, parse-args, xor
-  :macros: comment, of, profile/calls, profile/cpu, smacrolet
+.. hy:automacro:: comment
+.. hy:autofunction:: constantly
+.. hy:autofunction:: dec
+.. hy:autofunction:: inc
+.. hy:autofunction:: parse-args
+.. hy:automacro:: profile/calls
+.. hy:automacro:: profile/cpu
+.. hy:automacro:: smacrolet
+.. hy:autofunction:: xor
 
 Contributing to Hyrule
 ======================
