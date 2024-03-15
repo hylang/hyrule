@@ -215,21 +215,31 @@
           (and (isinstance args hy.models.List) (.startswith (get arg 0) "o!"))
             (get arg 0)))
   (setv os (lfor  x (map extract-o!-sym args)  :if x  x)
-        gs (lfor s os (hy.models.Symbol (+ "g!" (cut s 2 None)))))
+        gs (lfor s os (hy.models.Symbol (+ "g!" (cut s 2 None))))
+        syms (list
+               (distinct
+                 (filter (fn [x]
+                           (and (hasattr x "startswith")
+                                (.startswith x "g!")))
+                         (flatten [gs body]))))
+        gensyms []
+        g!res (hy.gensym "res"))
+  (for [sym syms]
+      (.extend gensyms [sym `(hy.gensym ~(cut sym 2 None))]))
 
-  (setv [docstring body] (if (and (isinstance (get body 0) str)
+  (setv [docstring body] (if (and body
+                                  (isinstance (get body 0) str)
                                   (> (len body) 1))
                              #((get body 0) (tuple (rest body)))
                              #(None body)))
-  (setv dg (hy.gensym))
 
-  `(do
-     (require hyrule.macrotools [defmacro/g! :as ~dg])
-     (~dg ~name ~args
-       ~docstring
-       `(do (setv ~@(sum (zip ~gs ~os) #()))
-            ~@~body))))
-
+  `(defmacro ~name ~args
+     ~docstring
+     (setv ~@gensyms
+           ~g!res ((fn [] ~@body)))
+     `(do
+        (setv ~~gs ~~os)
+        ~~g!res)))
 
 (defn macroexpand-all [form [ast-compiler None]]
   "Recursively performs all possible macroexpansions in form, using the ``require`` context of ``module-name``.
