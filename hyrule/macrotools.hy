@@ -1,6 +1,6 @@
 (import
   hy.compiler [HyASTCompiler calling-module]
-  hyrule.iterables [coll? distinct flatten rest]
+  hyrule.iterables [coll? flatten]
   hyrule.collections [walk])
 
 
@@ -184,37 +184,32 @@
        spam
        42
   "
-  (defn extract-o!-sym [arg]
-    (cond (and (isinstance arg hy.models.Symbol) (.startswith arg "o!"))
-            arg
-          (and (isinstance args hy.models.List) (.startswith (get arg 0) "o!"))
-            (get arg 0)))
-  (setv os (lfor  x (map extract-o!-sym args)  :if x  x)
-        gs (lfor s os (hy.models.Symbol (+ "g!" (cut s 2 None))))
-        syms (list
-               (distinct
-                 (filter (fn [x]
-                           (and (hasattr x "startswith")
-                                (.startswith x "g!")))
-                         (flatten [gs body]))))
-        gensyms []
-        g!res (hy.gensym "res"))
-  (for [sym syms]
-      (.extend gensyms [sym `(hy.gensym ~(cut sym 2 None))]))
-
-  (setv [docstring body] (if (and body
-                                  (isinstance (get body 0) str)
-                                  (> (len body) 1))
-                             #((get body 0) (tuple (rest body)))
-                             #(None body)))
+  (setv os (lfor x (flatten args)
+                 :if (and (isinstance x hy.models.Symbol)
+                          (.startswith x "o!"))
+                 x)
+        gs (lfor s os
+                 (hy.models.Symbol (+ "g!" (cut s 2 None))))
+        gensyms (gfor sym (sfor x (flatten [gs body])
+                                :if (and (isinstance x hy.models.Symbol)
+                                         (.startswith x "g!"))
+                                x)
+                      x [sym `(hy.gensym ~(cut sym 2 None))]
+                      x)
+        res (hy.gensym "res"))
+  (setv docstring None)
+  (when (and body
+             (isinstance (get body 0) str)
+             (> (len body) 1))
+    (setv [docstring #* body] body))
 
   `(defmacro ~name ~args
      ~docstring
      (setv ~@gensyms
-           ~g!res ((fn [] ~@body)))
+           ~res ((fn [] ~@body)))
      `(do
         (setv ~~gs ~~os)
-        ~~g!res)))
+        ~~res)))
 
 (defn macroexpand-all [form [ast-compiler None]]
   "Recursively performs all possible macroexpansions in form, using the ``require`` context of ``module-name``.
