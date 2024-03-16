@@ -1,6 +1,7 @@
 (import
   itertools [count islice]
-  hyrule [butlast coll? distinct drop-last flatten rest])
+  hyrule [butlast coll? distinct drop-last flatten rest thru]
+  pytest)
 
 
 (defn test-butlast []
@@ -79,3 +80,28 @@
   (assert (= (list (rest [1 2 3 4 5])) [2 3 4 5]))
   (assert (= (list (islice (rest (count 8)) 3)) [9 10 11]))
   (assert (= (list (rest [])) [])))
+
+
+(defn test-thru []
+  (assert (is (type (thru 5)) (type (range 5))))
+
+  (defn check [args values]
+    (assert (= (list (thru #* args)) values)))
+  (check [3]       [0 1 2 3])
+  (check [-1 3]    [-1 0 1 2 3])
+  (check [-1]      [])
+  (check [3 1]     [])
+  (check [3 1 -1]  [3 2 1])
+  (check [0 5 2]   [0 2 4])
+  (check [0 6 2]   [0 2 4 6])
+  (check [5 0 -2]  [5 3 1])
+  (check [6 0 -2]  [6 4 2 0])
+
+  (assert [(pytest.raises TypeError)]
+    (thru))
+  (assert [(pytest.raises TypeError)]
+    (thru 3.0))
+  (assert [(pytest.raises TypeError)]
+    (thru "3"))
+  (assert [(pytest.raises ValueError)]
+    (thru 1 10 0)))

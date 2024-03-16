@@ -1,9 +1,32 @@
 (require
-  hyrule [defmacro! defmacro/g! with-gensyms ->]
+  hyrule [defmacro-kwargs defmacro! defmacro/g! with-gensyms ->]
          :readers [/])
 (import
   pytest
-  hyrule [macroexpand-all])
+  hyrule [macroexpand-all map-model match-fn-params])
+
+
+(defn test-defmacro-kwargs []
+
+   (defmacro-kwargs m [a b [c "default-c"] #* rest #** kw]
+     "m docstring"
+     [a b c rest kw])
+   (assert (=
+     (m 1 2)
+     [1 2 "default-c" #() {}]))
+   (assert (=
+     (m :b "bb" :a "aa" :foo "hello")
+     ["aa" "bb" "default-c" #() {"foo" "hello"}]))
+   (assert (= (. (get-macro m) __doc__) "m docstring"))
+
+   ; Make sure we avoid spurious extra quoting.
+   (defmacro-kwargs m2 [[x 15]]
+     ; `x` should be an `int` here, not `hy.models.Integer`.
+     (global x-is-plain-int?)
+     (setv x-is-plain-int? (is (type x) int))
+     x)
+   (assert (= (m2) 15))
+   (assert (do-mac x-is-plain-int?)))
 
 
 (defmacro example--with-gensyms []
@@ -80,6 +103,105 @@
 
   (assert (= (get (macroexpand-all '(require-macro)) -1)
              '(setv blah 1))))
+
+
+(defn test-map-model []
+
+  ; When the callback returns `None`, the element is recursed into, or
+  ; left alone if non-sequential.
+  (assert (=
+    (map-model
+      '[foo "bar" 3 ["bing" baz]]
+      (fn [x]
+        (when (isinstance x hy.models.Symbol)
+          (hy.models.Symbol (.upper (str x))))))
+    '[FOO "bar" 3 ["bing" BAZ]]))
+
+  ; `hy.as-model` is called on the input, as well as the callback's
+  ; output.
+  (assert (=
+    (map-model
+      ["hello"]
+      (fn [x]
+        (cond
+          (= x "hello")  "wrong"
+          (= x '"hello") "right")))
+    '["right"]))
+
+  ; String and byte models aren't recursed into. (They're iterable,
+  ; but not sequential models.)
+  (assert (=
+    (map-model
+      '["a" "apple" #("a")]
+      (fn [x]
+        (when (= (str x) "a")
+          "b")))
+    '["b" "apple" #("b")]))
+
+  ; We can recurse into f-strings, and their properties (like brackets
+  ; and conversion specifiers) are preserved.
+  (setv x (map-model
+    '(+ #[f-x[a{1 !r :9}b{2 !r :9}c]f-x] "hello")
+    (fn [x]
+      (when (= x '2)
+        '3))))
+  (assert (= x '(+ #[f-x[a{1 !r :9}b{3 !r :9}c]f-x] "hello")))
+  (assert (= (. x [1] brackets) "f-x"))
+  (assert (= (. x [1] [1] conversion) "r"))
+
+  ; Try a macro implemented with `map-model`.
+  (defmacro lowercase-syms [#* body]
+    (hy.I.hyrule.map-model `(do ~@body) (fn [x]
+      (when (isinstance x hy.models.Symbol)
+        (hy.models.Symbol (.lower (str x)))))))
+  (lowercase-syms
+    (SETV FOO 15)
+    (+= FOO (ABS -5)))
+  (assert (= foo 20)))
+
+
+(defn test-match-fn-params []
+
+  (defn f [args]
+    (match-fn-params args '[a b [c "default-c"] #* rest #** kw]))
+  (assert (=
+    (f [1 2])
+    (dict :a 1 :b 2 :c "default-c" :rest #() :kw {})))
+  (assert (=
+    (f '[1 2])
+    (dict :a '1 :b '2 :c "default-c" :rest #() :kw {})))
+  (assert (=
+    (f '[1 2 3 4 (+ 4 1)])
+    (dict :a '1 :b '2 :c '3 :rest #('4 '(+ 4 1)) :kw {})))
+  (assert (=
+    (f '[:a 1 :b 2 :c 3 :extra 4])
+    (dict :a '1 :b '2 :c '3 :rest #() :kw {"extra" '4})))
+  (assert (=
+    (f '[:b 2 1])
+    (dict :a '1 :b '2 :c "default-c" :rest #() :kw {})))
+  (assert (=
+    (f '[:b 2 :extra "foo" :a 1])
+    (dict :a '1 :b '2 :c "default-c" :rest #() :kw {"extra" '"foo"})))
+  (assert (=
+    (f '[1 2 3 4 5 6 7 :x 10 :y 11])
+    (dict :a '1 :b '2 :c '3 :rest #('4 '5 '6 '7) :kw {"x" '10 "y" '11})))
+
+  ; Mangling
+  (assert (=
+    (match-fn-params
+      '[1 :⬢ ☤ :⚘ 3 :☘ 4]
+      '[a-b ⬢ #** ✈])
+    (dict
+      :a_b '1
+      :hyx_Xblack_hexagonX '☤
+      :hyx_XairplaneX {"hyx_XflowerX" '3 "hyx_XshamrockX" '4})))
+
+  ; Unpacking
+  (with [(pytest.raises TypeError :match "^unpacking is not allowed in `args`$")]
+    (f '[1 2 3 #* [1 2]]))
+  (with [(pytest.raises TypeError :match "^unpacking is not allowed in `args`$")]
+    (f '[1 2 3 #** {"qq" 1 "xx" 2}])))
+
 
 (defn test-slash-import []
   (defmacro no-name [name]

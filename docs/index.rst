@@ -91,15 +91,19 @@ Reference
 .. hy:autofunction:: drop-last
 .. hy:autofunction:: flatten
 .. hy:autofunction:: rest
+.. hy:autofunction:: thru
 
 ``macrotools`` — Tools for writing and handling macros
 ----------------------------------------------------------------------
 .. hy:automodule:: hyrule.macrotools
 
 .. hy:autotag:: /
+.. hy:automacro:: defmacro-kwargs
 .. hy:automacro:: defmacro/g!
 .. hy:automacro:: defmacro!
 .. hy:autofunction:: macroexpand-all
+.. hy:autofunction:: map-model
+.. hy:autofunction:: match-fn-params
 .. hy:automacro:: with-gensyms
 
 ``pprint`` — Pretty-printing data structures
@@ -133,6 +137,7 @@ Reference
 .. hy:autofunction:: parse-args
 .. hy:automacro:: profile/calls
 .. hy:automacro:: profile/cpu
+.. hy:autofunction:: sign
 .. hy:automacro:: smacrolet
 .. hy:autofunction:: xor
 

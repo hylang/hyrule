@@ -1,5 +1,15 @@
 .. default-role:: code
 
+Unreleased
+======================================================
+
+New Features
+------------------------------
+* New macro `defmacro-kwargs`.
+* New macro `parse-fn-params`.
+* New function `sign`.
+* New function `thru`.
+
 0.5.0 (released 2024-01-05; uses Hy 0.28.*)
 ======================================================
 
