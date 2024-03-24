@@ -161,13 +161,9 @@
        None
   "
   (setv val (hy.gensym))
-  (setv steps (gfor node args
-               `(is (setx ~val (hy.R.hyrule.-> ~val ~node)) None)))
-  ; interleave each form with None to use them with `cond` macro below
-  (setv steps (gfor v steps #(v None)))
-
   `(cond (is (setx ~val ~head) None) None
-         ~@(chain.from_iterable steps)
+         ~@(chain.from_iterable (gfor node args
+           [`(is (setx ~val (hy.R.hyrule.-> ~val ~node)) None) None]))
          True ~val))
 
 
