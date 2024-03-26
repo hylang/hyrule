@@ -99,7 +99,6 @@ Reference
 
 .. hy:autotag:: /
 .. hy:automacro:: defmacro-kwargs
-.. hy:automacro:: defmacro/g!
 .. hy:automacro:: defmacro!
 .. hy:autofunction:: macroexpand-all
 .. hy:autofunction:: map-model

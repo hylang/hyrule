@@ -1,5 +1,5 @@
 (require
-  hyrule [defmacro-kwargs defmacro! defmacro/g! with-gensyms ->]
+  hyrule [defmacro-kwargs defmacro! with-gensyms ->]
          :readers [/])
 (import
   pytest
@@ -32,8 +32,6 @@
 (defmacro example--with-gensyms []
   (with-gensyms [a]
     `(setv ~a 1)))
-(defmacro/g! example--defmacro/g! []
-  `(setv ~g!res 1))
 (defmacro! example--defmacro! []
   `(setv ~g!res 1))
 
@@ -46,16 +44,14 @@
 
   (defclass C [] (example--with-gensyms) (example--with-gensyms))
   (check)
-  (defclass C [] (example--defmacro/g!) (example--defmacro/g!))
-  (check)
   (defclass C [] (example--defmacro!) (example--defmacro!))
   (check))
 
 
-(defn test-defmacro/g! []
-  ;; defmacro/g! didn't like numbers initially because they
+(defn test-defmacro!-numbers []
+  ;; defmacro! didn't like numbers initially because they
   ;; don't have a startswith method and blew up during expansion
-  (defmacro/g! two-point-zero []
+  (defmacro! two-point-zero []
     `(+ (float 1) 1.0))
   (assert (= (two-point-zero) 2.0)))
 
@@ -78,6 +74,15 @@
   (assert (= 43 foo))
   ;; test that the optional arg works
   (assert (= (bar! 2) 1)))
+
+
+(defn test-defmacro!-returns []
+  ;; https://github.com/hylang/hyrule/issues/76
+  (defmacro! m [o!n]
+    (return `(+ ~g!n ~g!n ~g!n)))
+  (setv x 1)
+  (defn f [] (nonlocal x) (+= x 1) x)
+  (assert (= (m (f)) 6)))
 
 
 (defmacro foo-walk []

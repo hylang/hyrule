@@ -1,6 +1,6 @@
 (import
   hy.compiler [HyASTCompiler calling-module]
-  hyrule.iterables [coll? distinct flatten rest]
+  hyrule.iterables [coll? flatten]
   hyrule.collections [walk])
 
 
@@ -149,40 +149,15 @@
   [ps p-rest p-kwargs])
 
 
-(defmacro defmacro/g! [name args #* body]
-  "Like `defmacro`, but symbols prefixed with 'g!' are gensymed.
-
-  ``defmacro/g!`` is a special version of ``defmacro`` that is used to
-  automatically generate :hy:func:`gensyms <hy.gensym>` for
-  any symbol that starts with
-  ``g!``.
-
-  For example, ``g!a`` would become ``(hy.gensym \"a\")``."
-  (setv syms (list
-              (distinct
-               (filter (fn [x]
-                         (and (hasattr x "startswith")
-                              (.startswith x "g!")))
-                       (flatten body))))
-        gensyms [])
-  (for [sym syms]
-    (.extend gensyms [sym `(hy.gensym ~(cut sym 2 None))]))
-
-  (setv [docstring body] (if (and (isinstance (get body 0) str)
-                                  (> (len body) 1))
-                             #((get body 0) (tuple (rest body)))
-                             #(None body)))
-
-  `(defmacro ~name [~@args]
-     ~docstring
-     (setv ~@gensyms)
-     ~@body))
-
-
 (defmacro defmacro! [name args #* body]
-  "Like `defmacro/g!`, with automatic once-only evaluation for 'o!' params.
+  "Like `defmacro`, but with automatic gensyms and once-only evaluation.
 
-  Such 'o!' params are available within `body` as the equivalent 'g!' symbol.
+  ``defmacro!`` automatically generates :hy:func:`gensyms <hy.gensym>` for
+  any symbol that starts with ``g!``.
+  For example, ``g!a`` would become ``(hy.gensym \"a\")``.
+
+  Additionally, any params prefixed with ``o!`` are evaluated just once;
+  they are then available within `body` with a ``g!`` prefix.
 
   Examples:
     ::
@@ -197,7 +172,7 @@
 
     ::
 
-       => (defmacro/g! triple-2 [n] `(do (setv ~g!n ~n) (+ ~g!n ~g!n ~g!n)))
+       => (defmacro! triple-2 [n] `(do (setv ~g!n ~n) (+ ~g!n ~g!n ~g!n)))
        => (triple-2 (expensive-get-number))  ; avoid repeats with a gensym
        spam
        42
@@ -205,31 +180,36 @@
     ::
 
        => (defmacro! triple-3 [o!n] `(+ ~g!n ~g!n ~g!n))
-       => (triple-3 (expensive-get-number))  ; easier with defmacro!
+       => (triple-3 (expensive-get-number))  ; easier with `o!` prefix
        spam
        42
   "
-  (defn extract-o!-sym [arg]
-    (cond (and (isinstance arg hy.models.Symbol) (.startswith arg "o!"))
-            arg
-          (and (isinstance args hy.models.List) (.startswith (get arg 0) "o!"))
-            (get arg 0)))
-  (setv os (lfor  x (map extract-o!-sym args)  :if x  x)
-        gs (lfor s os (hy.models.Symbol (+ "g!" (cut s 2 None)))))
+  (setv os (lfor x (flatten args)
+                 :if (and (isinstance x hy.models.Symbol)
+                          (.startswith x "o!"))
+                 x)
+        gs (lfor s os
+                 (hy.models.Symbol (+ "g!" (cut s 2 None))))
+        gensyms (gfor sym (sfor x (flatten [gs body])
+                                :if (and (isinstance x hy.models.Symbol)
+                                         (.startswith x "g!"))
+                                x)
+                      x [sym `(hy.gensym ~(cut sym 2 None))]
+                      x)
+        res (hy.gensym "res"))
+  (setv docstring None)
+  (when (and body
+             (isinstance (get body 0) str)
+             (> (len body) 1))
+    (setv [docstring #* body] body))
 
-  (setv [docstring body] (if (and (isinstance (get body 0) str)
-                                  (> (len body) 1))
-                             #((get body 0) (tuple (rest body)))
-                             #(None body)))
-  (setv dg (hy.gensym))
-
-  `(do
-     (require hyrule.macrotools [defmacro/g! :as ~dg])
-     (~dg ~name ~args
-       ~docstring
-       `(do (setv ~@(sum (zip ~gs ~os) #()))
-            ~@~body))))
-
+  `(defmacro ~name ~args
+     ~docstring
+     (setv ~@gensyms
+           ~res ((fn [] ~@body)))
+     `(do
+        (setv ~~gs ~~os)
+        ~~res)))
 
 (defn macroexpand-all [form [ast-compiler None]]
   "Recursively performs all possible macroexpansions in form, using the ``require`` context of ``module-name``.

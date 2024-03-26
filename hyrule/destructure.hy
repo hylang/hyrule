@@ -114,7 +114,7 @@ Iterator patterns are specified using round brackets. They are the same as list 
 (require
   hyrule.argmove [->>]
   hyrule.control [unless branch]
-  hyrule.macrotools [defmacro/g!])
+  hyrule.macrotools [defmacro!])
 (import
   itertools [starmap chain count]
   functools [reduce]
@@ -331,7 +331,7 @@ Iterator patterns are specified using round brackets. They are the same as list 
                                 s [(hy.models.Keyword k) v]
                             s)))))
 
-(defmacro/g! defn+ [fn-name args #* doc+body]
+(defmacro! defn+ [fn-name args #* doc+body]
   "Define function `fn-name` with destructuring within `args`.
 
   Note that `#*` etc have no special meaning and are
@@ -345,7 +345,7 @@ Iterator patterns are specified using round brackets. They are the same as list 
      ~(_expanded-setv args g!args g!kwargs)
      ~@body))
 
-(defmacro/g! fn+ [args #* body]
+(defmacro! fn+ [args #* body]
   "Return anonymous function with destructuring within `args`
 
   Note that `*`, `/`, etc have no special meaning and are
@@ -355,7 +355,7 @@ Iterator patterns are specified using round brackets. They are the same as list 
      ~(_expanded-setv args g!args g!kwargs)
      ~@body))
 
-(defmacro/g! defn/a+ [fn-name args #* doc+body]
+(defmacro! defn/a+ [fn-name args #* doc+body]
   "Async variant of ``defn+``."
   (setv [doc body] (if (isinstance (get doc+body 0) str)
                      [(get doc+body 0) (rest doc+body)]
@@ -365,7 +365,7 @@ Iterator patterns are specified using round brackets. They are the same as list 
      ~(_expanded-setv args g!args g!kwargs)
      ~@body))
 
-(defmacro/g! fn/a+ [args #* body]
+(defmacro! fn/a+ [args #* body]
   "Async variant of ``fn+``."
   `(fn/a [#* ~g!args #** ~g!kwargs]
      ~(_expanded-setv args g!args g!kwargs)

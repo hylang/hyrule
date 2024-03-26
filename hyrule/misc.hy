@@ -1,5 +1,5 @@
 (require
-  hyrule.macrotools [defmacro/g!])
+  hyrule.macrotools [defmacro!])
 
 (import
   hy.scoping [ScopeLet]
@@ -219,7 +219,7 @@
            ~@body)))
 
 
-(defmacro/g! profile/cpu [#* body]
+(defmacro! profile/cpu [#* body]
   "Profile a bit of code
 
   Examples:

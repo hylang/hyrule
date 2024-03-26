@@ -1,5 +1,5 @@
 (require
-  hyrule.macrotools [defmacro/g! defmacro!])
+  hyrule.macrotools [defmacro!])
 (import
   hyrule.collections [prewalk by2s]
   hyrule.iterables [coll?]
@@ -283,7 +283,7 @@
     ~l))
 
 
-(defmacro/g! loop [bindings #* body]
+(defmacro! loop [bindings #* body]
   "The loop/recur macro allows you to construct functions that use
   tail-call optimization to allow arbitrary levels of recursion.
 

@@ -10,6 +10,15 @@ New Features
 * New function `sign`.
 * New function `thru`.
 
+Removals
+------------------------------
+* `defmacro/g!` has been removed; use `defmacro!` instead.
+
+Bug Fixes
+------------------------------
+* `defmacro!` now properly handles explicit return statements
+  within its macro definition.
+
 0.5.0 (released 2024-01-05; uses Hy 0.28.*)
 ======================================================
 
