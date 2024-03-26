@@ -127,7 +127,7 @@ Reference
 
 ``misc`` — Everything else
 ----------------------------------------------------------------------
-.. hy:automodule:: misc
+.. hy:automodule:: hyrule.misc
 
 .. hy:automacro:: comment
 .. hy:autofunction:: constantly
