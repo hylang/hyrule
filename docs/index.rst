@@ -64,7 +64,6 @@ Reference
 .. hy:automacro:: do-n
 .. hy:automacro:: ebranch
 .. hy:automacro:: ecase
-.. hy:automacro:: ifp
 .. hy:automacro:: lif
 .. hy:automacro:: list-n
 .. hy:automacro:: loop
