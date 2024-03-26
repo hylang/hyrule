@@ -1,5 +1,6 @@
 (import
-  hyrule.iterables [rest])
+  hyrule.iterables [rest]
+  itertools [chain])
 
 
 (eval-and-compile
@@ -136,6 +137,34 @@
          ~name ~head
          ~@(sum (gfor  x rest  [name x]) []))
      ~name))
+
+
+(defmacro some-> [head #* args]
+  "Thread `head` first through the `rest` of the forms, but short-circuit
+  if a form returns `None`.
+
+  ``some->`` (or the *threading macro* with short-circuit) is used to avoid
+  nesting of expressions. The threading macro inserts each expression into
+  the next expression's first argument place. However if an expression
+  returns `None`, then following expressions are ignored. The following
+  code demonstrates this:
+
+  Examples:
+    ::
+
+       => (defn output [a b] (print a b))
+       => (some-> (+ 4 6) (output 5))
+       10 5
+
+       => (defn ret_none [a b] None)
+       => (some-> 1 (+ 2) (ret_none 3) (* 3))
+       None
+  "
+  (setv val (hy.gensym))
+  `(cond (is (setx ~val ~head) None) None
+         ~@(chain.from_iterable (gfor node args
+           [`(is (setx ~val (hy.R.hyrule.-> ~val ~node)) None) None]))
+         True ~val))
 
 
 (defmacro doto [form #* expressions]

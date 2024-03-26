@@ -7,6 +7,7 @@ New Features
 ------------------------------
 * New macro `defmacro-kwargs`.
 * New macro `parse-fn-params`.
+* New macro `some->`.
 * New function `sign`.
 * New function `thru`.
 

@@ -38,6 +38,7 @@ Reference
 .. hy:automacro:: ->
 .. hy:automacro:: ->>
 .. hy:automacro:: as->
+.. hy:automacro:: some->
 .. hy:automacro:: doto
 
 ``collections`` — Tools for data structures

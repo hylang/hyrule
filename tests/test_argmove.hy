@@ -1,4 +1,5 @@
-(require hyrule [-> ->> as-> doto])
+(import unittest [mock])
+(require hyrule [-> ->> as-> some-> doto])
 
 
 (defn test-threading []
@@ -61,6 +62,36 @@
                    (:discovered x)
                    (:name x))
              "Sir Joseph Cooke Verco")))
+
+
+(defn test-threading-some []
+  ; the macro uses `cond`, so test for odd and even number of expressions
+  (assert (= (some-> 1 (+ 2) (* 3)) 9))
+  (assert (= (some-> 1 (+ 2) (* 3) (+ 1)) 10))
+
+  ; test for non-expression form
+  (defn inc [x] (+ x 1))
+  (assert (= (some-> 1 inc) 2)))
+
+
+(defn test-threading-some-circuit []
+  (setv m (mock.MagicMock))
+
+  ; test for null head
+  (assert (is (some-> None m) None))
+  (assert (= m.call_count 0))  ;; m is never called
+
+  ; test short-circuit with a function for odd and even number of
+  ; expressions
+  (defn ret_none [a b] None)
+
+  (setv m (mock.MagicMock))
+  (assert (is (some-> 1 m (ret_none 3) m) None))
+  (assert (= m.call_count 1))  ;; m is called once only, before `ret_none`
+
+  (setv m (mock.MagicMock))
+  (assert (is (some-> 1 m m (ret_none 3) m) None))
+  (assert (= m.call_count 2)))  ;; m is called twice only, before `ret_none`
 
 
 (defn test-doto []
