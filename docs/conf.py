@@ -1,6 +1,10 @@
 import sys, os; sys.path.insert(0, os.path.abspath('..'))
   # Read the Docs needs this bit to import Hyrule.
 
+import warnings; import sphinx.deprecation
+warnings.filterwarnings('ignore', category = sphinx.deprecation.RemovedInSphinx60Warning)
+warnings.filterwarnings('ignore', category = sphinx.deprecation.RemovedInSphinx70Warning)
+
 html_title = 'The Hyrule manual'
 
 extensions = [
