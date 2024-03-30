@@ -64,7 +64,6 @@ Reference
 .. hy:automacro:: do-n
 .. hy:automacro:: ebranch
 .. hy:automacro:: ecase
-.. hy:automacro:: ifp
 .. hy:automacro:: lif
 .. hy:automacro:: list-n
 .. hy:automacro:: loop
@@ -128,7 +127,7 @@ Reference
 
 ``misc`` — Everything else
 ----------------------------------------------------------------------
-.. hy:automodule:: misc
+.. hy:automodule:: hyrule.misc
 
 .. hy:automacro:: comment
 .. hy:autofunction:: constantly
