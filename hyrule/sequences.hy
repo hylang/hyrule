@@ -1,41 +1,13 @@
-"The sequences module contains a few macros for declaring sequences that are
-evaluated only as much as the client code requires. Unlike generators, they
-allow accessing the same element multiple times. They cache calculated values,
-and the implementation allows for recursive definition of sequences without
-resulting in recursive computation.
-
-The simplest sequence can be defined as ``(seq [n] n)``. This defines a sequence
-that starts as ``[0 1 2 3 ...]`` and continues forever. In order to define a
-finite sequence, you need to call ``end-sequence`` to signal the end of the
-sequence::
-
-   (seq [n]
-        \"sequence of 5 integers\"
-        (cond (< n 5) n
-              True (end-sequence)))
-
-This creates the following sequence: ``[0 1 2 3 4]``. For such a sequence,
-``len`` returns the amount of items in the sequence and negative indexing is
-supported. Because both of these require evaluating the whole sequence, calling
-one on an infinite sequence would take forever (or at least until available
-memory has been exhausted).
-
-Sequences can be defined recursively. For example, the Fibonacci sequence could
-be defined as::
-
-   (defseq fibonacci [n]
-     \"infinite sequence of fibonacci numbers\"
-     (cond (= n 0) 0
-           (= n 1) 1
-           True (+ (get fibonacci (- n 1))
-                   (get fibonacci (- n 2)))))
-
-This results in the sequence ``[0 1 1 2 3 5 8 13 21 34 ...]``.
-"
-
-
 (defclass Sequence []
-  "A container type for lazy sequences."
+  "A wrapper for iterables that caches values and supports :py:func:`len`, indexing, and slicing. For example::
+
+    (setv s (Sequence (gfor  x (range 10)  (** x 2))))
+    (print (len s))           ; => 10
+    (print (get s 2))         ; => 4
+    (print (get s -1))        ; => 81
+    (print (list (cut s 3)))  ; => [0, 1, 4]
+
+  ``Sequence`` supports infinite iterables, but trying to compute the length of such a sequence or look up a negative index will of course fail."
 
   (defn __init__ [self iterable]
     (setv self.it (iter iterable))
@@ -92,32 +64,38 @@ This results in the sequence ``[0 1 1 2 3 5 8 13 21 34 ...]``.
       (if (> (len items) self.max-items-in-repr) ", ..." ""))))
 
 (defmacro seq [param #* seq-code]
-  "Creates a sequence defined in terms of ``n``.
+  "Define a :hy:class:`Sequence` with code to compute the *n*-th element, where *n* starts from 0. The first argument is a literal list with a symbol naming the parameter, like the lambda list of :hy:func:`defn`, and the other arguments are the code to be evaluated. ::
 
-  Examples:
-    => (seq [n] (* n n))
-  "
+    (setv s (seq [n] (** n 2)))
+    (print (get s 2))  ; => 4
+
+  You can define the function recursively by getting previous elements of the sequence::
+
+    (setv fibonacci (seq [n]
+      (if (< n 2)
+        n
+        (+
+          (get fibonacci (- n 1))
+          (get fibonacci (- n 2))))))
+    (print (list (cut fibonacci 7)))  ; => [0, 1, 1, 2, 3, 5, 8]
+
+  To define a finite sequence, call :hy:func:`end-sequence` when the argument is too large::
+
+    (setv s (seq [n]
+      (if (< n 5)
+        (** n 2)
+        (end-sequence))))
+    (print (list s))  ; => [0, 1, 4, 9, 16]"
   `(hy.I.hyrule.Sequence (gfor
     ~(get param 0) (hy.I.itertools.count)
     (do ~@seq-code))))
 
 (defmacro defseq [seq-name param #* seq-code]
-  "Creates a sequence defined in terms of ``n`` and assigns it to a given name.
-
-  Examples:
-    => (defseq numbers [n] n)
-  "
+  "Shorthand for assigning :hy:func:`seq` to a symbol. ``(defseq sequence-name [n] ...)`` is equivalent to ``(setv sequence-name (seq [n] ...))``."
   `(setv ~seq-name (hy.R.hyrule.seq ~param ~@seq-code)))
 
-(defn end-sequence []
-  "Signals the end of a sequence when an iterator reaches the given point of the sequence.
-
-  Internally, this is done by raising
-  ``IndexError``, catching that in the iterator, and raising
-  ``StopIteration``
-
-  Examples:
-    ::
-
-       => (seq [n] (if (< n 5) n (end-sequence)))"
-  (raise (IndexError "sequence index out of range")))
+(do-mac
+  (setv code #[[(raise (IndexError "sequence index out of range"))]])
+  `(defn end-sequence []
+    ~f"Shorthand for ``{code}``."
+    ~(hy.read code)))
