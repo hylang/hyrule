@@ -33,88 +33,81 @@ be defined as::
 This results in the sequence ``[0 1 1 2 3 5 8 13 21 34 ...]``.
 "
 
-(import
-  itertools [islice]
-  hyrule.misc [inc])
-
-(require hyrule.macrotools [defmacro!])
 
 (defclass Sequence []
-  "Container for construction of lazy sequences."
+  "A container type for lazy sequences."
 
-  (defn __init__ [self func]
-    "initialize a new sequence with a function to compute values"
-    (setv (. self func) func)
-    (setv (. self cache) [])
-    (setv (. self high-water) -1))
+  (defn __init__ [self iterable]
+    (setv self.it (iter iterable))
+    (setv self.cache []))
 
-  (defn __getitem__ [self n]
-    "get nth item of sequence"
-    (if (hasattr n "start")
-    (gfor x (range (or n.start 0) n.stop (or n.step 1))
-         (get self x))
-    (do (when (< n 0)
-         ; Call (len) to force the whole
-         ; sequence to be evaluated.
-         (len self))
-       (if (<= n (. self high-water))
-         (get (. self cache) n)
-         (do (while (< (. self high-water) n)
-               (setv (. self high-water) (inc (. self high-water)))
-               (.append (. self cache) (.func self (. self high-water))))
-             (get self n))))))
+  (defn _wrap [self n]
+    (if (< n 0)
+      (+ n (len self))
+      n))
 
-   (defn __iter__ [self]
-     "create iterator for this sequence"
-     (setv index 0)
-     (try (while True
-            (yield (get self index))
-            (setv index (inc index)))
-          (except [IndexError]
-            (return))))
+  (defn __getitem__ [self ix]
 
-   (defn __len__ [self]
-     "length of the sequence, dangerous for infinite sequences"
-     (setv index (. self high-water))
-     (try (while True
-            (get self index)
-            (setv index (inc index)))
-          (except [IndexError]
-            (len (. self cache)))))
+    (when (hasattr ix "start")
+      ; `ix` is a `slice` object.
+      (return (Sequence ((fn []
+        (setv step (if (is ix.step None) 1 ix.step))
+        (setv n (cond
+          (is-not ix.start None) (._wrap self ix.start)
+          (< step 0)             (- (len self) 1)
+          True                   0))
+        (setv stop (cond
+          (is-not ix.stop None) (._wrap self ix.stop)
+          (< step 0)            -1
+          True                  Inf))
+        (while (if (< step 0) (> n stop) (< n stop))
+          (yield (get self n))
+          (+= n step)))))))
 
-   (setv max-items-in-repr 10)
+    ; Otherwise, `ix` should be an integer.
+    (setv ix (._wrap self ix))
+    (when (< ix 0)
+      (end-sequence))
+    ; Build up the cache until we have the element we need.
+    (while (<= (len self.cache) ix)
+      (.append self.cache (try
+        (next self.it)
+        (except [StopIteration]
+          (end-sequence)))))
+    (get self.cache ix))
 
-   (defn __str__ [self]
-     "string representation of this sequence"
-     (setv items (list (islice self (inc self.max-items-in-repr))))
-     (.format (if (> (len items) self.max-items-in-repr)
-                "[{0}, ...]"
-                "[{0}]")
-              (.join ", " (map str items))))
+  (defn __len__ [self]
+    (try
+      (for [n (hy.I.itertools.count (len self.cache))]
+        (get self n))
+      (except [IndexError]
+        (return n))))
 
-   (defn __repr__ [self]
-     "string representation of this sequence"
-     (.__str__ self)))
+  (setv max-items-in-repr 10)
 
-(defmacro! seq [param #* seq-code]
+  (defn __repr__ [self]
+    (setv items (cut self (+ self.max-items-in-repr 1)))
+    (.format "Sequence([{}{}])"
+      (.join ", " (map repr (cut items self.max-items-in-repr)))
+      (if (> (len items) self.max-items-in-repr) ", ..." ""))))
+
+(defmacro seq [param #* seq-code]
   "Creates a sequence defined in terms of ``n``.
 
   Examples:
     => (seq [n] (* n n))
   "
-  `(do
-     (import hyrule.sequences [Sequence :as ~g!Sequence])
-     (~g!Sequence (fn ~param (do ~@seq-code)))))
+  `(hy.I.hyrule.Sequence (gfor
+    ~(get param 0) (hy.I.itertools.count)
+    (do ~@seq-code))))
 
-(defmacro! defseq [seq-name param #* seq-code]
+(defmacro defseq [seq-name param #* seq-code]
   "Creates a sequence defined in terms of ``n`` and assigns it to a given name.
 
   Examples:
     => (defseq numbers [n] n)
   "
-  `(do
-     (import hyrule.sequences [Sequence :as ~g!Sequence])
-     (setv ~seq-name (~g!Sequence (fn ~param (do ~@seq-code))))))
+  `(setv ~seq-name (hy.R.hyrule.seq ~param ~@seq-code)))
 
 (defn end-sequence []
   "Signals the end of a sequence when an iterator reaches the given point of the sequence.
@@ -127,4 +120,4 @@ This results in the sequence ``[0 1 1 2 3 5 8 13 21 34 ...]``.
     ::
 
        => (seq [n] (if (< n 5) n (end-sequence)))"
-  (raise (IndexError "list index out of range")))
+  (raise (IndexError "sequence index out of range")))
