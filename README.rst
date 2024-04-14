@@ -2,6 +2,6 @@ Hyrule is a utility library for the `Hy <http://hylang.org>`_ programming langua
 
 All of Hyrule's contents can be imported or required directly from the top-level module ``hyrule``.
 
-`Hyrule's documentation can be read online on Read the Docs. <https://hyrule.readthedocs.io>`_
+`Hyrule's documentation can be read online on Hylang.org. <http://hylang.org/hyrule/doc>`_
 
 You can run Hyrule's test suite with the command ``pytest`` and build its documentation with ``( cd docs; sphinx-build . _build -b html )``.
