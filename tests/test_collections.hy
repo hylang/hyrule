@@ -3,15 +3,13 @@
 
 
 (defn test-assoc []
-  (setv vals {"one" "two"})
-  (assoc vals "two" "three")
-  (assert (= (get vals "two") "three")))
+  (setv vals {1 2})
+  (assoc vals 3 4)
+  (assert (= vals {1 2  3 4}))
 
-
-(defn test-multiassoc []
-  (setv vals {"one" "two"})
-  (assoc vals "two" "three" "four" "five")
-  (assert (and (= (get vals "two") "three") (= (get vals "four") "five") (= (get vals "one") "two"))))
+  (setv vals {1 2})
+  (assoc vals  3 4  5 6)
+  (assert (= vals {1 2  3 4  5 6})))
 
 
 (defn test-assoc-eval-lvalue-once []
