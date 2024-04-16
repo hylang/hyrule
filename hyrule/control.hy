@@ -135,37 +135,15 @@
       []))))
 
 
-(defmacro cfor [f #* generator]
-  #[[syntactic sugar for passing a ``generator`` expression to the callable ``f``
+(defmacro cfor [f #* gfor-args]
+  #[[Shorthand for ``(f (gfor …))``. See
+  :hy:func:`gfor`. ::
 
-  Its syntax is the same as :ref:`generator expression <py:genexpr>`, but takes
-  a function ``f`` that the generator will be immedietly passed to. Equivalent
-  to ``(f (gfor ...))``.
-
-  Examples:
-
-  ::
-     => (cfor tuple x (range 10) :if (% x 2) x)
-     #(1 3 5 7 9)
-
-  The equivalent in python would be:
-
-     >>> tuple(x for x in range(10) if x % 2)
-
-  Some other common functions that take iterables::
-
-     => (cfor all x [1 3 8 5] (< x 10))
-     True
-
-     => (with [f (open "AUTHORS")]
-     ...  (cfor max
-     ...        author (.splitlines (f.read))
-     ...        :setv name (.group (re.match r"\* (.*?) <" author) 1)
-     ...        :if (name.startswith "A")
-     ...        (len name)))
-     20 ;; The number of characters in the longest author's name that starts with 'A'
-  ]]
-  `(~f (gfor ~@generator)))
+     (cfor tuple
+       x (range 10)
+       :if (% x 2)
+       x)           ; => #(1 3 5 7 9)]]
+  `(~f (gfor ~@gfor-args)))
 
 
 (defn _do-n [count-form body]
@@ -180,19 +158,16 @@
 
 
 (defmacro do-n [count-form #* body]
-  #[[Execute `body` a number of times equal to `count-form` and return
+  #[[Execute ``body`` a number of times equal to ``count-form`` and return
   ``None``. (To collect return values, use :hy:macro:`list-n`
   instead.)
 
   The macro is implemented as a :hy:func:`for` loop over a
   :py:class:`range` call, with the attendent consequences for negative
   counts, :hy:func:`break`, etc. As an exception, if the count is
-  `Inf`, the loop is run over an infinite iterator instead. ::
+  ``Inf``, the loop is run over an infinite iterator instead. ::
 
-     => (do-n 3 (print "hi"))
-     hi
-     hi
-     hi]]
+     (do-n 3 (print "hi"))]]
 
   (_do-n count-form body))
 
@@ -211,19 +186,12 @@
 
   If you want fancy command-line arguments, you can use the standard Python
   module :mod:`argparse` in the usual way, because ``defmain`` doesn't change
-  ``sys.argv``. See also :hy:func:`parse-args`.
-  ::
+  ``sys.argv``. See also :hy:func:`parse-args`. ::
 
-      (import argparse)
-      (defmain []
-        (setv parser (argparse.ArgumentParser))
-        (.add-argument parser "STRING"
-          :help "string to replicate")
-        (.add-argument parser "-n" :type int :default 3
-          :help "number of copies")
-        (setv args (.parse-args parser))
-        (print (* args.STRING args.n))
-        0)]]
+    (defmain [program-name argument]
+      (print "Welcome to" program-name)
+      (print "The answer is" (* (float argument) 2)))]]
+
   (setv retval (hy.gensym)
         restval (hy.gensym))
   `(when (= __name__ "__main__")
@@ -272,10 +240,8 @@
 
   ::
 
-    => (setv counter 0)
-    => (list-n 5 (+= counter 1) counter)
-    [1 2 3 4 5]
-  "
+    (setv counter 0)
+    (list-n 5 (+= counter 1) counter)  ; => [1 2 3 4 5]"
   (setv l (hy.gensym))
   `(do
     (setv ~l [])
@@ -352,8 +318,9 @@
   are executed until ``(block-ret VALUE)`` is reached. The block
   returns ``VALUE``, or the value of the last form, if execution
   reached the end instead of being terminated by ``block-ret``.
-  ``VALUE`` is optional and defaults to ``None``. One use of ``block``
-  is to jump out of nested loops::
+  ``VALUE`` is optional and defaults to ``None``.
+
+  One use of ``block`` is to jump out of nested loops::
 
       (block (for [x (range 5)]
         (setv y x)
@@ -390,10 +357,10 @@
   There are no macros or functions named ``block-ret`` or
   ``block-ret-from``, since these forms are processed entirely by
   ``block``. ``block-ret`` and ``block-ret-from`` should not be
-  confused with Hy's built-in ``return``, which produces a true Python
+  confused with Hy's built-in :hy:func:`return`, which produces a true Python
   return statement. ``block`` is implemented with exception-handling
-  rather than functions, so it doesn't create a new scope as ``fn``
-  and ``defn`` do.]]
+  rather than functions, so it doesn't create a new scope as :hy:func:`fn`
+  and :hy:func:`defn` do.]]
   (block-f body {} (hy.gensym "br") True))
 
 (defn block-f [body tags BR [top False]]
