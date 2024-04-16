@@ -4,9 +4,6 @@ This module is heavily inspired by destructuring from Clojure and provides very
 similar semantics. It provides several macros that allow for destructuring within
 their arguments.
 
-Introduction
-============
-
 Destructuring allows one to easily peek inside a data structure and assign names to values within. For example, ::
 
     (setv+ {[{name :name [weapon1 weapon2] :weapons} :as all-players] :players
@@ -60,11 +57,13 @@ This is similar to unpacking iterables in Python, such as ``a, *b, c = range(10)
 
    Note that variables with a default value from an ``:or`` special option will fallback to their default value instead of being silently set to ``None``.
 
-Patterns
-========
+Pattern types
+~~~~~~~~~~~~~
 
-Dictionary Pattern
-------------------
+Several kinds of patterns are understood.
+
+Dictionary patterns
+-------------------
 
 Dictionary patterns are specified using dictionaries, where the keys corresponds to the symbols which are to be bound, and the values correspond to which key needs to be looked up in the expression for the given symbol. ::
 
@@ -85,8 +84,8 @@ The ordering of the special options and the variable names doesn't matter, howev
 
 Variables which are not found in the expression are set to ``None`` if no default value is specified.
 
-List Pattern
-------------
+List patterns
+-------------
 
 List patterns are specified using lists. The nth symbol in the pattern is bound to the nth value in the expression, or ``None`` if the expression has fewer than n values.
 
@@ -105,8 +104,8 @@ If the special options are present, they must be last, with ``:&`` preceding ``:
 
 Note that this pattern calls ``list`` on the expression before binding the variables, and hence cannot be used with infinite iterators.
 
-Iterator Pattern
-----------------
+Iterator patterns
+-----------------
 
 Iterator patterns are specified using round brackets. They are the same as list patterns, but can be safely used with infinite generators. The iterator pattern does not allow for recursive destructuring within the ``:as`` special option.
 "

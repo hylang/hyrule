@@ -73,6 +73,9 @@ Reference
 ----------------------------------------------------------------------
 .. hy:automodule:: hyrule.destructure
 
+API
+~~~~~~~~~~
+
 .. hy:automacro:: defn+
 .. hy:automacro:: defn/a+
 .. hy:automacro:: dict=:
