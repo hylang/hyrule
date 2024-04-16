@@ -1,3 +1,7 @@
+"This module provides macros similar to Clojure's threading macros,
+also known as arrow macros."
+
+
 (import
   hyrule.iterables [rest]
   itertools [chain])
@@ -13,19 +17,37 @@
 
 
 (defmacro -> [head #* args]
-  "Thread `head` first through the `rest` of the forms.
 
-  ``->`` (or the *threading macro*) is used to avoid nesting of expressions. The
-  threading macro inserts each expression into the next expression's first argument
-  place. The following code demonstrates this:
+  #[[Evaluate the first :ref:`expression <hy:expressions>` in ``args``
+  with ``head`` inserted as the second argument, then the next
+  expression with that result as its second argument, then the next
+  expression with *that* result as its second argument, and so on. In
+  other words, ::
 
-  Examples:
-    ::
+    (-> x (foo a b) (bar c d))
 
-       => (defn output [a b] (print a b))
-       => (-> (+ 4 6) (output 5))
-       10 5
-  "
+  is equvalent to ::
+
+    (do
+      (setv value x)
+      (setv value (foo value a b))
+      (setv value (bar value c d))
+      value)
+
+  but without actually using an intermediate variable. For example::
+
+    (-> (+ 4 6) (print 5))
+      ; Prints "10 5"
+
+  Arguments of the form ``.foo`` are automatically expanded to ``(.foo)``::
+
+    (-> " hello " .upper .strip)  ; => "HELLO"
+
+  And if an argument ``arg`` isn't an expression, it's expanded to
+  ``(arg)``::
+
+   (-> "0" int bool)  ; => False]]
+
   (setv ret head)
   (for [node args
        :setv node (_dotted node)]
@@ -36,19 +58,10 @@
 
 
 (defmacro ->> [head #* args]
-  "Thread `head` last through the `rest` of the forms.
+  #[[As :hy:func:`->`, but each result is placed as the last argument of
+  each expression instead of the second. ::
 
-  ``->>`` (or the *threading tail macro*) is similar to the *threading macro*, but
-  instead of inserting each expression into the next expression's first argument,
-  it appends it as the last argument. The following code demonstrates this:
-
-  Examples:
-    ::
-
-       => (defn output [a b] (print a b))
-       => (->> (+ 4 6) (output 5))
-       5 10
-  "
+    (->> "a" (+ "b" "c"))  ; => "bca" ]]
   (setv ret head)
   (for [node args
        :setv node (_dotted node)]
@@ -59,80 +72,36 @@
 
 
 (defmacro as-> [head name #* rest]
-  "Beginning with `head`, expand a sequence of assignments `rest` to `name`.
 
-  Each assignment is passed to the subsequent form. Returns the final assignment,
-  leaving the name bound to it in the local scope.
+  #[[Assign ``head`` to the symbol ``name`` and evaluate each form in
+  ``rest``. After each evaluation, the result is reassigned to
+  ``name``. ::
 
-  This behaves similarly to other threading macros, but requires specifying
-  the threading point per-form via the name, rather than fixing to the first
-  or last argument.
+    (as-> "a" it
+          (+ "b" it "c")
+          (.upper it)
+          (print it))
+      ; Prints "BAC".
 
-  Examples:
-    example how ``->`` and ``as->`` relate::
+  Thus ``as->`` is analogous to e.g. :hy:func:`->`, but the threading
+  point is set per form by name, rather than always being the second
+  argument.
 
-       => (as-> 0 it
-       ...      (inc it)
-       ...      (inc it))
-       2
+  Here's a more complex example, which prints a sentence from a Project
+  Gutenberg e-book::
 
-    ::
+    (import
+      re
+      urllib.request [urlopen])
 
-       => (-> 0 inc inc)
-       2
+    (as-> (urlopen "https://www.gutenberg.org/ebooks/219.txt.utf-8") it
+          (.read it)
+          (.decode it "UTF-8")
+          (re.search r"\. ([^.]+ paw-strokes [^.]+\.)" it)
+          (.group it 1)
+          (.replace it "\r\n" " ")
+          (print it))]]
 
-    create data for our cuttlefish database::
-
-       => (setv data [{:name \"hooded cuttlefish\"
-       ...             :classification {:subgenus \"Acanthosepion\"
-       ...                              :species \"Sepia prashadi\"}
-       ...             :discovered {:year 1936
-       ...                          :name \"Ronald Winckworth\"}}
-       ...            {:name \"slender cuttlefish\"
-       ...             :classification {:subgenus \"Doratosepion\"
-       ...                              :species \"Sepia braggi\"}
-       ...             :discovered {:year 1907
-       ...                          :name \"Sir Joseph Cooke Verco\"}}])
-
-    retrieve name of first entry::
-
-       => (as-> (get data 0) it
-       ...      (:name it))
-       \"hooded cuttlefish\"
-
-    retrieve species of first entry::
-
-       => (as-> (get data 0) it
-       ...      (:classification it)
-       ...      (:species it))
-       \"Sepia prashadi\"
-
-    find out who discovered slender cuttlefish::
-
-       => (as-> (filter (fn [entry] (= (:name entry)
-       ...                           \"slender cuttlefish\")) data) it
-       ...      (get it 0)
-       ...      (:discovered it)
-       ...      (:name it))
-       \"Sir Joseph Cooke Verco\"
-
-    more convoluted example to load web page and retrieve data from it::
-
-       => (import urllib.request [urlopen])
-       => (as-> (urlopen \"http://docs.hylang.org/en/stable/\") it
-       ...      (.read it)
-       ...      (.decode it \"utf-8\")
-       ...      (lfor  x it  :if (!= it \"Welcome\")  it)
-       ...      (cut it 30)
-       ...      (.join \"\" it))
-       \"Welcome to Hy’s documentation!\"
-
-  .. note::
-
-    In these examples, the REPL will report a tuple (e.g. `('Sepia prashadi',
-    'Sepia prashadi')`) as the result, but only a single value is actually
-    returned.
-  "
   `(do (setv
          ~name ~head
          ~@(sum (gfor  x rest  [name x]) []))
@@ -140,26 +109,13 @@
 
 
 (defmacro some-> [head #* args]
-  "Thread `head` first through the `rest` of the forms, but short-circuit
-  if a form returns `None`.
+  #[[As :hy:func:`->`, but if an intermediate result is ``None``, all
+  further forms are ignored. ::
 
-  ``some->`` (or the *threading macro* with short-circuit) is used to avoid
-  nesting of expressions. The threading macro inserts each expression into
-  the next expression's first argument place. However if an expression
-  returns `None`, then following expressions are ignored. The following
-  code demonstrates this:
-
-  Examples:
-    ::
-
-       => (defn output [a b] (print a b))
-       => (some-> (+ 4 6) (output 5))
-       10 5
-
-       => (defn ret_none [a b] None)
-       => (some-> 1 (+ 2) (ret_none 3) (* 3))
-       None
-  "
+    (defn lookup [char]
+      (.get {"a" 1 "b" 2} char))
+    (some-> "q" lookup (print "is the value"))
+      ; Prints nothing, since `(lookup "q")` returns `None`.]]
   (setv val (hy.gensym))
   `(cond (is (setx ~val ~head) None) None
          ~@(chain.from_iterable (gfor node args
@@ -168,25 +124,26 @@
 
 
 (defmacro doto [form #* expressions]
-  "Perform possibly mutating `expressions` on `form`, returning resulting obj.
 
-  ``doto`` is used to simplify a sequence of method calls to an object.
+  "As :hy:func:`->`, but instead of the return value of each expression being
+  passed to the next, a single object (obtained by evaluating the orignial
+  first argument ``form``) is used every time. In other words, ::
 
-  Examples:
-    ::
+    (doto x (foo a b) (bar c d))
 
-       => (doto [] (.append 1) (.append 2) (.reverse))
-       [2 1]
+  is equvalent to ::
 
-    ::
+    (do
+      (setv value x)
+      (foo value a b)
+      (bar value c d)
+      value)
 
-       => (setv collection [])
-       => (.append collection 1)
-       => (.append collection 2)
-       => (.reverse collection)
-       => collection
-       [2 1]
-  "
+  Thus, ``doto`` is useful when ``value`` is an object that gets mutated by
+  each expression::
+
+    (doto [] (.append 1) (.append 2) (.reverse))  ; => [2 1]"
+
   (setv f (hy.gensym))
   (defn build-form [expression]
     (setv expression (_dotted expression))
