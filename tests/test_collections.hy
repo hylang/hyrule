@@ -1,8 +1,12 @@
-(require
+(import
   hyrule [assoc])
 
 
 (defn test-assoc []
+  (setv vals {1 2})
+  (assoc vals)
+  (assert (= vals {1 2}))
+
   (setv vals {1 2})
   (assoc vals 3 4)
   (assert (= vals {1 2  3 4}))

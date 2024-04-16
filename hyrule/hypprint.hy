@@ -26,7 +26,6 @@ The differences that do exist are as follows:
 ;; Adapted from: https://github.com/python/cpython/blob/3.9/Lib/pprint.py
 
 (require
-  hyrule.collections [assoc]
   hyrule.control [unless])
 
 (import sys
@@ -38,6 +37,7 @@ The differences that do exist are as follows:
                 _safe-key]
         hy.core.hy-repr
         hy._compat [PY3_10]
+        hyrule.collections [assoc]
         hyrule.misc [inc dec constantly])
 
 (export [pprint pformat saferepr PrettyPrinter readable? recursive? pp])

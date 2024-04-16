@@ -45,7 +45,7 @@ Reference
 ----------------------------------------------------------------------
 .. hy:automodule:: hyrule.collections
 
-.. hy:automacro:: assoc
+.. hy:autofunction:: assoc
 .. hy:automacro:: ncut
 .. hy:autofunction:: postwalk
 .. hy:autofunction:: prewalk
