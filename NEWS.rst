@@ -3,8 +3,13 @@
 Unreleased
 ======================================================
 
+Breaking Changes
+------------------------------
+* `cut` on a `Sequence` now returns another `Sequence`, not a generator.
+
 New Features
 ------------------------------
+* The `Sequence` constructor now accepts an arbitrary iterable.
 * New macro `defmacro-kwargs`.
 * New macro `parse-fn-params`.
 * New macro `some->`.
@@ -19,6 +24,7 @@ Bug Fixes
 ------------------------------
 * `defmacro!` now properly handles explicit return statements
   within its macro definition.
+* Various `Sequence` bugs have been fixed.
 
 0.5.0 (released 2024-01-05; uses Hy 0.28.*)
 ======================================================

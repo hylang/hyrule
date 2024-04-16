@@ -1,130 +1,101 @@
-"The sequences module contains a few macros for declaring sequences that are
-evaluated only as much as the client code requires. Unlike generators, they
-allow accessing the same element multiple times. They cache calculated values,
-and the implementation allows for recursive definition of sequences without
-resulting in recursive computation.
-
-The simplest sequence can be defined as ``(seq [n] n)``. This defines a sequence
-that starts as ``[0 1 2 3 ...]`` and continues forever. In order to define a
-finite sequence, you need to call ``end-sequence`` to signal the end of the
-sequence::
-
-   (seq [n]
-        \"sequence of 5 integers\"
-        (cond (< n 5) n
-              True (end-sequence)))
-
-This creates the following sequence: ``[0 1 2 3 4]``. For such a sequence,
-``len`` returns the amount of items in the sequence and negative indexing is
-supported. Because both of these require evaluating the whole sequence, calling
-one on an infinite sequence would take forever (or at least until available
-memory has been exhausted).
-
-Sequences can be defined recursively. For example, the Fibonacci sequence could
-be defined as::
-
-   (defseq fibonacci [n]
-     \"infinite sequence of fibonacci numbers\"
-     (cond (= n 0) 0
-           (= n 1) 1
-           True (+ (get fibonacci (- n 1))
-                   (get fibonacci (- n 2)))))
-
-This results in the sequence ``[0 1 1 2 3 5 8 13 21 34 ...]``.
-"
-
-(import
-  itertools [islice]
-  hyrule.misc [inc])
-
-(require hyrule.macrotools [defmacro!])
-
 (defclass Sequence []
-  "Container for construction of lazy sequences."
+  "A wrapper for iterables that caches values and supports :py:func:`len`, indexing, and slicing. For example::
 
-  (defn __init__ [self func]
-    "initialize a new sequence with a function to compute values"
-    (setv (. self func) func)
-    (setv (. self cache) [])
-    (setv (. self high-water) -1))
+    (setv s (Sequence (gfor  x (range 10)  (** x 2))))
+    (print (len s))           ; => 10
+    (print (get s 2))         ; => 4
+    (print (get s -1))        ; => 81
+    (print (list (cut s 3)))  ; => [0, 1, 4]
 
-  (defn __getitem__ [self n]
-    "get nth item of sequence"
-    (if (hasattr n "start")
-    (gfor x (range (or n.start 0) n.stop (or n.step 1))
-         (get self x))
-    (do (when (< n 0)
-         ; Call (len) to force the whole
-         ; sequence to be evaluated.
-         (len self))
-       (if (<= n (. self high-water))
-         (get (. self cache) n)
-         (do (while (< (. self high-water) n)
-               (setv (. self high-water) (inc (. self high-water)))
-               (.append (. self cache) (.func self (. self high-water))))
-             (get self n))))))
+  ``Sequence`` supports infinite iterables, but trying to compute the length of such a sequence or look up a negative index will of course fail."
 
-   (defn __iter__ [self]
-     "create iterator for this sequence"
-     (setv index 0)
-     (try (while True
-            (yield (get self index))
-            (setv index (inc index)))
-          (except [IndexError]
-            (return))))
+  (defn __init__ [self iterable]
+    (setv self.it (iter iterable))
+    (setv self.cache []))
 
-   (defn __len__ [self]
-     "length of the sequence, dangerous for infinite sequences"
-     (setv index (. self high-water))
-     (try (while True
-            (get self index)
-            (setv index (inc index)))
-          (except [IndexError]
-            (len (. self cache)))))
+  (defn _wrap [self n]
+    (if (< n 0)
+      (+ n (len self))
+      n))
 
-   (setv max-items-in-repr 10)
+  (defn __getitem__ [self ix]
 
-   (defn __str__ [self]
-     "string representation of this sequence"
-     (setv items (list (islice self (inc self.max-items-in-repr))))
-     (.format (if (> (len items) self.max-items-in-repr)
-                "[{0}, ...]"
-                "[{0}]")
-              (.join ", " (map str items))))
+    (when (hasattr ix "start")
+      ; `ix` is a `slice` object.
+      (return (Sequence ((fn []
+        (setv step (if (is ix.step None) 1 ix.step))
+        (setv n (cond
+          (is-not ix.start None) (._wrap self ix.start)
+          (< step 0)             (- (len self) 1)
+          True                   0))
+        (setv stop (cond
+          (is-not ix.stop None) (._wrap self ix.stop)
+          (< step 0)            -1
+          True                  Inf))
+        (while (if (< step 0) (> n stop) (< n stop))
+          (yield (get self n))
+          (+= n step)))))))
 
-   (defn __repr__ [self]
-     "string representation of this sequence"
-     (.__str__ self)))
+    ; Otherwise, `ix` should be an integer.
+    (setv ix (._wrap self ix))
+    (when (< ix 0)
+      (end-sequence))
+    ; Build up the cache until we have the element we need.
+    (while (<= (len self.cache) ix)
+      (.append self.cache (try
+        (next self.it)
+        (except [StopIteration]
+          (end-sequence)))))
+    (get self.cache ix))
 
-(defmacro! seq [param #* seq-code]
-  "Creates a sequence defined in terms of ``n``.
+  (defn __len__ [self]
+    (try
+      (for [n (hy.I.itertools.count (len self.cache))]
+        (get self n))
+      (except [IndexError]
+        (return n))))
 
-  Examples:
-    => (seq [n] (* n n))
-  "
-  `(do
-     (import hyrule.sequences [Sequence :as ~g!Sequence])
-     (~g!Sequence (fn ~param (do ~@seq-code)))))
+  (setv max-items-in-repr 10)
 
-(defmacro! defseq [seq-name param #* seq-code]
-  "Creates a sequence defined in terms of ``n`` and assigns it to a given name.
+  (defn __repr__ [self]
+    (setv items (cut self (+ self.max-items-in-repr 1)))
+    (.format "Sequence([{}{}])"
+      (.join ", " (map repr (cut items self.max-items-in-repr)))
+      (if (> (len items) self.max-items-in-repr) ", ..." ""))))
 
-  Examples:
-    => (defseq numbers [n] n)
-  "
-  `(do
-     (import hyrule.sequences [Sequence :as ~g!Sequence])
-     (setv ~seq-name (~g!Sequence (fn ~param (do ~@seq-code))))))
+(defmacro seq [param #* seq-code]
+  "Define a :hy:class:`Sequence` with code to compute the *n*-th element, where *n* starts from 0. The first argument is a literal list with a symbol naming the parameter, like the lambda list of :hy:func:`defn`, and the other arguments are the code to be evaluated. ::
 
-(defn end-sequence []
-  "Signals the end of a sequence when an iterator reaches the given point of the sequence.
+    (setv s (seq [n] (** n 2)))
+    (print (get s 2))  ; => 4
 
-  Internally, this is done by raising
-  ``IndexError``, catching that in the iterator, and raising
-  ``StopIteration``
+  You can define the function recursively by getting previous elements of the sequence::
 
-  Examples:
-    ::
+    (setv fibonacci (seq [n]
+      (if (< n 2)
+        n
+        (+
+          (get fibonacci (- n 1))
+          (get fibonacci (- n 2))))))
+    (print (list (cut fibonacci 7)))  ; => [0, 1, 1, 2, 3, 5, 8]
 
-       => (seq [n] (if (< n 5) n (end-sequence)))"
-  (raise (IndexError "list index out of range")))
+  To define a finite sequence, call :hy:func:`end-sequence` when the argument is too large::
+
+    (setv s (seq [n]
+      (if (< n 5)
+        (** n 2)
+        (end-sequence))))
+    (print (list s))  ; => [0, 1, 4, 9, 16]"
+  `(hy.I.hyrule.Sequence (gfor
+    ~(get param 0) (hy.I.itertools.count)
+    (do ~@seq-code))))
+
+(defmacro defseq [seq-name param #* seq-code]
+  "Shorthand for assigning :hy:func:`seq` to a symbol. ``(defseq sequence-name [n] ...)`` is equivalent to ``(setv sequence-name (seq [n] ...))``."
+  `(setv ~seq-name (hy.R.hyrule.seq ~param ~@seq-code)))
+
+(do-mac
+  (setv code #[[(raise (IndexError "sequence index out of range"))]])
+  `(defn end-sequence []
+    ~f"Shorthand for ``{code}``."
+    ~(hy.read code)))

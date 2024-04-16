@@ -1,91 +1,103 @@
 (require
   hyrule [seq defseq])
 (import
-  hyrule [end-sequence inc dec rest])
+  itertools [count combinations]
+  hyrule [Sequence end-sequence])
 
 
-(defn test-infinite-sequence []
-  (assert (= (list (cut (seq [n] n) 5))
+(defn test-via-constructor []
+
+  (setv s (Sequence (count 5)))
+  (assert (= (get s 0) 5))
+  (assert (= (get s 10) 15))
+
+  (defn combs [] (combinations "abcde" 2))
+  (setv s (Sequence (combs)))
+  (assert (= (len s) (len (tuple (combs)))))
+
+  (setv computed [])
+  (setv s (Sequence ((fn []
+    (for [n (count)]
+      (.append computed n)
+      (yield (* n 10)))))))
+  (assert (= computed []))
+  (assert (= (get s 3) 30))
+  (assert (= computed [0 1 2 3]))
+  (assert (= (get s 2) 20))
+  (assert (= computed [0 1 2 3]))
+  (assert (= (get s 5) 50))
+  (assert (= computed [0 1 2 3 4 5])))
+
+
+(defn test-list []
+  ; https://github.com/hylang/hyrule/issues/63
+  (assert (= (list (seq [n] (if (< n 5) n (end-sequence))))
              [0 1 2 3 4])))
 
 
-(defn test-indexing-sequence []
+(defn test-get []
+
   (defseq shorty [n]
-    (cond (< n 10) n
-          True (end-sequence)))
-  (setv 0-to-9 (list (range 10)))
-  (assert (= (get shorty 0)
-             (get 0-to-9 0))
-          "getting first element failed")
-  (assert (= (get shorty 5)
-             (get 0-to-9 5))
-          "getting 5th element failed")
-  (assert (= (get shorty -1)
-             (get 0-to-9 -1))
-          "getting element -1 failed"))
+    (if (< n 10) n (end-sequence)))
+  (assert (= (get shorty  0) 0))
+  (assert (= (get shorty  5) 5))
+  (assert (= (get shorty -1) 9))
+
+  ; Try a negative index on a new sequence for
+  ; https://github.com/hylang/hyrule/issues/63
+  (assert (= (get (seq [n] (if (< n 10) n (end-sequence))) -1) 9))
+
+  (assert (= (get (seq [n] n) 5) 5)))
 
 
-(defn test-slicing-sequence []
+(defn test-cut []
+
   (defseq shorty [n]
-    (cond (< n 10) n
-          True (end-sequence)))
-  (setv 0-to-9 (list (range 10)))
-  (assert (= (get shorty 0)
-             (get 0-to-9 0))
-          "getting first failed")
-  (assert (= (list (rest shorty))
-             (list (rest 0-to-9)))
-          "getting rest failed")
-  (assert (= (list (cut shorty 2 6))
-             (list (cut 0-to-9 2 6)))
-          "cutting 2-6 failed")
-  (assert (= (list (cut shorty 2 8 2))
-             (list (cut 0-to-9 2 8 2)))
-          "cutting 2-8-2 failed")
-  (assert (= (list (cut shorty 8 2 -2))
-             (list (cut 0-to-9 8 2 -2)))
-          "negative cut failed"))
+    (if (< n 10) n (end-sequence)))
+  (defmacro cs [#* args]
+    `(list (cut shorty ~@args)))
+  (assert (= (cs  5           ) [0 1 2 3 4]))
+  (assert (= (cs -8           ) [0 1]))
+  (assert (= (cs  2    6      ) [2 3 4 5]))
+  (assert (= (cs  6    2      ) []))
+  (assert (= (cs  2    8     2) [2 4 6]))
+  (assert (= (cs  8    2    -2) [8 6 4]))
+  (assert (= (cs -2   -7    -2) [8 6 4]))
+  ; https://github.com/hylang/hyrule/issues/65
+  (assert (= (cs  5   None    ) [5 6 7 8 9]))
+  (assert (= (cs -2   None    ) [8 9]))
+  (assert (= (cs None  0    -1) [9 8 7 6 5 4 3 2 1]))
+  (assert (= (cs None -3    -1) [9 8]))
+  (assert (= (cs None None  -1) [9 8 7 6 5 4 3 2 1 0]))
+
+  (assert (= (list (cut (seq [n] n) 5)) [0 1 2 3 4]))
+  (assert (= (get (cut (seq [n] n) None None 2) 5) 10)))
 
 
-(defn test-recursive-sequence []
+(defn test-recursive []
   (defseq fibonacci [n]
     (cond (= n 0) 0
           (= n 1) 1
           True (+ (get fibonacci (- n 1))
                   (get fibonacci (- n 2)))))
-  (assert (= (get fibonacci 0)
-             0)
-          "first element of fibonacci didn't match")
-  (assert (= (get fibonacci 1)
-             1)
-          "second element of fibonacci didn't match")
-  (assert (= (get fibonacci 40)
-             102334155)
-          "40th element of fibonacci didn't match")
-  (assert (= (list (cut fibonacci 9))
-             [0 1 1 2 3 5 8 13 21])
-          "taking 8 elements of fibonacci didn't match"))
+  (assert (= (get fibonacci 0) 0))
+  (assert (= (get fibonacci 1) 1))
+  (assert (= (get fibonacci 40) 102,334,155))
+  (assert (= (list (cut fibonacci 9)) [0 1 1 2 3 5 8 13 21])))
 
 
 (defn test-nested-functions []
-  (defseq primes [n]
-    "infinite sequence of prime numbers"
-    (defn divisible? [n prevs]
-      "is n divisible by any item in prevs?"
-      (any (map (fn [x]
-                  (not (% n x)))
-                prevs)))
-    (defn previous-primes [n]
-      "previous prime numbers"
-      (cut primes (dec n)))
-    (defn next-possible-prime [n]
-      "next possible prime after nth prime"
-      (inc (get primes (dec n))))
-    (cond (= n 0) 2
-          True (do (setv guess (next-possible-prime n))
-                    (while (divisible? guess (previous-primes n))
-                      (setv guess (inc guess)))
-                    guess)))
-  (assert (= (list (cut primes 10))
-             [2 3 5 7 11 13 17 19 23 29])
-          "prime sequence didn't match"))
+  (defseq fibonacci [n]
+    (defn prev-sum []
+      (+ (get fibonacci (- n 1))
+         (get fibonacci (- n 2))))
+    (cond (= n 0) 0
+          (= n 1) 1
+          True (prev-sum)))
+  (assert (= (list (cut fibonacci 9)) [0 1 1 2 3 5 8 13 21])))
+
+
+(defn test-repr []
+  (assert (= (repr (Sequence [])) "Sequence([])"))
+  (assert (= (repr (Sequence [4, 5, 6])) "Sequence([4, 5, 6])"))
+  (assert (= (repr (Sequence (count))) "Sequence([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, ...])")))

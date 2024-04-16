@@ -117,13 +117,14 @@ Reference
 .. hy:autofunction:: recursive?
 .. hy:autofunction:: saferepr
 
-``sequences`` — Lazy, indexable iterables
+``sequences`` — Cached, indexable iterables
 ----------------------------------------------------------------------
 .. hy:automodule:: hyrule.sequences
 
+.. hy:autoclass:: Sequence
+.. hy:automacro:: seq
 .. hy:automacro:: defseq
 .. hy:autofunction:: end-sequence
-.. hy:automacro:: seq
 
 ``misc`` — Everything else
 ----------------------------------------------------------------------
