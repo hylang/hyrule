@@ -179,9 +179,6 @@
       (and (isinstance sym hy.models.Expression) (= (get sym 0) :))
         `(slice ~@(cut sym 1 None))
 
-      (= sym '...)
-        'Ellipsis
-
       (and (isinstance sym #(hy.models.Keyword hy.models.Symbol))
             (in ":" (str sym)))
         (try
