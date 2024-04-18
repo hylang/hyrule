@@ -150,40 +150,28 @@
 
 
 (defmacro defmacro! [name args #* body]
-  "Like `defmacro`, but with automatic gensyms and once-only evaluation.
 
-  ``defmacro!`` automatically generates :hy:func:`gensyms <hy.gensym>` for
-  any symbol that starts with ``g!``.
-  For example, ``g!a`` would become ``(hy.gensym \"a\")``.
+  #[[As :hy:func:`defmacro`, but with automatic gensyms. For each symbol in
+  the body beginning with "``g!``", a gensym is implicitly created and assigned
+  to that symbol. ::
 
-  Additionally, any params prefixed with ``o!`` are evaluated just once;
-  they are then available within `body` with a ``g!`` prefix.
+    (defmacro! m []
+      `(do
+         (setv ~g!accum [])
+         (for [x (range 3)]
+           (.append ~g!accum x))
+         ~g!accum))
+    (m)  ; => [0 1 2]
 
-  Examples:
-    ::
+  Furthermore, for each parameter of the macro beginning with "``o!``", the
+  argument is evaluated exactly once, and the corresponding ``g!`` symbol is
+  bound to a gensym to hold the value. ::
 
-       => (defn expensive-get-number [] (print \"spam\") 14)
-       => (defmacro triple-1 [n] `(+ ~n ~n ~n))
-       => (triple-1 (expensive-get-number))  ; evals n three times
-       spam
-       spam
-       spam
-       42
+    (defmacro! m [o!x]
+      `(+ ~g!x ~g!x ~g!x))
+    (setv l (list "abc"))
+    (m (.pop l))  ; => "ccc"]]
 
-    ::
-
-       => (defmacro! triple-2 [n] `(do (setv ~g!n ~n) (+ ~g!n ~g!n ~g!n)))
-       => (triple-2 (expensive-get-number))  ; avoid repeats with a gensym
-       spam
-       42
-
-    ::
-
-       => (defmacro! triple-3 [o!n] `(+ ~g!n ~g!n ~g!n))
-       => (triple-3 (expensive-get-number))  ; easier with `o!` prefix
-       spam
-       42
-  "
   (setv os (lfor x (flatten args)
                  :if (and (isinstance x hy.models.Symbol)
                           (.startswith x "o!"))
@@ -298,24 +286,21 @@
 
 
 (defmacro with-gensyms [args #* body]
-  "Execute `body` with `args` as bracket of names to gensym for use in macros.
 
-  ``with-gensym`` is used to generate a set of :hy:func:`gensyms <hy.gensym>`
-  for use in a macro. The following code:
+  #[[Evaluate ``body`` with each name in ``args`` (a list of symbols) bound to
+  a gensym. The syntax ::
 
-  Examples:
-    ::
+    (with-gensyms [a b c]
+      …)
 
-       => (with-gensyms [a b c]
-       ...   ...)
+  is equivalent to ::
 
-    expands to::
+    (do
+      (setv a (hy.gensym 'a))
+      (setv b (hy.gensym 'b))
+      (setv c (hy.gensym 'c))
+      …)]]
 
-       => (do
-       ...   (setv a (hy.gensym)
-       ...         b (hy.gensym)
-       ...         c (hy.gensym))
-       ...   ...)"
   (setv syms [])
   (for [arg args]
     (.extend syms [arg `(hy.gensym '~arg)]))
@@ -325,28 +310,17 @@
 
 
 (defreader /
-  #[[Sugar for :hy:class:`hy.I`, to access modules without needing to explicitly import them first.
-  Unlike ``hy.I``, ``#/`` cannot be used if the module name is only known at runtime.
 
-  Examples:
+  #[[Read one identifier and interpret it as a one-shot import in the same
+  way as :hy:class:`hy.I`. ::
 
-    Access modules and their elements directly by name:
+    #/ os.curdir
+      ; hy.I.os.curdir
+      ; => "."
+    (#/ os/path.basename "path/to/file")
+      ; (hy.I.os/path/basename "path/to/file")
+      ; => "file"]]
 
-    ::
-
-      => (type #/ re)
-      <class 'module'>
-      => #/ os.curdir
-      "."
-      => (#/ re.search r"[a-z]+" "HAYneedleSTACK")
-      <re.Match object; :span #(3 9) :match "needle">
-
-    Like ``hy.I``, separate submodule names with ``/``:
-
-    ::
-
-      => (#/ os/path.basename "path/to/file")
-      "file"]]
   (.slurp-space &reader)
   (setv [mod #* ident] (.split (.read-ident &reader) ".")
         imp `(hy.I ~(hy.mangle (.replace mod "/" "."))))
