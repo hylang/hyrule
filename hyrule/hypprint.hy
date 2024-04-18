@@ -1,28 +1,19 @@
-"``hyrule.pprint`` is a port of python's built-in ``pprint`` that can pretty
-print objects using Hy syntax.
+"Hyrule provides various tools for pretty-printing objects in Hy syntax. The
+interface is largely compatible with Python's own :mod:`pprint`, with two
+cosmetic differences:
 
-Hy ``pprint`` leverages ``hy.repr`` for much of it's pretty printing and
-therefor can be extended to work with arbitrary types using
-``hy.repr-register``. Like Python's ``pprint`` and ``hy.repr``, Hy ``pprint``
-attempts to maintain round-trippability of it's input where possible. Unlike
-Python, however, Hy does not have `string literal concatenation`_,
-which is why strings and bytestrings are broken up using the form ``(+ ...)``.
+- :py:func:`isreadable <pprint.isreadable>` becomes :hy:func:`readable?
+  <hyrule.readable?>`.
+- :py:func:`isrecursive <pprint.isrecursive>` becomes :hy:func:`recursive?
+  <hyrule.recursive?>`.
 
-.. _string literal concatenation: https://docs.python.org/3/reference/lexical_analysis.html#string-literal-concatenation
+Much of the work is done by :hy:func:`hy.repr`, and thus Hyrule's
+pretty-printing can be extended to new types with :hy:func:`hy.repr-register`.
 
-The API for Hy ``pprint`` is functionally identical to Python's ``pprint``
-module, so be sure to reference the Python `pprint`_
-docs for more on how to use the module's various methods and arguments.
+Since Hy lacks :ref:`implicit concatenation of string literals
+<py:string-concatenation>`, strings (and bytestrings) are broken up using
+:hy:func:`+ <hy.pyops.+>`."
 
-.. _pprint: https://docs.python.org/3/library/pprint.html
-
-The differences that do exist are as follows:
-
-- ``isreadable`` becomes ``readable?``
-- ``isrecursive`` becomes ``recursive?``
-- Passing ``False`` to the ``PrettyPrinter`` arg ``sort-dicts`` in Python
-  versions < 3.8 will raise a ``ValueError``
-"
 ;; Adapted from: https://github.com/python/cpython/blob/3.9/Lib/pprint.py
 
 (require
@@ -49,41 +40,27 @@ The differences that do exist are as follows:
   (import pprint [_safe-repr :as _safe-py-repr]))
 
 (defn pprint [object #* args #** kwargs]
-  "Pretty-print a Python object to a stream [default is sys.stdout].
-
-  Examples:
-    ::
-
-       => (pprint {:name \"Adam\" :favorite-foods #{:apple :pizza}
-                     :bio \"something very important\"}
-             :width 20)
-        {:name \"Adam\"
-         :bio (+ \"something \"
-                 \"very \"
-                 \"important\")
-         :favorite-foods #{:apple
-                           :pizza}}
-  "
+  "Pretty-print the object to a stream."
   (.pprint (PrettyPrinter #* args #** kwargs) object))
 
 (defn pformat [object #* args #** kwargs]
-  "Format a Python object into a pretty-printed representation."
+  "Format an object into a pretty-printed representation. Return a string."
   (.pformat (PrettyPrinter #* args #** kwargs) object))
 
 (defn pp [object [sort-dicts False] #* args #** kwargs]
-  "Pretty-print a Python object"
+  "As :hy:func:`pprint`, but with ``sort-dicts`` defaulting to ``False``."
   (pprint object #* args :sort-dicts sort-dicts #** kwargs))
 
 (defn saferepr [object]
-  "Version of (repr) which can handle recursive data structures."
+  "As :hy:func:`hy.repr`, but with a different approach to recursive objects."
   (get (_safe-repr object {} None 0 True) 0))
 
 (defn readable? [object]
-  "Determine if (saferepr object) is readable by (hy.eval)."
+  "Determine if ``(saferepr object)`` is readable by Hy's parser."
   (get (_safe-repr object {} None 0 True) 1))
 
 (defn recursive? [object]
-  "Determine if object requires a recursive representation."
+  "Determine if the object requires a recursive representation."
   (get (_safe-repr object {} None 0 True) 2))
 
 (defn _safe-repr [object context maxlevels level [sort-dicts True]]
@@ -183,17 +160,8 @@ The differences that do exist are as follows:
     (yield (hy.repr current))))
 
 (defclass PrettyPrinter [PyPrettyPrinter]
-  "Handle pretty printing operations onto a stream using a set of
-   configured parameters.
-
-   Args:
-     indent: Number of spaces to indent for each level of nesting.
-     width: Attempted maximum number of columns in the output.
-     depth: The maximum depth to print out nested structures.
-     stream: The desired output stream.  If omitted (or false), the standard
-       output stream available at construction will be used.
-     compact: If true, several items will be combined in one line.
-     sort-dicts: If True, dict keys are sorted. (only available for python >= 3.8)"
+  "Handle pretty-printing operations onto a stream using a set of
+  configured parameters. See :py:class:`pprint.PrettyPrinter`."
   (defn __init__ [self [indent 1] [width 80] [depth None] [stream None]
                   * [compact False] [sort-dicts True]]
     (setv self._sort-dicts True)
