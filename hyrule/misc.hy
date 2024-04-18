@@ -7,156 +7,68 @@
 
 
 (defmacro comment [#* body]
-  "Ignores body and always expands to None
 
-  The ``comment`` macro ignores its body and always expands to ``None``.
-  Unlike linewise comments, the body of the ``comment`` macro must
-  be grammatically valid Hy, so the compiler can tell where the comment ends.
-  Besides the semicolon linewise comments,
-  Hy also has the ``#_`` discard prefix syntax to discard the next form.
-  This is completely discarded and doesn't expand to anything, not even ``None``.
+  #[=[Ignore any arguments and expand to ``None``. ::
 
-  Examples:
-    ::
+    (setv x ["a"
+             (comment <h1>Surprise!</h1>
+                      You might be surprised what's lexically valid in Hy
+                      (keep delimiters balanced and you're mostly good to go))
+             "b"])
+     x  ; => ["a" None "b"]
 
-        => (print (comment <h1>Surprise!</h1>
-        ...                <p>You'd be surprised what's grammatically valid in Hy</p>
-        ...                <p>(Keep delimiters in balance, and you're mostly good to go)</p>)
-        ...        \"Hy\")
-        None Hy
+  Contrast with Hy's built-in semicolon comments and :ref:`discard
+  prefix <hy:discard-prefix>`::
 
-    ::
+    (setv x [1 ; 2 3
+               3])
+    x  ; => [1 3]
+    (setv x [1 #_ 2 3])
+    x  ; => [1 3]
+    (setv x [1 (comment 2) 3])
+    x  ; => [1 None 3]]=]
 
-        => (print #_(comment <h1>Surprise!</h1>
-        ...                  <p>You'd be surprised what's grammatically valid in Hy</p>
-        ...                  <p>(Keep delimiters in balance, and you're mostly good to go)</p>))
-        ...        \"Hy\")
-        Hy"
   None)
 
 
 (defn constantly [value]
-  "Create a new function that always returns `value` regardless of its input.
+  "Return a constant function, which ignores its arguments and always
+  returns ``value``. ::
 
-  Create a new function that always returns the given value, regardless of
-  the arguments given to it.
-
-  Examples:
-    ::
-
-        => (setv answer (constantly 42))
-        => (answer)
-        42
-
-    ::
-
-        => (answer 1 2 3)
-        42
-
-    ::
-
-        => (answer 1 :foo 2)
-        42
-  "
+    (setv answer (constantly 42))
+    (answer)           ; => 42
+    (answer 1 :foo 2)  ; => 42"
   (fn [#* args #** kwargs]
     value))
 
 
 (defn dec [n]
-  "Decrement `n` by 1.
-
-  Returns one less than *x*. Equivalent to ``(- x 1)``. Raises ``TypeError``
-  if *x* is not numeric.
-
-  Examples:
-    ::
-
-        => (dec 3)
-        2
-
-    ::
-
-        => (dec 0)
-        -1
-
-    ::
-
-        => (dec 12.3)
-        11.3
-  "
+  #[[Shorthand for ``(- n 1)``. The name stands for "decrement".]]
   (- n 1))
 
 
 (defn inc [n]
-  "Increment `n` by 1.
-
-  Returns one more than *x*. Equivalent to ``(+ x 1)``. Raises ``TypeError``
-  if *x* is not numeric.
-
-  Examples:
-    ::
-
-       => (inc 3)
-       4
-
-    ::
-
-       => (inc 0)
-       1
-
-    ::
-
-       => (inc 12.3)
-       13.3
-  "
+  #[[Shorthand for ``(+ n 1)``. The name stands for "increment".]]
   (+ n 1))
 
 
 (defmacro of [base #* args]
-  "Shorthand for indexing for type annotations.
 
-  If only one arguments are given, this expands to just that argument. If two arguments are
-  given, it expands to indexing the first argument via the second. Otherwise, the first argument
-  is indexed using a tuple of the rest.
+  "Shorthand for type annotations with indexing. If only one argument
+  is given, the macro expands to just that argument. If two arguments are
+  given, it expands to indexing the first argument with the second.
+  Otherwise, the first argument is indexed using a tuple of the rest. Thus:
 
-  ``of`` has three forms:
+  - ``(of T)`` becomes ``T``.
+  - ``(of T x)`` becomes ``(get T x)``.
+  - ``(of T x y z)`` becomes ``(get T #(x y z))``.
 
-  - ``(of T)`` will simply become ``T``.
-  - ``(of T x)`` will become ``(get T x)``.
-  - ``(of T x y ...)`` (where the ``...`` represents zero or more arguments) will become
-    ``(get T #(x y ...))``.
+  Here are some Python equivalents of example uses:
 
-  Examples:
-    ::
+  - ``(of str)`` → ``str``
+  - ``(of List int)`` → ``List[int]``
+  - ``(of Callable [int str] str)`` → ``Callable[[int, str], str]``"
 
-       => (of str)
-       str
-
-    ::
-
-       => (of List int)
-       List[int]
-
-    ::
-
-       => (of Set int)
-       Set[int]
-
-    ::
-
-       => (of Dict str str)
-       Dict[str, str]
-
-    ::
-
-       => (of Tuple str int)
-       Tuple[str, int]
-
-    ::
-
-       => (of Callable [int str] str)
-       Callable[[int, str], str]
-  "
   (if
     (not args) base
     (if (= (len args) 1)
@@ -165,23 +77,17 @@
 
 
 (defn parse-args [spec [args None] #** parser-args]
-  "Return arguments namespace parsed from *args* or ``sys.argv`` with
-  :py:meth:`argparse.ArgumentParser.parse_args` according to *spec*.
 
-  *spec* should be a list of arguments which will be passed to repeated
-  calls to :py:meth:`argparse.ArgumentParser.add_argument`.  *parser-args*
-  may be a list of keyword arguments to pass to the
-  :py:class:`argparse.ArgumentParser` constructor.
+  #[=[Shorthand for typical uses of :py:mod:`argparse`. ``spec`` is a list of arguments to pass in repeated calls to :py:meth:`ArgumentParser.add_argument <argparse.ArgumentParser.add_argument>`. ``args``, defaulting to :data:`sys.argv`, will be used as the input arguments. ``parser-args``, if provided, will be passed on to the constructor of :py:class:`ArgumentParser <argparse.ArgumentParser>`. The return value is that of :py:meth:`parse_args <argparse.ArgumentParser.parse_args>`.
 
-  Examples:
-    ::
+  ::
 
-       => (parse-args [[\"strings\" :nargs \"+\" :help \"Strings\"]
-       ...             [\"-n\" \"--numbers\" :action \"append\" :type int :help \"Numbers\"]]
-       ...            [\"a\" \"b\" \"-n\" \"1\" \"-n\" \"2\"]
-       ...            :description \"Parse strings and numbers from args\")
-       Namespace(numbers=[1, 2], strings=['a', 'b'])
-  "
+    (parse-args :spec [["strings" :nargs "+" :help "Strings"]
+                       ["-n" "--numbers" :action "append" :type int :help "Numbers"]]
+                :description "Parse strings and numbers from args"
+                :args ["a" "b" "-n" "1" "-n" "2"])
+       ; => Namespace(strings=['a', 'b'], numbers=[1, 2])]=]
+
   (import argparse)
   (setv parser (argparse.ArgumentParser #** parser-args))
   (for [arg spec]
@@ -277,19 +183,20 @@
 
 
 (defn xor [a b]
-  "Perform exclusive or between `a` and `b`.
 
-  ``xor`` performs the logical operation of exclusive OR. It takes two arguments.
-  If exactly one argument is true, that argument is returned. If neither is true,
-  the second argument is returned (which will necessarily be false). Otherwise,
-  when both arguments are true, the value ``False`` is returned.
+  "A logical exclusive-or operation.
 
-  Examples:
-    ::
+  - If exactly one argument is true, return it.
+  - If neither is true, return the second argument (which will
+    necessarily be false).
+  - Otherwise (that is, when both arguments are true), return
+    ``False``.
 
-       => [(xor 0 0) (xor 0 1) (xor 1 0) (xor 1 1)]
-       [0 1 1 False]
-  "
+  ::
+
+    [(xor 0 0) (xor 0 1) (xor 1 0) (xor 1 1)]
+      ; => [0 1 1 False]"
+
   (if (and a b)
     False
     (or a b)))
