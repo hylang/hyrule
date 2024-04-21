@@ -6,6 +6,7 @@ Unreleased
 Breaking Changes
 ------------------------------
 * `cut` on a `Sequence` now returns another `Sequence`, not a generator.
+* `assoc` is now a function rather than a macro. Its effect is unchanged.
 
 New Features
 ------------------------------
@@ -25,6 +26,7 @@ Bug Fixes
 * `defmacro!` now properly handles explicit return statements
   within its macro definition.
 * Various `Sequence` bugs have been fixed.
+* `assoc` no longer requires a second and third argument.
 
 0.5.0 (released 2024-01-05; uses Hy 0.28.*)
 ======================================================

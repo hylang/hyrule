@@ -34,51 +34,25 @@
       (_parse-indexing key)))
 
 
-(defmacro assoc [coll k1 v1 #* other-kvs]
-  "Associate key/index value pair(s) to a collection `coll` like a dict or list.
+(defn assoc [coll #* kvs]
+  "Associate key-value pairs by assigning to elements of `coll`. Thus, ::
 
-  ``assoc`` is used to associate a key with a value in a dictionary or to set an
-  index of a list to a value. It takes at least three parameters: the *data
-  structure* to be modified, a *key* or *index*, and a *value*. If more than
-  three parameters are used, it will associate in pairs.
+    (assoc coll  k1 v1  k2 v2  k3 v3)
 
-  Examples:
-    ::
+  is equivalent to ::
 
-       => (do
-       ...   (setv collection {})
-       ...   (assoc collection \"Dog\" \"Bark\")
-       ...   (print collection))
-       {\"Dog\" \"Bark\"}
+    (setv (get coll k1) v1)
+    (setv (get coll k2) v2)
+    (setv (get coll k3) v3)
 
-    ::
+  except ``coll`` is evaluated exactly once. Notice that this implies
+  the return value is ``None``, not ``coll`` or one of the newly
+  assigned elements."
 
-       => (do
-       ...   (setv collection {})
-       ...   (assoc collection \"Dog\" \"Bark\" \"Cat\" \"Meow\")
-       ...   (print collection))
-       {\"Cat\" \"Meow\"  \"Dog\" \"Bark\"}
-
-    ::
-
-       => (do
-       ...   (setv collection [1 2 3 4])
-       ...   (assoc collection 2 None)
-       ...   (print collection))
-       [1 2 None 4]
-
-  .. note:: ``assoc`` modifies the datastructure in place and returns ``None``.
-  "
-  (when (% (len other-kvs) 2)
-        (raise (ValueError "`assoc` takes an odd number of arguments")))
-  (setv c (if other-kvs
-            (hy.gensym "c")
-            coll))
-  `(setv ~@(+ (if other-kvs
-                [c coll]
-                [])
-              (lfor [i x] (enumerate (+ #(k1 v1) other-kvs))
-                    (if (% i 2) x `(get ~c ~x))))))
+  (when (% (len kvs) 2)
+    (raise (ValueError "`assoc` takes an odd number of arguments")))
+  (for [[k v] (by2s kvs)]
+    (setv (get coll k) v)))
 
 
 (defmacro ncut [seq key1 #* keys]
