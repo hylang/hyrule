@@ -137,6 +137,7 @@ API
 .. hy:autofunction:: constantly
 .. hy:autofunction:: dec
 .. hy:autofunction:: inc
+.. hy:autofunction:: import-path
 .. hy:automacro:: of
 .. hy:autofunction:: parse-args
 .. hy:automacro:: profile/calls

@@ -1,9 +1,10 @@
 (require
   hyrule [comment of smacrolet])
 (import
+  sys
   pytest
   typing [List Dict]
-  hyrule [constantly dec inc parse-args sign xor])
+  hyrule [constantly dec inc import-path parse-args sign xor])
 
 
 (defn test-constantly []
@@ -32,6 +33,24 @@
   (defclass X [object]
     (defn __add__ [self other] (.format "__add__ got {}" other)))
   (assert (= (inc (X)) "__add__ got 1")))
+
+
+(defn test-import-path [tmp-path]
+  (setv mp (/ tmp-path "a.hy"))
+  (.write-text mp "(setv foo 7)")
+
+  (setv m (import-path mp "mymod"))
+  (assert (= m.foo 7))
+  (assert (= m.__name__ "mymod"))
+  (assert (is (get sys.modules "mymod") m))
+
+  (setv m2 (import-path mp))
+  (assert (= m2.foo 7))
+  (assert (is-not m2 m))
+  (assert (in m2 (.values sys.modules)))
+
+  (.write-text (/ tmp-path "b.py") "bar = 3")
+  (assert (= (. (import-path (/ tmp-path "b.py")) bar) 3)))
 
 
 (defn test-of []

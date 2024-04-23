@@ -16,6 +16,7 @@ New Features
 * New macro `some->`.
 * New function `sign`.
 * New function `thru`.
+* New function `import-path`.
 
 Removals
 ------------------------------

@@ -2,6 +2,8 @@
   hyrule.macrotools [defmacro!])
 
 (import
+  sys
+  importlib.util
   hy.scoping [ScopeLet]
   hyrule.collections [by2s])
 
@@ -50,6 +52,32 @@
 (defn inc [n]
   #[[Shorthand for ``(+ n 1)``. The name stands for "increment".]]
   (+ n 1))
+
+
+(defn import-path [path [name None]]
+
+  #[[Import the Python or Hy source code at ``path`` as a module with
+  :func:`importlib.util.spec_from_file_location`, per Python's documentation.
+  Return the new module object. ``name`` defaults to ``(str (hy.gensym
+  "import-file"))``. ::
+
+    (setv p (hy.I.pathlib.Path "mymodule.hy"))
+    (.write-text p "(setv foo 3)")
+    (setv m (import-path p))
+    (print m.foo)  ; => 3]]
+
+  (when (is name None)
+    (setv name (str (hy.gensym "import-file"))))
+  (when (in name sys.modules)
+    (raise (ValueError f"The name {(hy.repr name)} is already in use in `sys.modules`.")))
+
+  ; Translated from https://github.com/python/cpython/blob/408e127159e54d87bb3464fd8bd60219dc527fac/Doc/library/importlib.rst?plain=1#L1584
+  (setv spec (importlib.util.spec-from-file-location name path))
+  (setv m (importlib.util.module-from-spec spec))
+  (setv (get sys.modules name) m)
+  (.loader.exec-module spec m)
+
+  m)
 
 
 (defmacro of [base #* args]
