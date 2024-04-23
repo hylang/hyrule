@@ -73,6 +73,9 @@ Reference
 ----------------------------------------------------------------------
 .. hy:automodule:: hyrule.destructure
 
+API
+~~~~~~~~~~
+
 .. hy:automacro:: defn+
 .. hy:automacro:: defn/a+
 .. hy:automacro:: dict=:
@@ -134,6 +137,7 @@ Reference
 .. hy:autofunction:: constantly
 .. hy:autofunction:: dec
 .. hy:autofunction:: inc
+.. hy:automacro:: of
 .. hy:autofunction:: parse-args
 .. hy:automacro:: profile/calls
 .. hy:automacro:: profile/cpu

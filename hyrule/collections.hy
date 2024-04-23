@@ -4,31 +4,15 @@
 
 
 (defreader s
-  "Shorthand tag macro for constructing slices using Python's sugared form.
+  #[[Read one form and interpret it like an index argument of
+  :hy:func:`ncut`. The "s" stands for "slice". ::
 
-  Examples:
-    ::
-
-       => #s 1:4:2
-       (slice 1 4 2)
-       => (get [1 2 3 4 5] #s 2::2)
-       [3 5]
-
-    Numpy makes use of ``Ellipsis`` in its slicing semantics so they can also be
-    constructed with this macro in their sugared ``...`` form.
-    ::
-
-       => #s ...
-       Ellipsis
-
-    Slices can technically also contain strings (something pandas makes use of
-    when slicing by string indices) and because Hy allows colons in identifiers,
-    to construct these slices we have to use the form ``(...)``:
-    ::
-
-       => #s(\"colname\" 1 2)
-       (slice \"colname\" 1 2)
-  "
+   (setv x (list (range 10)))
+   (get x #s 1:4:2)
+     ; …is equivalent to…
+   (ncut x 1:4:2)
+     ; …is equivalent to…
+   (get x (slice 1 4 2))]]
   (setv key (.parse-one-form &reader))
   (if (isinstance key hy.models.Expression) (_parse-indexing `(: ~@key))
       (_parse-indexing key)))
@@ -56,119 +40,57 @@
 
 
 (defmacro ncut [seq key1 #* keys]
-  "N-Dimensional ``cut`` macro with shorthand slice notation.
 
-  Libraries like ``numpy`` and ``pandas`` extend Python's sequence
-  slicing syntax to work with tuples to allow for elegant handling of
-  multidimensional arrays (numpy) and multi-axis selections (pandas).
-  A key in ``ncut`` can be any valid kind of index; specific,
-  ranged, a numpy style mask. Any library can make use of tuple based
-  slicing, so check with each lib for what is and isn't valid.
+  #[=[Shorthand for ``(get seq …)`` with various kinds of complex indices as used
+  by `NumPy <https://numpy.org/doc/stable/user/basics.indexing.html>`__ and
+  `pandas <https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html>`__.
+  Thus ``ncut`` provides an *n*-dimensional equivalent of :hy:func:`cut <hy.pyops.cut>`.
 
-  Args:
-    seq: Slicable sequence
-    key1: A valid sequence index. What is valid can change from library to
-      library.
-    *keys: Additional indices. Specifying more than one index will expand
-      to a tuple allowing multi-dimensional indexing.
+  Simple uses are identical to :hy:func:`get <hy.pyops.get>`::
 
-  Examples:
-    Single dimensional list slicing
-    ::
+    (ncut x i)  ; (get x i)
 
-       => (ncut (list (range 10)) 2:8:2)
-       [2 4 6]
+  When multiple arguments are provided, they're combined into a tuple::
 
-    numpy multidimensional slicing:
-    ::
+    (ncut x i1 i2)  ; (get x #(i1 i2))
 
-       => (setv a (.reshape (np.arange 36) #(6 6)))
-       => a
-       array([[ 0,  1,  2,  3,  4,  5],
-              [ 6,  7,  8,  9, 10, 11],
-              [12, 13, 14, 15, 16, 17],
-              [18, 19, 20, 21, 22, 23],
-              [24, 25, 26, 27, 28, 29],
-              [30, 31, 32, 33, 34, 35]])
-       => (ncut a #(0 1 2 3 4) #(1 2 3 4 5))
-       array([ 1,  8, 15, 22, 29])
-       => (ncut a 3: #(0 2 5))
-       array([[18, 20, 23],
-              [24, 26, 29],
-              [30, 32, 35]])
-       => (ncut a 1:-1:2 3:5)
-       array([[ 9, 10],
-              [21, 22]])
-       => (ncut a ::2 3 None)
-       array([[ 3],
-              [15],
-              [27]])
-       => (ncut a ... 0)
-       array([ 0,  6, 12, 18, 24, 30])
+  A keyword, or a symbol containing a colon, is understood as
+  shorthand for a :class:`slice` of integer literals. An omitted
+  integer is understood as ``None``, as in Python's own slicing
+  syntax. ::
 
-    Because variables can have colons in Hy (eg: ``abc:def`` is a valid identifier),
-    the sugared slicing form only allows numeric literals. In order to construct slices
-    that involve names and/or function calls, the form ``(: ...)`` can be used in an
-    ``ncut`` expresion as an escape hatch to ``slice``:
-    ::
+    (ncut x :)      ; (get x (slice None None))
+    (ncut x 1:2)    ; (get x (slice 1 2))
+    (ncut x 1:)     ; (get x (slice 1 None))
+    (ncut x 1:2:3)  ; (get x (slice 1 2 3))
+    (ncut x ::2)    ; (get x (slice None None 2))
 
-       => (setv abc:def -2)
-       => (hy.macroexpand '(ncut a abc:def (: (sum [1 2 3]) None abc:def)))
-       (get a #(abc:def (slice (sum [1 2 3]) None abc:def)))
+  An expression of the form ``(: … )`` is understood as ``(slice …)``::
 
-    Pandas allows extensive slicing along single or multiple axes:
-    ::
+    (ncut x (: a b))  ; (get x (slice a b))
 
-       => (setv s1 (pd.Series (np.random.randn 6) :index (list \"abcdef\")))
-       => s1
-       a    0.687645
-       b   -0.598732
-       c   -1.452075
-       d   -0.442050
-       e   -0.060392
-       f    0.440574
-       dtype: float64
+  Here are some executable examples::
 
-       => (ncut s1 (: \"c\" None 2))
-       c   -1.452075
-       e   -0.060392
-       dtype: float64
+    (ncut (list (range 10)) 2:8:2)
+      ; => [2 4 6]
 
-    ::
+    (import numpy :as np)
+    (setv a (.reshape (np.arange 36) #(6 6)))
+    (ncut a 3: #(0 2 5))
+      ; => array([[18, 20, 23],
+      ;           [24, 26, 29],
+      ;           [30, 32, 35]])
+    (ncut a ... 0)
+      ; => array([ 0,  6, 12, 18, 24, 30])
 
-       => (setv df (pd.DataFrame (np.random.randn 8 4)
-                                 :index (pd.date-range \"1/1/2000\" :periods 8)
-                                 :columns (list \"ABCD\")))
-       => df
-                          A         B         C         D
-       2000-01-01 -0.185291 -0.803559 -1.483985 -0.136509
-       2000-01-02 -3.290852 -0.688464  2.715168  0.750664
-       2000-01-03  0.771222 -1.170541 -1.015144  0.491510
-       2000-01-04  0.243287  0.769975  0.473460  0.407027
-       2000-01-05 -0.857291  2.395931 -0.950846  0.299086
-       2000-01-06 -0.195595  0.981791 -0.673646  0.637218
-       2000-01-07 -1.022636 -0.854971  0.603573 -1.169342
-       2000-01-08 -0.494866  0.783248 -0.064389 -0.960760
+    (import pandas :as pd)
+    (setv df (pd.DataFrame [[1 2 3 4] [5 6 7 8]]
+                           :columns (list "ABCD")))
+    (ncut df.loc : ["B" "A"])
+      ; =>    B  A
+      ;    0  2  1
+      ;    1  6  5]=]
 
-       => (ncut df.loc : [\"B\" \"A\"])
-                          B         A
-       2000-01-01 -0.803559 -0.185291
-       2000-01-02 -0.688464 -3.290852
-       2000-01-03 -1.170541  0.771222
-       2000-01-04  0.769975  0.243287
-       2000-01-05  2.395931 -0.857291
-       2000-01-06  0.981791 -0.195595
-       2000-01-07 -0.854971 -1.022636
-       2000-01-08  0.783248 -0.494866
-
-  .. note::
-
-     For more info on the capabilities of multiindex slicing, check with the respective
-     library.
-
-     - `Pandas <https://pandas.pydata.org/pandas-docs/stable/user_guide/indexing.html>`_
-     - `Numpy <https://numpy.org/doc/stable/reference/arrays.indexing.html>`_
-  "
   `(get ~seq ~(if keys
                `#(~@(map _parse-indexing #(key1 #* keys)))
                (_parse-indexing key1))))
@@ -178,9 +100,6 @@
     (cond
       (and (isinstance sym hy.models.Expression) (= (get sym 0) :))
         `(slice ~@(cut sym 1 None))
-
-      (= sym '...)
-        'Ellipsis
 
       (and (isinstance sym #(hy.models.Keyword hy.models.Symbol))
             (in ":" (str sym)))
