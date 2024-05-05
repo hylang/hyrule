@@ -27,13 +27,12 @@ Since Hy lacks :ref:`implicit concatenation of string literals
                 _safe-tuple
                 _safe-key]
         hy.core.hy-repr
-        hy._compat [PY3_10]
         hyrule.collections [assoc]
         hyrule.misc [inc dec constantly])
 
 (export [pprint pformat saferepr PrettyPrinter readable? recursive? pp])
 
-(if PY3_10
+(if (>= sys.version-info #(3 10))
   (defn _safe-py-repr [object context maxlevels level sort-dicts]
     (._safe-repr (PyPrettyPrinter :sort-dicts sort-dicts)
       object context maxlevels level))
