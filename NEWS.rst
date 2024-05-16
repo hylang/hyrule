@@ -1,6 +1,6 @@
 .. default-role:: code
 
-Unreleased
+0.6.0 (released 2024-05-20; uses Hy 0.29.*)
 ======================================================
 
 Breaking Changes
