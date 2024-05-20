@@ -3,7 +3,11 @@
 0.6.0 (released 2024-05-20; uses Hy 0.29.*)
 ======================================================
 
-Breaking Changes
+Removals
+------------------------------
+* `defmacro/g!` has been removed. Use `defmacro!` instead.
+
+Other Breaking Changes
 ------------------------------
 * `cut` on a `Sequence` now returns another `Sequence`, not a generator.
 * `assoc` is now a function rather than a macro. Its effect is unchanged.
@@ -14,13 +18,9 @@ New Features
 * New macro `defmacro-kwargs`.
 * New macro `parse-fn-params`.
 * New macro `some->`.
+* New function `import-path`.
 * New function `sign`.
 * New function `thru`.
-* New function `import-path`.
-
-Removals
-------------------------------
-* `defmacro/g!` has been removed; use `defmacro!` instead.
 
 Bug Fixes
 ------------------------------
