@@ -126,7 +126,7 @@ also known as arrow macros."
 (defmacro doto [form #* expressions]
 
   "As :hy:func:`->`, but instead of the return value of each expression being
-  passed to the next, a single object (obtained by evaluating the orignial
+  passed to the next, a single object (obtained by evaluating the original
   first argument ``form``) is used every time. In other words, ::
 
     (doto x (foo a b) (bar c d))

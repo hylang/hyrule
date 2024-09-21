@@ -108,6 +108,13 @@ API
 .. hy:autofunction:: match-fn-params
 .. hy:automacro:: with-gensyms
 
+``oop`` — Tools for object-oriented programming
+----------------------------------------------------------------------
+.. hy:automodule:: hyrule.oop
+
+.. hy:automacro:: meth
+.. hy:automacro:: ameth
+
 ``pprint`` — Pretty-printing data structures
 ----------------------------------------------------------------------
 .. hy:automodule:: hyrule.hypprint
