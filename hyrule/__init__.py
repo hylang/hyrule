@@ -1,7 +1,7 @@
 # We use an `__init__.py` instead of `__init__.hy` so that importing
 # from Python works even if `hy` hasn't been imported yet.
 
-__version__ = '0.7.0'
+__version__ = 'unreleased'
 
 import hy
 from hyrule.hy_init import *
