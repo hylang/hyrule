@@ -25,7 +25,7 @@ class install(install):
 # both setup_requires and install_requires
 # since we need to compile .hy files during setup
 requires = [
-    'hy'
+    'hy >= 1'
 ]
 
 

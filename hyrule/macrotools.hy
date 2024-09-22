@@ -129,16 +129,16 @@
   "A subroutine for `defmacro-kwargs` and `match-params`."
   (import
     funcparserlib.parser [maybe many]
-    hy.model-patterns [SYM FORM sym brackets pexpr])
+    hy.model-patterns [SYM FORM sym brackets pexpr whole])
 
   (setv msym (>> SYM hy.mangle))
   (defn pvalue [root wanted]
     (>> (pexpr (+ (sym root) wanted)) (fn [x] (get x 0))))
   (setv [ps p-rest p-kwargs] (.parse
-    (+
+    (whole [
       (many (| msym (brackets msym FORM)))
       (maybe (pvalue "unpack-iterable" msym))
-      (maybe (pvalue "unpack-mapping" msym)))
+      (maybe (pvalue "unpack-mapping" msym))])
     params))
   (setv ps (dfor
     p ps

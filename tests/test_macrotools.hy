@@ -205,7 +205,12 @@
   (with [(pytest.raises TypeError :match "^unpacking is not allowed in `args`$")]
     (f '[1 2 3 #* [1 2]]))
   (with [(pytest.raises TypeError :match "^unpacking is not allowed in `args`$")]
-    (f '[1 2 3 #** {"qq" 1 "xx" 2}])))
+    (f '[1 2 3 #** {"qq" 1 "xx" 2}]))
+
+  ; A syntactically invalid parameter list
+  (with [(pytest.raises hy.I.funcparserlib/parser.NoParseError)]
+     (match-fn-params [1] '[a 3]))
+  (assert (= (match-fn-params [1] '[a]) (dict :a 1))))
 
 
 (defn test-slash-import []

@@ -16,7 +16,7 @@ project = 'Hy'
 copyright = '%s the authors' % time.strftime('%Y')
 html_title = f'Hyrule {hyrule.__version__} manual'
 
-hy_version = 'v0.29.0'
+hy_version = 'v1.0.0'
 
 exclude_patterns = ['_build']
 

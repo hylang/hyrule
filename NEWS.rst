@@ -1,11 +1,16 @@
 .. default-role:: code
 
-Unreleased
+0.7.0 (released 2024-09-22; uses Hy ≥ 1)
 ======================================================
 
 New Features
 ------------------------------
 * New macros `meth` and `ameth`.
+
+Bug Fixes
+------------------------------
+* `match-fn-params` now raises an error for syntactically invalid
+  parameter lists.
 
 0.6.0 (released 2024-05-20; uses Hy 0.29.*)
 ======================================================
