@@ -1,5 +1,13 @@
 .. default-role:: code
 
+Unreleased
+======================================================
+
+Bug Fixes
+------------------------------
+* `map-model` now calls `as-model` only once (before its own recursion),
+  and it does so unconditionally.
+
 0.7.0 (released 2024-09-22; uses Hy ≥ 1)
 ======================================================
 
