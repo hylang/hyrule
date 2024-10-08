@@ -240,7 +240,7 @@
 
 
 (defn map-model [x f]
-  #[[Recursively apply a callback to some code. The unary function ``f`` is called on the object ``x``, converting it to a :ref:`model <hy:models>` first if it isn't one already. If the return value isn't ``None``, it's converted to a model and used as the result. But if the return value is ``None``, and ``x`` isn't a :ref:`sequential model <hy:hysequence>`, then ``x`` is used as the result instead. ::
+  #[[Recursively apply a callback to some code. The unary function ``f`` is called on the object ``x``, calling :hy:func:`hy.as-model` first. If the return value isn't ``None``, it's converted to a model and used as the result. But if the return value is ``None``, and ``x`` isn't a :ref:`sequential model <hy:hysequence>`, then ``x`` is used as the result instead. ::
 
      (defn f [x]
        (when (= x 'b)
@@ -259,6 +259,7 @@
       (hy.I.hyrule.map-model `(do ~@body) (fn [x]
         (when (isinstance x hy.models.Symbol)
           (hy.models.Symbol (.lower (str x)))))))
+
     (lowercase-syms
       (SETV FOO 15)
       (+= FOO (ABS -5)))
@@ -266,14 +267,15 @@
 
   That's why the parameters of ``map-model`` are backwards compared to ``map``: in user code, ``x`` is typically a symbol or other simple form whereas ``f`` is a multi-line anonymous function.]]
 
-  (when (not (isinstance x hy.models.Object))
-    (setv x (hy.as-model x)))
+  (_map-model (hy.as-model x) f))
+
+(defn _map-model [x f]
   (cond
     (is-not (setx value (f x)) None)
       (hy.as-model value)
     (isinstance x hy.models.Sequence)
       ((type x)
-        (gfor  elem x  (map-model elem f))
+        (gfor  elem x  (_map-model elem f))
         #** (cond
           (isinstance x hy.models.FString)
             {"brackets" x.brackets}

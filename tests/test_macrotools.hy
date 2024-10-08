@@ -132,6 +132,14 @@
           (= x "hello")  "wrong"
           (= x '"hello") "right")))
     '["right"]))
+  ; Even if the outermost layer of the input is already a model.
+  (setv seen [])
+  (map-model
+    (hy.models.List ["hello"])
+    (fn [x]
+      (.append seen (= x '["hello"]))
+      1))
+  (assert (= seen [True]))
 
   ; String and byte models aren't recursed into. (They're iterable,
   ; but not sequential models.)
