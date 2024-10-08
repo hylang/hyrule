@@ -259,6 +259,7 @@
       (hy.I.hyrule.map-model `(do ~@body) (fn [x]
         (when (isinstance x hy.models.Symbol)
           (hy.models.Symbol (.lower (str x)))))))
+
     (lowercase-syms
       (SETV FOO 15)
       (+= FOO (ABS -5)))
