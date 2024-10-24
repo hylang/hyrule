@@ -11,7 +11,8 @@ also known as arrow macros."
   (defn _dotted [node]
     "Helper function to turn '.name forms into '(.name) forms"
     (if (and (isinstance node hy.models.Expression)
-             (= (get node 0) '.))
+             (= (get node 0) '.)
+             (is (get node 1) None))
       `(~node)
       node)))
 
