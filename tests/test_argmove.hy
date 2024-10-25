@@ -24,6 +24,15 @@
              (->> ["foo"] (* 10) (.join ", ") .split))))
 
 
+(defn test-threading-dotted-properties []
+  (defclass A []
+    (defn __init__ [self]
+      (setv self.a 1)))
+  (setv x (A))
+  (assert (= x.a
+             (-> x (. a)))))
+
+
 (defn test-threading-in-macro []
   ; https://github.com/hylang/hy/issues/1537
   ; The macros need to be defined in another file or else the bug
