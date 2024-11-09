@@ -3,6 +3,10 @@
 Unreleased
 ======================================================
 
+New Features
+------------------------------
+* New macro `map-hyseq`.
+
 Bug Fixes
 ------------------------------
 * `map-model` now calls `as-model` only once (before its own recursion),

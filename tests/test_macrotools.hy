@@ -3,7 +3,7 @@
          :readers [/])
 (import
   pytest
-  hyrule [macroexpand-all map-model match-fn-params])
+  hyrule [macroexpand-all map-hyseq map-model match-fn-params])
 
 
 (defn test-defmacro-kwargs []
@@ -108,6 +108,42 @@
 
   (assert (= (get (macroexpand-all '(require-macro)) -1)
              '(setv blah 1))))
+
+
+(defn test-map-hyseq []
+
+  ; If `x` isn't sequential (or not a model at all), `f` isn't called.
+  (assert (=
+    (map-hyseq
+      3
+      (fn [x] (raise ValueError)))
+    3))
+  (assert (=
+    (map-hyseq
+      [1 2]
+      (fn [x] (raise ValueError)))
+    [1 2]))
+
+  ; `f` can be called when `x` is empty.
+  (assert (=
+    (map-hyseq
+      '[]
+      (fn [x] ['4]))
+    '[4]))
+
+  ; `f` gets the sequence contents as a tuple.
+  (setv saw None)
+  (assert (=
+    (map-hyseq
+      '{1 2  3 4}
+      (fn [x]
+        (nonlocal saw)
+        (setv saw x)
+        (gfor  e x  (hy.models.Integer (+ e 1)))))
+    '{2 3  4 5}))
+  (assert (= saw #('1 '2 '3 '4))))
+  ; Preservation of sequence attributes is tested as part of testing
+  ; `map-model`.
 
 
 (defn test-map-model []

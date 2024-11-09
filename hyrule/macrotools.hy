@@ -270,21 +270,34 @@
   (_map-model (hy.as-model x) f))
 
 (defn _map-model [x f]
-  (cond
-    (is-not (setx value (f x)) None)
-      (hy.as-model value)
-    (isinstance x hy.models.Sequence)
-      ((type x)
-        (gfor  elem x  (_map-model elem f))
-        #** (cond
-          (isinstance x hy.models.FString)
-            {"brackets" x.brackets}
-          (isinstance x hy.models.FComponent)
-            {"conversion" x.conversion}
-          True
-            {}))
-    True
-      x))
+  (if (is-not (setx value (f x)) None)
+    (hy.as-model value)
+    (map-hyseq x (fn [contents]
+      (gfor  elem contents  (_map-model elem f))))))
+
+(defn map-hyseq [x f]
+
+  "Apply the function ``f`` to the contents of the :ref:`sequential model <hy:hysequence>` ``x`` gathered into a tuple. ``f`` should return an iterable object. This result is then wrapped in the original model type, preserving attributes such as the brackets of an :class:`hy.models.FString`. ::
+
+    (map-hyseq '[:a :b :c] (fn [x]
+      (gfor  e x  (hy.models.Keyword (.upper e.name)))))
+      ; => '[:A :B :C]
+
+  Unlike :hy:func:`map-model`, ``map-hyseq`` isn't inherently recursive.
+
+  If ``x`` isn't a sequential Hy model, it's returned as-is, without calling ``f``."
+
+  (if (isinstance x hy.models.Sequence)
+    ((type x)
+      (f (tuple x))
+      #** (cond
+        (isinstance x hy.models.FString)
+          {"brackets" x.brackets}
+        (isinstance x hy.models.FComponent)
+          {"conversion" x.conversion}
+        True
+          {}))
+    x))
 
 
 (defmacro with-gensyms [args #* body]
