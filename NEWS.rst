@@ -5,6 +5,7 @@ Unreleased
 
 New Features
 ------------------------------
+* New macro `pun`.
 * New macro `map-hyseq`.
 
 Bug Fixes

@@ -150,6 +150,7 @@ API
 .. hy:autofunction:: parse-args
 .. hy:automacro:: profile/calls
 .. hy:automacro:: profile/cpu
+.. hy:automacro:: pun
 .. hy:autofunction:: sign
 .. hy:automacro:: smacrolet
 .. hy:autofunction:: xor

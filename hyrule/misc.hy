@@ -4,8 +4,10 @@
 (import
   sys
   importlib.util
+  itertools
   hy.scoping [ScopeLet]
-  hyrule.collections [by2s])
+  hyrule.collections [by2s]
+  hyrule.macrotools [map-hyseq])
 
 
 (defmacro comment [#* body]
@@ -188,6 +190,27 @@
            (.sort-stats (pstats.Stats ~g!hy-pr :stream ~g!hy-s)))
      (.print-stats ~g!hy-ps)
      (print (.getvalue ~g!hy-s))))
+
+
+(defmacro pun [#* body]
+  #[[Evaluate ``body`` with a shorthand for keyword arguments that are set to variables of the same name. Any keyword whose name starts with an exclamation point, such as ``:!foo``, is replaced with a keyword followed by a symbol, such as ``:foo foo``::
+
+    (setv  a 1  b 2  c 3)
+    (pun (dict :!a :!b :!c))
+      ; i.e., (dict :a a :b b :c c)
+      ; => {"a" 1  "b" 2  "c" 3}
+
+  This macro is named after the `NamedFieldPuns <https://ghc.gitlab.haskell.org/ghc/doc/users_guide/exts/record_puns.html>`__ language extension to Haskell.]]
+
+  (map-hyseq `(do ~@body) _pun))
+
+(defn _pun [x]
+  (itertools.chain.from-iterable (gfor
+    e x
+    (if (and (isinstance e hy.models.Keyword) (.startswith e.name "!"))
+      [(hy.models.Keyword (cut e.name 1 None))
+        (hy.models.Symbol (cut e.name 1 None))]
+      [(map-hyseq e _pun)]))))
 
 
 (do-mac (do
