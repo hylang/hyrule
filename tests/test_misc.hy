@@ -1,5 +1,5 @@
 (require
-  hyrule [comment of smacrolet])
+  hyrule [comment of pun smacrolet])
 (import
   sys
   pytest
@@ -86,6 +86,22 @@
   ; Of two distinct false values, the second is returned.
   (assert (= (xor False 0) 0))
   (assert (= (xor 0 False) False)))
+
+
+(defn test-pun [] (pun
+  (setv   adam 1  bob 2  chris 3  !bob 100)
+  (assert (=
+    [:!adam :!bob :!chris]
+    [:adam 1 :bob 2 :chris 3]))
+  (assert (=
+    (dict :!adam :!bob :!chris)
+    {"adam" 1  "bob" 2  "chris" 3}))
+  (assert (=
+    (dict :!adam :bob 4 :!chris)
+    {"adam" 1  "bob" 4  "chris" 3}))
+  (assert (=
+    (dict :!adam :!!bob :!chris)
+    {"adam" 1  (hy.mangle "!bob") 100  "chris" 3}))))
 
 
 (defn test-sign []

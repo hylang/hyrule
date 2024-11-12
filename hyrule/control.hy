@@ -173,7 +173,7 @@
 
 
 (defmacro defmain [args #* body]
-  #[[Define a function to be called when :attr:`__name__` equals ``"__main__"``
+  #[[Define a function to be called when :attr:`module.__name__` equals ``"__main__"``
   (see :mod:`__main__`). ``args`` is the function's lambda list, which will be
   matched against :data:`sys.argv`. Recall that the first element of
   ``sys.argv`` is always the name of the script being invoked, whereas the rest
