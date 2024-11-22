@@ -250,55 +250,40 @@
 
 
 (defmacro! loop [bindings #* body]
-  "The loop/recur macro allows you to construct functions that use
-  tail-call optimization to allow arbitrary levels of recursion.
+  "Construct and immediately call an anonymous function with explicit `tail-call elimination <https://en.wikipedia.org/wiki/Tail-call_elimination>`__. To see how it's used, consider this tail-recursive implementation of the factorial function::
 
-  ``loop`` establishes a recursion point. With ``loop``, ``recur``
-  rebinds the variables set in the recursion point and sends code
-  execution back to that recursion point. If ``recur`` is used in a
-  non-tail position, an exception is raised. which
-  causes chaos.
+    (defn factorial [n [acc 1]]
+      (if n
+        (factorial (- n 1) (* acc n))
+        acc))
 
-  Usage: ``(loop bindings #* body)``
+  With ``loop``, this would be written as::
 
-  Examples:
-    ::
+    (defn factorial [n]
+      (loop [[n n] [acc 1]]
+        (if n
+          (recur (- n 1) (* acc n))
+          acc)))
 
-       => (require hyrule.contrib.loop [loop])
-       => (defn factorial [n]
-       ...  (loop [[i n] [acc 1]]
-       ...    (if (= i 0)
-       ...      acc
-       ...      (recur (dec i) (* acc i)))))
-       => (factorial 1000)"
-  (setv [fnargs initargs] (if bindings (zip #* bindings) [[] []]))
-  (setv new-body (prewalk
-    (fn [x] (if (= x 'recur) g!recur-fn x))
-    body))
+  Don't forget to ``(import hyrule [recur])``. The :hy:class:`recur` object holds the arguments for the next call. When the function returns a :hy:class:`recur`, ``loop`` calls it again with the new arguments. Otherwise, ``loop`` ends and the final value is returned. Thus, what would be a nested set of recursive calls becomes a series of calls that are resolved entirely in sequence.
+
+  Note that while ``loop`` uses the same syntax as ordinary function definitions for its lambda list, all arguments other than ``#* args`` and ``#* kwargs`` must have a default value, because the function will first be called with no arguments."
+
   `(do
-    (import hyrule.control [_trampoline :as ~g!t])
-    (setv ~g!recur-fn (~g!t (fn [~@fnargs] ~@new-body)))
-    (~g!recur-fn ~@initargs)))
+    (defn ~g!f ~bindings
+      ~@body)
+    (setv ~g!result (~g!f))
+    (while (isinstance ~g!result hy.I.hyrule.recur)
+      (setv ~g!result (~g!f
+        #* (. ~g!result args)
+        #** (. ~g!result kwargs))))
+    ~g!result))
 
-(defn _trampoline [f]
-  "Wrap f function and make it tail-call optimized."
-  ;; Takes the function "f" and returns a wrapper that may be used for tail-
-  ;; recursive algorithms. Note that the returned function is not side-effect
-  ;; free and should not be called from anywhere else during tail recursion.
-
-  (setv result None)
-  (setv active False)
-  (setv accumulated [])
-
-  (fn [#* args]
-    (nonlocal active)
-    (.append accumulated args)
-    (when (not active)
-      (setv active True)
-      (while (> (len accumulated) 0)
-        (setv result (f #* (.pop accumulated))))
-      (setv active False)
-      result)))
+(defclass recur []
+  "A simple wrapper class used by :hy:func:`loop`. The attribute
+  ``args`` holds a tuple and ``kwargs`` holds a dictionary."
+  (defn __init__ [self #* args #** kwargs]
+    (setv  self.args args  self.kwargs kwargs)))
 
 
 (defmacro unless [test #* body]

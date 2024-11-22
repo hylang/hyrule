@@ -67,6 +67,7 @@ Reference
 .. hy:automacro:: lif
 .. hy:automacro:: list-n
 .. hy:automacro:: loop
+.. hy:autoclass:: recur
 .. hy:automacro:: unless
 
 ``destructure`` — Macros for destructuring collections

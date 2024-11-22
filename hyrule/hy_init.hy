@@ -10,6 +10,7 @@
   hyrule.sequences *)
 (import
   hyrule.collections *
+  hyrule.control [recur]
   hyrule.destructure *
   hyrule.iterables *
   hyrule.macrotools *

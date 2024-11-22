@@ -3,15 +3,22 @@
 Unreleased
 ======================================================
 
+Breaking Changes
+------------------------------
+* `recur` is now a real object that must be imported from Hyrule when
+  using `loop`.
+
 New Features
 ------------------------------
 * New macro `pun`.
 * New macro `map-hyseq`.
+* `loop` allows more kinds of parameters.
 
 Bug Fixes
 ------------------------------
 * `map-model` now calls `as-model` only once (before its own recursion),
   and it does so unconditionally.
+* `loop` now works when nested.
 
 0.7.0 (released 2024-09-22; uses Hy ≥ 1)
 ======================================================

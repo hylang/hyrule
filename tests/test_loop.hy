@@ -38,6 +38,27 @@
   (assert (= (tco-sum 100 10,000) 10,100)))
 
 
+(defn test-nested []
+  (assert (=
+    (loop [[x 1]]
+      (if (< x 3)
+        (recur (+ x 1))
+        [x (loop [[y 1]]
+          (if (< y 5)
+            (recur (+ y 1))
+            y))]))
+    [3 5])))
+
+
+(defn test-fancier-args []
+  (assert (=
+    (loop [[x 1] #* a #** b]
+      (if (= x 1)
+        (recur 2 3 4 :foo "bar")
+        [x a b]))
+    [2 #(3 4) {"foo" "bar"}])))
+
+
 (defn test-recur-string []
   "`loop` shouldn't touch a string named `recur`."
   (assert (= (loop [] (+ "recur" "1")) "recur1")))
