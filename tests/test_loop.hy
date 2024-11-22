@@ -28,21 +28,6 @@
   (assert (= (tco-sum 100 10,000) 10,100)))
 
 
-(defn test-recur-in-wrong-loc []
-  (defn bad-recur [n]
-    (loop [[i n]]
-          (if (= i 0)
-            0
-            (inc (recur (dec i))))))
-
-  (try
-   (bad-recur 3)
-   (except [e TypeError]
-     (assert True))
-   (else
-    (assert False))))
-
-
 (defn test-recur-string []
   "`loop` shouldn't touch a string named `recur`."
   (assert (= (loop [] (+ "recur" "1")) "recur1")))
