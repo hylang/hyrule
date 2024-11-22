@@ -1,9 +1,19 @@
 (require
   hyrule [loop])
 (import
+  math
   sys
-  hyrule [inc dec]
+  hyrule [inc dec recur]
   pytest)
+
+
+(defn test-factorial []
+  (assert (=
+    (loop [[i 5] [acc 1]]
+      (if (= i 0)
+       acc
+       (recur (dec i) (* acc i))))
+    (math.factorial 5))))
 
 
 (defn test-tco-sum []
