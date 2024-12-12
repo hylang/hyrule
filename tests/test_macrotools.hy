@@ -107,7 +107,17 @@
              'f"{(a 1)}"))
 
   (assert (= (get (macroexpand-all '(require-macro)) -1)
-             '(setv blah 1))))
+             '(setv blah 1)))
+
+  ; Check quoting.
+  (assert (= (macroexpand-all ''(foo-walk))
+             ''(foo-walk)))
+  (assert (= (macroexpand-all `(do (foo-walk)))
+             '(do 42)))
+  (assert (= (macroexpand-all '`(do (foo-walk)))
+             '`(do (foo-walk))))
+  (assert (= (macroexpand-all '`(do ~(foo-walk)))
+             '`(do ~42))))
 
 
 (defn test-map-hyseq []
