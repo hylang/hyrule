@@ -199,12 +199,12 @@
         (setv ~~gs ~~os)
         ~~res)))
 
-(defn macroexpand-all [form [ast-compiler None]]
+(defn macroexpand-all [model [module None] [macros None]]
   "Recursively performs all possible macroexpansions in form, using the ``require`` context of ``module-name``.
   `macroexpand-all` assumes the calling module's context if unspecified.
   "
   (setv quote-level 0
-        ast-compiler (or ast-compiler (HyASTCompiler (calling-module))))
+        module (or module (hy.compiler.calling-module)))
   (defn traverse [form]
     (walk expand (fn [x] x) form))
   (defn expand [form]
@@ -227,16 +227,13 @@
                      True (traverse form))
               (= (get form 0) 'quote) form
               (= (get form 0) 'quasiquote) (+quote)
-              (= (get form 0) (hy.models.Symbol "require")) (do
-               (ast-compiler.compile form)
-               (return))
               (in (get form 0) '[except unpack-mapping])
                (hy.models.Expression [(get form 0) #* (traverse (cut form 1 None))])
-              True (traverse (hy.macros.macroexpand form ast-compiler.module ast-compiler :result-ok False)))
+              True (traverse (hy.macroexpand form module macros)))
         (if (coll? form)
             (traverse form)
             form)))
-  (expand form))
+  (expand model))
 
 
 (defn map-model [x f]
