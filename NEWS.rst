@@ -3,6 +3,11 @@
 Unreleased
 ======================================================
 
+Removals
+------------------------------
+* `walk`, `prewalk`, and `postwalk` have been removed. Use `map-model` and
+  `map-hyseq` instead.
+
 Breaking Changes
 ------------------------------
 * `recur` is now a real object that must be imported from Hyrule when

@@ -47,10 +47,7 @@ Reference
 
 .. hy:autofunction:: assoc
 .. hy:automacro:: ncut
-.. hy:autofunction:: postwalk
-.. hy:autofunction:: prewalk
 .. hy:autotag:: s
-.. hy:autofunction:: walk
 
 ``control`` — Control structures
 ----------------------------------------------------------------------
