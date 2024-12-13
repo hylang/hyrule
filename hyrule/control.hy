@@ -1,7 +1,7 @@
 (require
   hyrule.macrotools [defmacro!])
 (import
-  hyrule.collections [prewalk by2s]
+  hyrule.collections [by2s]
   hyrule.iterables [coll?]
   hyrule.misc [inc])
 
