@@ -199,9 +199,21 @@
         ~~res)))
 
 (defn macroexpand-all [model [module None] [macros None]]
-  "Recursively performs all possible macroexpansions in form, using the ``require`` context of ``module-name``.
-  `macroexpand-all` assumes the calling module's context if unspecified.
-  "
+  "As :hy:func:`hy.macroexpand`, but with recursive descent through the input model, attempting to expand all macro calls throughout the tree::
+
+    (defmacro m [] 5)
+    (print (hy.repr (hy.macroexpand '(m))))
+      ; => '5
+    (print (hy.repr (hy.macroexpand '(do (m)))))
+      ; => '(do (m))
+    (print (hy.repr (macroexpand-all '(do (m)))))
+      ; => '(do 5)
+
+  ``macroexpand-all`` even expands macros in unquoted portions of quasiquoted forms::
+
+    (print (hy.repr (macroexpand-all '(do `[4 (m) ~(m) 6]))))
+      ; => '(do `[4 (m) ~5 6])"
+
   (setv  quote-level 0  module (or module (hy.compiler.calling-module)))
 
   (defn expand [m]
