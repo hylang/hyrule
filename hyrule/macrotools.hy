@@ -1,7 +1,6 @@
 (import
   hy.compiler [HyASTCompiler calling-module]
-  hyrule.iterables [coll? flatten]
-  hyrule.collections [walk])
+  hyrule.iterables [coll? flatten])
 
 
 (defmacro defmacro-kwargs [name params #* body]
@@ -203,37 +202,45 @@
   "Recursively performs all possible macroexpansions in form, using the ``require`` context of ``module-name``.
   `macroexpand-all` assumes the calling module's context if unspecified.
   "
-  (setv quote-level 0
-        module (or module (hy.compiler.calling-module)))
-  (defn traverse [form]
-    (walk expand (fn [x] x) form))
-  (defn expand [form]
+  (setv  quote-level 0  module (or module (hy.compiler.calling-module)))
+
+  (defn expand [m]
+
+    (when (not (and (isinstance m hy.models.Expression) m))
+      (return))
+    (setv [head #* args] m)
+    (when (not (isinstance head hy.models.Symbol))
+      (return))
+    (setv mhead (hy.mangle head))
     (nonlocal quote-level)
-    ;; manages quote levels
-    (defn +quote [[x 1]]
-      (nonlocal quote-level)
-      (setv head (get form 0))
-      (+= quote-level x)
-      (when (< quote-level 0)
-        (raise (TypeError "unquote outside of quasiquote")))
-      (setv res (traverse (cut form 1 None)))
-      (-= quote-level x)
-      `(~head ~@res))
-    (if (and (isinstance form hy.models.Expression) form)
-        (cond quote-level
-               (cond (in (get form 0) '[unquote unquote-splice])
-                       (+quote -1)
-                     (= (get form 0) 'quasiquote) (+quote)
-                     True (traverse form))
-              (= (get form 0) 'quote) form
-              (= (get form 0) 'quasiquote) (+quote)
-              (in (get form 0) '[except unpack-mapping])
-               (hy.models.Expression [(get form 0) #* (traverse (cut form 1 None))])
-              True (traverse (hy.macroexpand form module macros)))
-        (if (coll? form)
-            (traverse form)
-            form)))
-  (expand model))
+    (when (and (= quote-level 0) (= mhead "quote"))
+      (return m))
+
+    (setv quote-adjustment None)
+    (cond
+      (and quote-level (in mhead ["unquote" "unquote_splice"]))
+        (setv quote-adjustment -1)
+      (= mhead "quasiquote")
+        (setv quote-adjustment 1))
+    (when quote-adjustment
+      (+= quote-level quote-adjustment))
+    (setv new (if
+       (or
+         quote-level
+         quote-adjustment
+         (in mhead (.split "unquote unquote_splice unpack_mapping except hyx_exceptXasteriskX finally else")))
+           ; These stub macros would cause a crash if we tried to
+           ; expand them.
+      `(~head ~@(gfor  e args  (map-model e expand)))
+      (map-hyseq
+        (hy.macroexpand m module macros)
+        (fn [e] (map-model e expand)))))
+    (when quote-adjustment
+      (-= quote-level quote-adjustment))
+
+    new)
+
+  (map-model model expand))
 
 
 (defn map-model [x f]

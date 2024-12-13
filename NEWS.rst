@@ -20,6 +20,8 @@ Bug Fixes
 * `map-model` now calls `as-model` only once (before its own recursion),
   and it does so unconditionally.
 * `loop` now works when nested.
+* `macroexpand-all` no longer crashes on stub macros.
+* `macroexpand-all` now recognizes macro names properly.
 
 0.7.0 (released 2024-09-22; uses Hy ≥ 1)
 ======================================================
