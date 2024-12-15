@@ -13,6 +13,7 @@ Breaking Changes
 * `recur` is now a real object that must be imported from Hyrule when
   using `loop`.
 * `macroexpand-all` now uses the same parameters as `hy.macroexpand`.
+* `lif` now treats `False` as false.
 
 New Features
 ------------------------------

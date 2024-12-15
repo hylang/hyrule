@@ -204,10 +204,10 @@
 (defmacro lif [#* args]
   #[[A "Lispy if" similar to :hy:func:`if` and :hy:func:`cond
   <hy.core.macros.cond>`. Its most notable property is that it tests
-  the condition with ``(is-not condition None)`` instead of ``(bool
-  condition)``, so values such as the integer 0, the empty string, and
-  ``False`` are considered true, not false. The general
-  syntax is
+  the condition values against ``None`` and ``False`` with
+  :hy:func:`is-not <hy.pyops.is-not>`, rather than calling
+  :py:class:`bool`. Thus, values such as the integer 0 and the empty
+  string are considered true, not false. The general syntax is
   ::
 
       (lif
@@ -220,12 +220,12 @@
   ::
 
       (cond
-        (is-not condition1 None) result1
-        (is-not condition2 None) result2
+        (is-not None condition1 False) result1
+        (is-not None condition2 False) result2
         …
-        True                     else-value)
+        True                           else-value)
 
-  When no condition matches and there is no else-value, the result is ``None``.]]
+  When no condition obtains and there is no else-value, the result is ``None``.]]
 
   (_lif args))
 
@@ -235,7 +235,7 @@
       (get args 0)
     args (do
       (setv [condition result #* rest] args)
-      `(if (is-not ~condition None)
+      `(if (is-not None ~condition False)
         ~result
         ~(_lif rest)))))
 

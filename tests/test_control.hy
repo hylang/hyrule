@@ -315,11 +315,12 @@
 
 
 (defn test-lif []
-  ;; None is false
+  ;; `None` and `False` are false
   (assert (= (lif None "true" "false") "false"))
+  (assert (= (lif False "true" "false") "false"))
 
   ;; But everything else is True!  Even falsey things.
-  (for [x [True False 0 "some-string" "" (+ 1 2 3)]]
+  (for [x [True 0 "some-string" "" (+ 1 2 3)]]
     (assert (= (lif x "true" "false") "true")))
 
   ;; Test ellif [sic]
