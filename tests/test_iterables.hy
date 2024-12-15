@@ -63,14 +63,13 @@
   (assert (=
     (flatten ["foo" #(1 2) [1 [2 3] 4] "bar"])
     ["foo" 1 2 1 2 3 4 "bar"]))
+  (assert (= (flatten "foo") ["foo"]))
+  (assert (= (flatten 12.34) [12.34]))
   (assert (= (flatten [1]) [1]))
   (assert (= (flatten []) []))
   (assert (= (flatten #(1)) [1]))
   (assert (= (flatten #(1 #(None 3))) [1 None 3]))
-  (try (flatten "foo")
-       (except [e [TypeError]] (assert (in "not a collection" (str e)))))
-  (try (flatten 12.34)
-       (except [e [TypeError]] (assert (in "not a collection" (str e))))))
+  (assert (= (flatten {"a" 1 "b" 2}) ["a" "b"])))
 
 
 (defn test-rest []
