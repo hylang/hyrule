@@ -57,19 +57,16 @@
 
 
 (defn test-flatten []
-  (setv res (flatten [1 2 [3 4] 5]))
-  (assert (= res [1 2 3 4 5]))
-  (setv res (flatten ["foo" #(1 2) [1 [2 3] 4] "bar"]))
-  (assert (= res ["foo" 1 2 1 2 3 4 "bar"]))
-  (setv res (flatten [1]))
-  (assert (= res [1]))
-  (setv res (flatten []))
-  (assert (= res []))
-  (setv res (flatten #(1)))
-  (assert (= res [1]))
-  ;; test with None
-  (setv res (flatten #(1 #(None 3))))
-  (assert (= res [1 None 3]))
+  (assert (=
+    (flatten [1 2 [3 4] 5])
+    [1 2 3 4 5]))
+  (assert (=
+    (flatten ["foo" #(1 2) [1 [2 3] 4] "bar"])
+    ["foo" 1 2 1 2 3 4 "bar"]))
+  (assert (= (flatten [1]) [1]))
+  (assert (= (flatten []) []))
+  (assert (= (flatten #(1)) [1]))
+  (assert (= (flatten #(1 #(None 3))) [1 None 3]))
   (try (flatten "foo")
        (except [e [TypeError]] (assert (in "not a collection" (str e)))))
   (try (flatten 12.34)
