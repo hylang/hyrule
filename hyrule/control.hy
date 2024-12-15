@@ -226,13 +226,18 @@
         True                     else-value)
 
   When no condition matches and there is no else-value, the result is ``None``.]]
-  (setv n (len args))
-  (when n
-        (if (= n 1)
-            (get args 0)
-            `(if (is-not ~(get args 0) None)
-                 ~(get args 1)
-                 (lif ~@(cut args 2 None))))))
+
+  (_lif args))
+
+(defn _lif [args]
+  (cond
+    (= (len args) 1)
+      (get args 0)
+    args (do
+      (setv [condition result #* rest] args)
+      `(if (is-not ~condition None)
+        ~result
+        ~(_lif rest)))))
 
 
 (defmacro list-n [count-form #* body]

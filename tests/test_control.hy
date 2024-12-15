@@ -1,6 +1,7 @@
 (require
   hyrule [block branch ebranch case ecase cfor do-n lif list-n unless])
 (import
+  types [ModuleType]
   pytest)
 
 
@@ -327,7 +328,14 @@
                   None 1
                   x 2
                   3)
-             2)))
+             2))
+
+  ;; It should still work with a different name.
+  (assert (=
+    (hy.eval '(foo  None 1  0 2  8 3)
+      :module (ModuleType "M")
+      :macros {"foo" (get-macro lif)})
+    2)))
 
 
 (defn test-list-n []
