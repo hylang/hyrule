@@ -3,10 +3,16 @@
 Unreleased
 ======================================================
 
+Removals
+------------------------------
+* `walk`, `prewalk`, and `postwalk` have been removed. Use `map-model` and
+  `map-hyseq` instead.
+
 Breaking Changes
 ------------------------------
 * `recur` is now a real object that must be imported from Hyrule when
   using `loop`.
+* `macroexpand-all` now uses the same parameters as `hy.macroexpand`.
 
 New Features
 ------------------------------
@@ -19,6 +25,8 @@ Bug Fixes
 * `map-model` now calls `as-model` only once (before its own recursion),
   and it does so unconditionally.
 * `loop` now works when nested.
+* `macroexpand-all` no longer crashes on stub macros.
+* `macroexpand-all` now recognizes macro names properly.
 
 0.7.0 (released 2024-09-22; uses Hy ≥ 1)
 ======================================================

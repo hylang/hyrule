@@ -107,7 +107,23 @@
              'f"{(a 1)}"))
 
   (assert (= (get (macroexpand-all '(require-macro)) -1)
-             '(setv blah 1))))
+             '(setv blah 1)))
+
+  ; Avoid crashing on stub macros like `else`.
+  (assert (= (macroexpand-all '(for [c "ab"] (else (foo-walk))))
+             '(for [c "ab"] (else 42))))
+
+  ; Check quoting.
+  (assert (= (macroexpand-all ''(foo-walk))
+             ''(foo-walk)))
+  (assert (= (macroexpand-all `(do (foo-walk)))
+             '(do 42)))
+  (assert (= (macroexpand-all '`(do (foo-walk)))
+             '`(do (foo-walk))))
+  (assert (= (macroexpand-all '`(do ~(foo-walk)))
+             '`(do ~42)))
+  (assert (= (macroexpand-all '`(do (unquote_splice (foo-walk))))
+             '`(do (unquote_splice 42)))))
 
 
 (defn test-map-hyseq []

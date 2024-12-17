@@ -1,7 +1,7 @@
 (require
   hyrule.macrotools [defmacro!])
 (import
-  hyrule.collections [prewalk by2s]
+  hyrule.collections [by2s]
   hyrule.iterables [coll?]
   hyrule.misc [inc])
 
@@ -267,7 +267,7 @@
 
   Don't forget to ``(import hyrule [recur])``. The :hy:class:`recur` object holds the arguments for the next call. When the function returns a :hy:class:`recur`, ``loop`` calls it again with the new arguments. Otherwise, ``loop`` ends and the final value is returned. Thus, what would be a nested set of recursive calls becomes a series of calls that are resolved entirely in sequence.
 
-  Note that while ``loop`` uses the same syntax as ordinary function definitions for its lambda list, all arguments other than ``#* args`` and ``#* kwargs`` must have a default value, because the function will first be called with no arguments."
+  Note that while ``loop`` uses the same syntax as ordinary function definitions for its lambda list, all parameters other than ``#* args`` and ``#** kwargs`` must have a default value, because the function will first be called with no arguments."
 
   `(do
     (defn ~g!f ~bindings
