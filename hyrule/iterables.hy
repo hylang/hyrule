@@ -52,20 +52,30 @@
 
 
 (defn flatten [coll]
-  #[=[Recurisvely collect all the elements and subelements of ``coll`` into a
-  single list. :hy:func:`coll?` is used to decide whether objects should be
-  descended into. ::
+  #[=[Recurisvely collect all the elements and subelements of ``coll``,
+  depth-first, and return them in a single list. :hy:func:`coll?` is used to
+  decide whether objects should be descended into. ::
+
 
     (flatten ["foo" #(1 2) [1 [2 3] 4] "bar"])
-      ; => ["foo" 1 2 1 2 3 4 "bar"]]=]
-  (if (coll? coll)
-    (_flatten coll [])
-    (raise (TypeError (.format "{0!r} is not a collection" coll)))))
+      ; => ["foo" 1 2 1 2 3 4 "bar"]
+
+  Since iteration is used to collect the elements of ``coll``, dictionaries
+  are reduced to lists of keys::
+
+    (flatten [{"a" 1  "b" 2} {"c" 3  "d" 4}])
+      ; => ["a" "b" "c" "d"]
+
+  If ``coll`` isn't a collection at all, it's returned in a singleton list::
+
+    (flatten "hello")
+      ; => ["hello"]]=]
+  (_flatten coll []))
 
 (defn _flatten [coll result]
   (if (coll? coll)
-    (do (for [b coll]
-          (_flatten b result)))
+    (for [x coll]
+      (_flatten x result))
     (.append result coll))
   result)
 
