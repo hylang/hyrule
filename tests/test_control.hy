@@ -1,6 +1,7 @@
 (require
   hyrule [block branch ebranch case ecase cfor do-n lif list-n unless])
 (import
+  types [ModuleType]
   pytest)
 
 
@@ -314,11 +315,12 @@
 
 
 (defn test-lif []
-  ;; None is false
+  ;; `None` and `False` are false
   (assert (= (lif None "true" "false") "false"))
+  (assert (= (lif False "true" "false") "false"))
 
   ;; But everything else is True!  Even falsey things.
-  (for [x [True False 0 "some-string" "" (+ 1 2 3)]]
+  (for [x [True 0 "some-string" "" (+ 1 2 3)]]
     (assert (= (lif x "true" "false") "true")))
 
   ;; Test ellif [sic]
@@ -327,7 +329,14 @@
                   None 1
                   x 2
                   3)
-             2)))
+             2))
+
+  ;; It should still work with a different name.
+  (assert (=
+    (hy.eval '(foo  None 1  0 2  8 3)
+      :module (ModuleType "M")
+      :macros {"foo" (get-macro lif)})
+    2)))
 
 
 (defn test-list-n []

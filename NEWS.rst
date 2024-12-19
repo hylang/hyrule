@@ -13,6 +13,7 @@ Breaking Changes
 * `recur` is now a real object that must be imported from Hyrule when
   using `loop`.
 * `macroexpand-all` now uses the same parameters as `hy.macroexpand`.
+* `lif` now treats `False` as false.
 
 New Features
 ------------------------------
@@ -29,6 +30,7 @@ Bug Fixes
 * `loop` now works when nested.
 * `macroexpand-all` no longer crashes on stub macros.
 * `macroexpand-all` now recognizes macro names properly.
+* `lif` now works when renamed, or when invoked with `hy.R`.
 
 0.7.0 (released 2024-09-22; uses Hy ≥ 1)
 ======================================================
