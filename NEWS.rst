@@ -20,6 +20,7 @@ New Features
 * New macro `pun`.
 * New macro `map-hyseq`.
 * `loop` allows more kinds of parameters.
+* `assoc` allows keyword arguments.
 * `flatten`, given a non-collection, returns it as a singleton list,
   instead of raising an error.
 
