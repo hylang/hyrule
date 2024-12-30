@@ -18,8 +18,8 @@
       (_parse-indexing key)))
 
 
-(defn assoc [coll #* kvs]
-  "Associate key-value pairs by assigning to elements of `coll`. Thus, ::
+(defn assoc [coll #* kvs #** kwargs]
+  #[[Associate key-value pairs by assigning to elements of ``coll``. Thus, ::
 
     (assoc coll  k1 v1  k2 v2  k3 v3)
 
@@ -31,11 +31,20 @@
 
   except ``coll`` is evaluated exactly once. Notice that this implies
   the return value is ``None``, not ``coll`` or one of the newly
-  assigned elements."
+  assigned elements.
+
+  Keyword arguments work like positional arguments with the keyword
+  used as a string key, subject to Hy's usual mangling rules. Thus,
+  ``(assoc coll :foo-bar 1)`` is equivalent to ``(assoc coll "foo_bar"
+  1)`` or ``(setv (get coll "foo_bar") 1)``. Assignments for keyword
+  arguments occur after (and thus may override) assignments for
+  positional arguments.]]
 
   (when (% (len kvs) 2)
-    (raise (ValueError "`assoc` takes an odd number of arguments")))
+    (raise (ValueError "`assoc` takes an odd number of arguments (not counting `#** kwargs`)")))
   (for [[k v] (by2s kvs)]
+    (setv (get coll k) v))
+  (for [[k v] (.items kwargs)]
     (setv (get coll k) v)))
 
 

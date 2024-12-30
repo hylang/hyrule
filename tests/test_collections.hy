@@ -27,3 +27,13 @@
   (assoc (f)  "a" 1  "b" 2  "c" 3)
   (assert (= d {"a" 1  "b" 2  "c" 3}))
   (assert (= counter [1])))
+
+
+(defn test-assoc-kwargs []
+  (setv vals {1 2})
+  (assoc vals :foo-bar 3)
+  (assert (= vals {1 2  "foo_bar" 3}))
+  ; Keyword arguments override positional arguments (in the case of a
+  ; plain `dict`).
+  (assoc vals :x 8 "x" 9 "y" 10)
+  (assert (= vals {1 2  "foo_bar" 3  "x" 8  "y" 10})))
