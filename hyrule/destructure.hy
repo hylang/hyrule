@@ -1,61 +1,61 @@
 ;;; Hy destructuring bind
-"
-This module is heavily inspired by destructuring from Clojure and provides very
-similar semantics. It provides several macros that allow for destructuring within
-their arguments.
+#[=[
+This module is heavily inspired by destructuring from Clojure and provides
+similar semantics. It provides several macros that allow for destructuring
+within their arguments, not unlike iterable unpacking, as in ``(setv [a #* b c]
+(range 10))``, but also functioning on dictionaries and allowing several special
+options.
 
-Destructuring allows one to easily peek inside a data structure and assign names to values within. For example, ::
+Destructuring allows you to easily peek inside a data structure and assign names to values within. For example, suppose you have a data structure like this::
 
-    (setv+ {[{name :name [weapon1 weapon2] :weapons} :as all-players] :players
-            map-name :map
-            :keys [tasks-remaining tasks-completed]}
-           data)
+    (setv data {:players [{:name "Joe" :weapons [:sword :dagger]}
+                          {:name "Max" :weapons [:axe :crossbow]}]
+                :map "Dungeon"
+                :tasks-remaining 4})
 
-would be equivalent to ::
+You could manually write out a lot of assignments like this::
 
     (setv map-name (.get data ':map)
           tasks-remaining (.get data ':tasks-remaining)
           tasks-completed (.get data ':tasks-completed)
           all-players (.get data ':players)
           name (.get (get all-players 0) ':name)
-          weapon1 (get (.get (get all-players 0) ':weapons) 0)
-          weapon2 (get (.get (get all-players 0) ':weapons) 1))
+          weapon1 (get all-players 0 :weapons 0)
+          weapon2 (get all-players 0 :weapons 1))
 
-where ``data`` might be defined by ::
+Or, for the same result, you could use a destructuring macro::
 
-    (setv data {:players [{:name Joe :weapons [:sword :dagger]}
-                          {:name Max :weapons [:axe :crossbow]}]
-                :map \"Dungeon\"
-                :tasks-remaining 4})
-
-This is similar to unpacking iterables in Python, such as ``a, *b, c = range(10)``, however it also works on dictionaries, and has several special options.
+    (setv+ {[{name :name [weapon1 weapon2] :weapons} :as all-players] :players
+            map-name :map
+            :keys [tasks-remaining tasks-completed]}
+           data)
 
 .. warning::
-   Variables which are not found in the expression are silently set to ``None`` if no default value is specified. This is particularly important with ``defn+`` and ``fn+``. ::
+   Variables which are not found in the data are silently set to ``None`` if no default value is specified. This is particularly important with ``defn+`` and ``fn+``. ::
 
       (defn+ some-function [arg1
-                            {subarg2-1 \"key\"
+                            {subarg2-1 "key"
                              :or {subarg2-1 20}
                              :as arg2}
                             [subarg3-1
                              :& subargs3-2+
                              :as arg3]]
-        {\"arg1\" arg1  \"arg2\" arg2  \"arg3\" arg3
-         \"subarg2-1\" subarg2-1  \"subarg3-1\" subarg3-1  \"subargs3-2+\" subargs3-2+})
+        {"arg1" arg1  "arg2" arg2  "arg3" arg3
+         "subarg2-1" subarg2-1  "subarg3-1" subarg3-1  "subargs3-2+" subargs3-2+})
 
-      (some-function 1 {\"key\" 2} [3 4 5])
-      ; => {\"arg1\" 1  \"arg2\" {\"key\" 2}  \"arg3\" [3 4 5]
-      ;     \"subarg2-1\" 2  \"subarg3-1\" 3  \"subargs3-2+\" [4 5]}
+      (some-function 1 {"key" 2} [3 4 5])
+      ; => {"arg1" 1  "arg2" {"key" 2}  "arg3" [3 4 5]
+      ;     "subarg2-1" 2  "subarg3-1" 3  "subargs3-2+" [4 5]}
 
       (some-function 1 2 [])
-      ; => {\"arg1\" 1  \"arg2\" None  \"arg3\" []
-      ;     \"subarg2-1\" 20  \"subarg3-1\" None  \"subargs3-2+\" []}
+      ; => {"arg1" 1  "arg2" None  "arg3" []
+      ;     "subarg2-1" 20  "subarg3-1" None  "subargs3-2+" []}
 
       (some-function)
-      ; => {\"arg1\" None  \"arg2\" None  \"arg3\" None
-      ;     \"subarg2-1\" 20  \"subarg3-1\" None  \"subargs3-2+\" None}
+      ; => {"arg1" None  "arg2" None  "arg3" None
+      ;     "subarg2-1" 20  "subarg3-1" None  "subargs3-2+" None}
 
-   Note that variables with a default value from an ``:or`` special option will fallback to their default value instead of being silently set to ``None``.
+   Notice how a variable with a default value from an ``:or`` special option will fall back to that value instead of ``None``.
 
 Pattern types
 ~~~~~~~~~~~~~
@@ -65,34 +65,41 @@ Several kinds of patterns are understood.
 Dictionary patterns
 -------------------
 
-Dictionary patterns are specified using dictionaries, where the keys corresponds to the symbols which are to be bound, and the values correspond to which key needs to be looked up in the expression for the given symbol. ::
+Dictionary patterns are specified using a :class:`hy.models.Dict`, where the keys corresponds to the symbols to be bound, and the values correspond to keys to be looked up in the data. ::
 
-    (setv+ {a :a b \"b\" c #(1 0)} {:a 1 \"b\" 2 #(1 0) 3})
+    (setv+ {a :a  b "b"  c #(1 0)}
+           {:a 1  "b" 2  #(1 0) 3})
     [a b c] ; => [1 2 3]
 
-The keys can also be one of the following 4 special options: ``:or``, ``:as``, ``:keys``, ``:strs``.
+A key in a dictionary pattern can also be one of the following special options:
 
 - ``:or`` takes a dictionary of default values.
-- ``:as`` takes a variable name which is bound to the entire expression.
-- ``:keys`` takes a list of variable names which are looked up as keywords in the expression.
-- ``:strs`` is the same as ``:keys`` but uses strings instead.
+- ``:as`` takes a symbol, which is bound to the entire input dictionary.
+- ``:keys`` takes a list of symbols, which are looked up as keywords in the data.
+- ``:strs`` works like ``:keys``, but looks up strings instead of keywords.
 
-The ordering of the special options and the variable names doesn't matter, however each special option can be used at most once. ::
+For example::
 
-    (setv+ {:keys [a b] :strs [c d] :or {b 2 d 4} :as full} {:a 1 :b 2 \"c\" 3})
-    [a b c d full] ; => [1 2 3 4 {:a 1 :b 2 \"c\" 3}]
+    (setv+ {:keys [a b]  :strs [c d]  :or {b 2 d 4}  :as full}
+           {:a 1  :b 2  "c" 3})
+    [a b c d full] ; => [1 2 3 4 {:a 1  :b 2  "c" 3}]
 
-Variables which are not found in the expression are set to ``None`` if no default value is specified.
+The ordering of the special options and the ordinary variable names doesn't matter, but each special option can be used at most once.
+
+If a lookup fails, and the symbol to be bound to doesn't have an associated default, ``None`` is bound instead::
+
+   (setv+ {out "a"} {})
+   (is out None) ; => True
 
 List patterns
 -------------
 
-List patterns are specified using lists. The nth symbol in the pattern is bound to the nth value in the expression, or ``None`` if the expression has fewer than n values.
+List patterns are specified with a :class:`hy.models.List`. The ``n``\th symbol in the pattern is bound to the ``n``\th value in the data, or ``None`` if the data has fewer than ``n`` values.
 
-There are 2 special options: ``:&`` and ``:as``.
+List patterns support these special options:
 
-- ``:&`` takes a pattern which is bound to the rest of the expression. This pattern can be anything, including a dictionary, which allows for keyword arguments.
-- ``:as`` takes a variable name which is bound to the entire expression.
+- ``:&`` takes a pattern, which is bound to the rest of the data. This pattern can be anything, including a dictionary pattern, which allows for keyword arguments.
+- ``:as`` takes a symbol, which is bound to the whole input iterable.
 
 If the special options are present, they must be last, with ``:&`` preceding ``:as`` if both are present. ::
 
@@ -102,13 +109,19 @@ If the special options are present, they must be last, with ``:&`` preceding ``:
     (setv+ [a b :& {:keys [c d] :or {c 3}}] [1 2 :d 4 :e 5]
     [a b c d] ; => [1 2 3 4]
 
-Note that this pattern calls ``list`` on the expression before binding the variables, and hence cannot be used with infinite iterators.
+Note that list patterns call ``list`` on the data before binding the variables, so they can't be used with infinite iterators.
 
 Iterator patterns
 -----------------
 
-Iterator patterns are specified using round brackets. They are the same as list patterns, but can be safely used with infinite generators. The iterator pattern does not allow for recursive destructuring within the ``:as`` special option.
-"
+Iterator patterns are specified with a :class:`hy.models.Expression`. They work the same as list patterns except that they only consume as much of the input as is required for matching, so they can be safely used with infinite iterators. ``:rest`` and ``:as`` create iterables instead of lists, and no recursive destructuring within ``:as`` is allowed. ::
+
+    (import itertools [count islice])
+    (setv+ (a b :& rest :as full) (count))
+    [a b] ; => [0 1]
+    (list (islice rest 5)) ; => [2 3 4 5 6]
+    (list (islice full 5)) ; => [0 1 2 3 4]
+]=]
 
 (require
   hyrule.argmove [->>]
@@ -122,16 +135,13 @@ Iterator patterns are specified using round brackets. They are the same as list 
   hyrule.collections [by2s])
 
 (defmacro setv+ [#* pairs]
-  "Assignment with destructuring for both mappings and iterables.
+#[=[
 
-  Destructuring equivalent of ``setv``. Binds symbols found in a pattern
-  using the corresponding expression.
+Take pairs of destructuring patterns and input data structures, assign to variables in the current scope as specified by the patterns, and return ``None``. ::
 
-  Examples:
-    ::
-
-       (setv+ pattern_1 expression_1 ...  pattern_n expression_n)
-  "
+    (setv+ {a "apple"  b "banana"}  {"apple" 1  "banana" 2}
+           [c d] [3 4])
+    [a b c d] ; => [1 2 3 4]]=]
   (setv gsyms [])
   `(do
     (setv ~@(gfor [binds expr] (by2s pairs)
@@ -140,10 +150,14 @@ Iterator patterns are specified using round brackets. They are the same as list 
     (del ~@gsyms)))
 
 (defmacro dict=: [#* pairs]
-  "Destructure into dict
+  #[[
 
-  Same as ``setv+``, except returns a dictionary with symbols to be defined,
-  instead of actually declaring them."
+Take pairs of destructuring patterns and input data structures, and return a dictionary of bindings, where the keys are :class:`hy.models.Symbol` objects. The syntax is the same as that of :hy:func:`setv+`. ::
+
+    (dict=: {a "apple"  b "banana"}
+            {"apple" 1  "banana" 2})
+      ; => {'a 1  'b 2}]]
+
   (setv gsyms []
         result (hy.gensym 'dict=:))
   `(do
@@ -331,11 +345,7 @@ Iterator patterns are specified using round brackets. They are the same as list 
                             s)))))
 
 (defmacro! defn+ [fn-name args #* doc+body]
-  "Define function `fn-name` with destructuring within `args`.
-
-  Note that `#*` etc have no special meaning and are
-  intepretted as any other argument.
-  "
+  "As :hy:func:`defn`, but the lambda list is destructured as a list pattern. The usual special parameter names in lambda lists, such as `#*`, aren't special here. No type annotations are allowed."
   (setv [doc body] (if (isinstance (get doc+body 0) str)
                      [(get doc+body 0) (rest doc+body)]
                      [None doc+body]))
@@ -345,11 +355,7 @@ Iterator patterns are specified using round brackets. They are the same as list 
      ~@body))
 
 (defmacro! fn+ [args #* body]
-  "Return anonymous function with destructuring within `args`
-
-  Note that `*`, `/`, etc have no special meaning and are
-  intepretted as any other argument.
-  "
+  "A version of :hy:func:`fn` that destructures like :hy:func:`defn+`."
   `(fn [#* ~g!args #** ~g!kwargs]
      ~(_expanded-setv args g!args g!kwargs)
      ~@body))
@@ -371,7 +377,7 @@ Iterator patterns are specified using round brackets. They are the same as list 
      ~@body))
 
 (defmacro let+ [args #* body]
-  "let macro with full destructuring with `args`"
+  "A version of :hy:func:`let` that allows destructuring patterns in place of plain symbols for binding."
   (when (% (len args) 2)
         (raise (ValueError "let bindings must be paired")))
   `(let ~(lfor [bs expr] (by2s args)
