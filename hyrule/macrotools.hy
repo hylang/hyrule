@@ -358,3 +358,33 @@
   (if ident
     `(. ~imp ~@(map hy.models.Symbol ident))
     imp))
+
+
+(defn parse-defn-like [like args]
+  ; Currently, this is just for internal use.
+
+  (cond
+    (= like 'fn)
+      (setv [headers args] (if (= (get args 0) ':async)
+        [['fn (get args 0)] (rest args)]
+        [['fn] args]))
+    (= like 'defn) (do
+      (setv headers ['defn] args (list args))
+      ; Pop leading elements from `args` until we hit the function name.
+      (while True
+        (.append headers (.pop args 0))
+        (when (or
+            ; The function name is a symbol or an annotation expression.
+            (isinstance (get headers -1) hy.models.Symbol)
+            (and
+              (isinstance (get headers -1) hy.models.Expression)
+              (get headers -1)
+              (= (get headers -1 0) 'annotate)))
+          (break)))))
+
+  (setv [params #* args] args)
+  (setv [doc body] (if (and (> (len args) 1) (isinstance (get args 0) str))
+    [(get args 0) (cut args 1 None)]
+    [None args]))
+
+  #(headers params doc body))

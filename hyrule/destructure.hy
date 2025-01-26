@@ -131,8 +131,8 @@ Iterator patterns are specified with a :class:`hy.models.Expression`. They work 
   itertools [starmap chain count]
   functools [reduce]
   hy.pyops *
-  hyrule.iterables [rest]
-  hyrule.collections [by2s])
+  hyrule.collections [by2s]
+  hyrule.macrotools [parse-defn-like])
 
 (defmacro setv+ [#* pairs]
 #[=[
@@ -344,20 +344,20 @@ Take pairs of destructuring patterns and input data structures, and return a dic
                                 s [(hy.models.Keyword k) v]
                             s)))))
 
-(defmacro! defn+ [fn-name args #* doc+body]
-  "As :hy:func:`defn`, but the lambda list is destructured as a list pattern. The usual special parameter names in lambda lists, such as `#*`, aren't special here. No type annotations are allowed."
-  (setv [doc body] (if (isinstance (get doc+body 0) str)
-                     [(get doc+body 0) (rest doc+body)]
-                     [None doc+body]))
-  `(defn ~fn-name [#* ~g!args #** ~g!kwargs]
-     ~doc
-     ~(_expanded-setv args g!args g!kwargs)
-     ~@body))
+(defmacro defn+ [#* args]
+  "As :hy:func:`defn`, but the lambda list is destructured as a list pattern. The usual special parameter names in lambda lists, such as `#*`, aren't special here. No type annotations are allowed are in the lambda list, but a return-value annotation for the whole function is allowed."
+  (destructuring-fn 'defn args))
 
-(defmacro! fn+ [args #* body]
+(defmacro fn+ [#* args]
   "A version of :hy:func:`fn` that destructures like :hy:func:`defn+`."
-  `(fn [#* ~g!args #** ~g!kwargs]
-     ~(_expanded-setv args g!args g!kwargs)
+  (destructuring-fn 'fn args))
+
+(defn destructuring-fn [like args]
+  (setv [headers params doc body] (parse-defn-like like args))
+  (setv args (hy.gensym) kwargs (hy.gensym))
+  `(~@headers [#* ~args #** ~kwargs]
+     ~doc
+     ~(_expanded-setv params args kwargs)
      ~@body))
 
 (defmacro! defn/a+ [fn-name args #* doc+body]

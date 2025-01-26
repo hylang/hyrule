@@ -65,10 +65,12 @@
   (defclass Pony []
     (meth __init__
         [a1 @i1 [@i2 "i2-default"] [a2 "a2-default"] #* @ia #** @ikw]
+      "docstring"
       (nonlocal got)
       (setv got [a1 @i1 i2 a2 @ia @ikw])
       (setv @i1 "override")))
 
+  (assert (= Pony.__init__.__doc__ "docstring"))
   (setv x (Pony 1 2))
   (assert (= got [1 2 "i2-default" "a2-default" #() {}]))
   (assert (= x.i1 "override"))
@@ -96,6 +98,27 @@
   (setv x (Pony 1))
   (assert (= x.value 1))
   (assert (= x.attr 2)))
+
+
+(do-mac (when (>= hy.I.sys.version-info #(3 12))
+'(defn test-meth-fancy []
+
+  (defclass Pony []
+    (meth
+      :async
+      [example-decorator]
+      :tp [T]
+      #^ (get list T) fancy-meth
+      [a @b]
+      [(- a @b)]))
+
+  (setv p (Pony))
+  (assert (= (hy.I.asyncio.run (.fancy-meth p 5 2)) [3]))
+  (assert (= p.b 2))
+  (assert (= Pony.fancy-meth.da "hello"))
+  (assert (=
+    (str (:return (hy.I.inspect.get-annotations Pony.fancy-meth)))
+    "list[T]")))))
 
 
 (defn test-ameth []
