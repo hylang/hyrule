@@ -61,7 +61,7 @@
   #[[Import the Python or Hy source code at ``path`` as a module with
   :func:`importlib.util.spec_from_file_location`, per Python's documentation.
   Return the new module object. ``name`` defaults to ``(str (hy.gensym
-  "import-file"))``. ::
+  "import-path"))``. ::
 
     (setv p (hy.I.pathlib.Path "mymodule.hy"))
     (.write-text p "(setv foo 3)")
@@ -69,7 +69,7 @@
     (print m.foo)  ; => 3]]
 
   (when (is name None)
-    (setv name (str (hy.gensym "import-file"))))
+    (setv name (str (hy.gensym "import-path"))))
   (when (in name sys.modules)
     (raise (ValueError f"The name {(hy.repr name)} is already in use in `sys.modules`.")))
 

@@ -8,6 +8,13 @@ Removals
 * `defn/a+` has been removed. Use `(defn+ :async …)` instead.
 * `fn/a+` has been removed. Use `(fn+ :async …)` instead.
 
+Other Breaking Changes
+------------------------------
+* The names of gensyms produced by `import-path` have changed. (This
+  shouldn't break your code unless you're doing something
+  exceptionally weird, but the argument to `hy.gensym` was documented,
+  so this is technically a breaking change.)
+
 Bug Fixes
 ------------------------------
 * A lot of incompatibilities of `meth`, `ameth`, `defn+`, and `fn+`
