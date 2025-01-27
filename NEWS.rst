@@ -3,6 +3,11 @@
 Unreleased
 ======================================================
 
+Removals
+------------------------------
+* `defn/a+` has been removed. Use `(defn+ :async …)` instead.
+* `fn/a+` has been removed. Use `(fn+ :async …)` instead.
+
 Bug Fixes
 ------------------------------
 * A lot of incompatibilities of `meth`, `ameth`, `defn+`, and `fn+`

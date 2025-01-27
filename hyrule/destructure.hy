@@ -360,22 +360,6 @@ Take pairs of destructuring patterns and input data structures, and return a dic
      ~(_expanded-setv params args kwargs)
      ~@body))
 
-(defmacro! defn/a+ [fn-name args #* doc+body]
-  "Async variant of ``defn+``."
-  (setv [doc body] (if (isinstance (get doc+body 0) str)
-                     [(get doc+body 0) (rest doc+body)]
-                     [None doc+body]))
-  `(defn/a ~fn-name [#* ~g!args #** ~g!kwargs]
-     ~doc
-     ~(_expanded-setv args g!args g!kwargs)
-     ~@body))
-
-(defmacro! fn/a+ [args #* body]
-  "Async variant of ``fn+``."
-  `(fn/a [#* ~g!args #** ~g!kwargs]
-     ~(_expanded-setv args g!args g!kwargs)
-     ~@body))
-
 (defmacro let+ [args #* body]
   "A version of :hy:func:`let` that allows destructuring patterns in place of plain symbols for binding."
   (when (% (len args) 2)
