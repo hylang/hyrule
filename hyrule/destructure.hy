@@ -345,7 +345,7 @@ Take pairs of destructuring patterns and input data structures, and return a dic
                             s)))))
 
 (defmacro defn+ [#* args]
-  "As :hy:func:`defn`, but the lambda list is destructured as a list pattern. The usual special parameter names in lambda lists, such as `#*`, aren't special here. No type annotations are allowed are in the lambda list, but a return-value annotation for the whole function is allowed."
+  "As :hy:func:`defn`, but the lambda list is destructured as a list pattern. The usual special parameter names in lambda lists, such as ``#*``, aren't special here. No type annotations are allowed are in the lambda list, but a return-value annotation for the whole function is allowed."
   (destructuring-fn 'defn args))
 
 (defmacro fn+ [#* args]

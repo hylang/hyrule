@@ -45,11 +45,11 @@
 
 (defn match-fn-params [args params]
   #[[Match an iterable of arguments against a parameter list in the
-  style of a :hy:func:`defn` lambda list. The parameter-list syntax
-  here is somewhat restricted: annotations are forbiddden, ``/`` and
-  ``*`` aren't recognized, and nothing is allowed after ``#* args``
-  other than ``#** kwargs``. Return a dictionary of the parameters and
-  their values. ::
+  style of a :hy:func:`defn` lambda list. Return a dictionary of the
+  parameters and their values. The parameter-list syntax here is
+  somewhat restricted: annotations are forbiddden, ``/`` and ``*``
+  aren't recognized, and nothing is allowed after ``#* args`` other
+  than ``#** kwargs``. ::
 
     (match-fn-params
       [1 :foo "x"]
@@ -298,7 +298,7 @@
       (+= FOO (ABS -5)))
     (print foo)  ; => 20
 
-  That's why the parameters of ``map-model`` are backwards compared to ``map``: in user code, ``x`` is typically a symbol or other simple form whereas ``f`` is a multi-line anonymous function.]]
+  That's why the parameters of ``map-model`` are backwards compared to :func:`map`: in user code, ``x`` is typically a symbol or other simple form whereas ``f`` is a multi-line anonymous function.]]
 
   (_map-model (hy.as-model x) f))
 

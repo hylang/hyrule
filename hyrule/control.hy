@@ -179,18 +179,18 @@
   ``sys.argv`` is always the name of the script being invoked, whereas the rest
   are command-line arguments. If ``args`` is ``[]``, this will be treated like
   ``[#* _]``, so any command-line arguments (and the script name) will be
-  allowed, but ignored.
+  allowed, but ignored. ::
+
+    (defmain [program-name argument]
+      (print "Welcome to" program-name)
+      (print "The answer is" (* (float argument) 2)))
 
   If the defined function returns an :class:`int`, :func:`sys.exit` is called
   with that integer as the return code.
 
   If you want fancy command-line arguments, you can use the standard Python
   module :mod:`argparse` in the usual way, because ``defmain`` doesn't change
-  ``sys.argv``. See also :hy:func:`parse-args`. ::
-
-    (defmain [program-name argument]
-      (print "Welcome to" program-name)
-      (print "The answer is" (* (float argument) 2)))]]
+  ``sys.argv``. See also :hy:func:`parse-args`.]]
 
   (setv retval (hy.gensym)
         restval (hy.gensym))
@@ -264,13 +264,16 @@
 
   With ``loop``, this would be written as::
 
+    (require hyrule [loop])
+    (import hyrule [recur])
+
     (defn factorial [n]
       (loop [[n n] [acc 1]]
         (if n
           (recur (- n 1) (* acc n))
           acc)))
 
-  Don't forget to ``(import hyrule [recur])``. The :hy:class:`recur` object holds the arguments for the next call. When the function returns a :hy:class:`recur`, ``loop`` calls it again with the new arguments. Otherwise, ``loop`` ends and the final value is returned. Thus, what would be a nested set of recursive calls becomes a series of calls that are resolved entirely in sequence.
+  The :hy:class:`recur` object holds the arguments for the next call. When the function returns a :hy:class:`recur`, ``loop`` calls it again with the new arguments. Otherwise, ``loop`` ends and the final value is returned. Thus, what would be a nested set of recursive calls becomes a series of calls that are resolved entirely in sequence.
 
   Note that while ``loop`` uses the same syntax as ordinary function definitions for its lambda list, all parameters other than ``#* args`` and ``#** kwargs`` must have a default value, because the function will first be called with no arguments."
 

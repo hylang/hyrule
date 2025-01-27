@@ -64,7 +64,7 @@
       (if (> (len items) self.max-items-in-repr) ", ..." ""))))
 
 (defmacro seq [param #* seq-code]
-  "Define a :hy:class:`Sequence` with code to compute the *n*-th element, where *n* starts from 0. The first argument is a literal list with a symbol naming the parameter, like the lambda list of :hy:func:`defn`, and the other arguments are the code to be evaluated. ::
+  r"Define a :hy:class:`Sequence` with code to compute the ``n``\th element, where ``n`` starts at 0. The first argument is a literal list with a symbol naming the parameter, like the lambda list of :hy:func:`defn`, and the other arguments are the code to be evaluated. ::
 
     (setv s (seq [n] (** n 2)))
     (print (get s 2))  ; => 4

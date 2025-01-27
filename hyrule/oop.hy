@@ -3,7 +3,7 @@
 
 
 (defmacro meth [#* args]
-  #[[A replacement for :hy:func:`defn` that provides syntactic sugar for ``self``. As the name suggests, it's most useful for defining methods. The parameter list is automatically prepended with ``self``, and any reference to a symbol beginning with ``@``, such as ``@foo``, is replaced by ``self.foo``::
+  #[[A replacement for :hy:func:`defn` that provides syntactic sugar for ``self``. As the name suggests, it's most useful for defining methods. The parameter list is automatically prepended with ``self``, and any reference to a symbol beginning with ``@`` is replaced such that ``@foo`` becomes ``self.foo``::
 
     (defclass BirdWatcher []
 

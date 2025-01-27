@@ -15,7 +15,7 @@
 
 (defn coll? [x]
   #[[Return ``True`` if ``x`` inherits from :class:`collections.abc.Iterable`
-  but not ``str`` or ``bytes``. ::
+  but not :class:`str` or :class:`bytes`. ::
 
     (coll? ["abc"])         ; True
     (coll? {"a" 1 "b" 2})   ; True
@@ -29,7 +29,7 @@
 (defn distinct [coll]
   "Return an iterator from the original iterable ``coll`` with no
   duplicates. Duplicates are detected by calling :hy:func:`in
-  <hy.pyops.in>` on a :class:`set`. Elements will be produced in order
+  <hy.pyops.in>` on a :class:`set`. Elements are produced in order
   of their first appearance in ``coll``. ::
 
     (list (distinct [1 2 3 4 3 5 0 2]))  ; => [1 2 3 4 5 0]"
@@ -95,11 +95,11 @@
   arguments as ``range``, but includes the endpoint (given a
   compatible start point and step size). ::
 
-    (thru 3)
+    (list (thru 3))
       ; => [0 1 2 3]
-    (thru 0 10 2)
+    (list (thru 0 10 2))
       ; => [0 2 4 6 8 10]
-    (thru 0 9 2)
+    (list (thru 0 9 2))
       ; => [0 2 4 6 8]"
 
   (when (is b None)
