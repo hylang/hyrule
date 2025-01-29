@@ -329,6 +329,7 @@
   (assert (= zot "text")))
 
 (defn test-defn+ []
+
   (defn+ foo [[a b] {:keys [c d]} :& {:strs [e f]}]
     "bar foo"
     [a b c d e f])
@@ -336,16 +337,52 @@
   (assert (= "bar foo" foo.__doc__))
   (defn+ bar [&optional &rest &kwonly]
     (+ &optional &rest &kwonly))
-  (assert (= (bar 1 2 3) 6)))
+  (assert (= (bar 1 2 3) 6))
+
+  (defn+ foo [])
+  (assert (is (foo) None)))
+
+(do-mac (when (>= hy.I.sys.version-info #(3 12))
+'(defn test-defn+-fancy []
+
+  (defn decorator1 [f]
+    (setv f.a1 1)
+    f)
+  (defn decorator2 [f]
+    (setv f.a2 2)
+    f)
+
+  (defn+
+    :async
+    [decorator1 decorator2]
+    :tp [T]
+    #^ (get list T) fancy-fun
+    [[a b]]
+    [(- a b)])
+
+  (assert (= (hy.I.asyncio.run (fancy-fun [5 2])) [3]))
+  (assert (= fancy-fun.a1 1))
+  (assert (= fancy-fun.a2 2))
+  (assert (=
+    (str (:return (hy.I.inspect.get-annotations fancy-fun)))
+    "list[T]")))))
 
 (defn test-fn+ []
+
   (setv f (fn+ [[a b] {:keys [c d]} :& {:strs [e f]}]
             [a b c d e f]))
   (assert (= [1 2 3 4 5 6]
              (f [1 2] {:c 3 :d 4} "e" 5 "f" 6)))
   (setv g (fn+ [&optional &rest &kwonly]
             (+ &optional &rest &kwonly)))
-  (assert (= 6 (g 1 2 3))))
+  (assert (= 6 (g 1 2 3)))
+
+  (setv f (fn+ []))
+  (assert (is (f) None))
+
+  (setv f (fn+ [] "hello world" 1))
+  (assert (= f.__doc__ "hello world"))
+  (assert (= (f) 1)))
 
 (defn test-let+ []
   (let+ [a 1]

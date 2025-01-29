@@ -1,5 +1,19 @@
 .. default-role:: code
 
+Unreleased
+======================================================
+
+Removals
+------------------------------
+* `defn/a+` has been removed. Use `(defn+ :async …)` instead.
+* `fn/a+` has been removed. Use `(fn+ :async …)` instead.
+
+Bug Fixes
+------------------------------
+* A lot of incompatibilities of `meth`, `ameth`, `defn+`, and `fn+`
+  with the core `defn` and `fn` have been fixed. You can now use `:async`,
+  docstrings are recognized properly, etc.
+
 0.8.0 (released 2025-01-08)
 ======================================================
 

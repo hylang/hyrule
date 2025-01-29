@@ -75,10 +75,8 @@ API
 ~~~~~~~~~~
 
 .. hy:automacro:: defn+
-.. hy:automacro:: defn/a+
 .. hy:automacro:: dict=:
 .. hy:automacro:: fn+
-.. hy:automacro:: fn/a+
 .. hy:automacro:: let+
 .. hy:automacro:: setv+
 

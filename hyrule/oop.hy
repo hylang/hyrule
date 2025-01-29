@@ -1,5 +1,5 @@
 (import
-  hyrule.macrotools [map-model])
+  hyrule.macrotools [map-model parse-defn-like])
 
 
 (defmacro meth [#* args]
@@ -35,17 +35,15 @@
 
   The symbol ``@,`` is replaced with just plain ``self``. By contrast, the symbol ``@`` is left untouched, since it may refer to the Hy core macro :hy:func:`@ <hy.pyops.@>`.]]
 
-  (if (and args (isinstance (get args 0) hy.models.List))
-    (setv [decorators name params #* body] args)
-    (setv decorators []  [name params #* body] args))
-  `(defn ~decorators ~name ~@(_meth params body)))
+  (_meth 'defn args))
 
-(defmacro ameth [params #* body]
+(defmacro ameth [#* args]
   "Define an anonymous method. ``ameth`` is to :hy:func:`meth` as :hy:func:`fn` is to :hy:func:`defn`: it has the same syntax except that no method name (or decorators) are allowed."
-  `(fn ~@(_meth params body)))
+  (_meth 'fn args))
 
 
-(defn _meth [params body]
+(defn _meth [like args]
+  (setv [headers params doc body] (parse-defn-like like args))
   (setv to-set [])
   (setv params (map-model params (fn [x]
     (when (and (isinstance x hy.models.Symbol) (.startswith x "@"))
@@ -58,9 +56,9 @@
         (= x '@) '@
         (= x '@,) 'self
         True      `(. self ~(hy.models.Symbol (cut x 1 None))))))))
-  `[
-    [self ~@params]
+  `(~@headers [self ~@params]
+     ~doc
     ~@(gfor
       sym to-set
       `(setv (. self ~sym) ~sym))
-    ~@body])
+    ~@body))
