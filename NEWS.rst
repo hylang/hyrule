@@ -9,6 +9,8 @@ Removals
 * `fn/a+` has been removed. Use `(fn+ :async …)` instead.
 * `profile/calls` has been removed. Use `pycallgraph2` or
   `python-call-graph`, which are available on PyPI, instead.
+* `profile/cpu` has been removed. Use `(with [pr (cProfile.Profile)]
+  …)` instead.
 
 Other Breaking Changes
 ------------------------------

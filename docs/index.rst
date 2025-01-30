@@ -144,7 +144,6 @@ API
 .. hy:autofunction:: import-path
 .. hy:automacro:: of
 .. hy:autofunction:: parse-args
-.. hy:automacro:: profile/cpu
 .. hy:automacro:: pun
 .. hy:autofunction:: sign
 .. hy:automacro:: smacrolet

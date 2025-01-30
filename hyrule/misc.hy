@@ -137,43 +137,6 @@
   (.parse-args parser args))
 
 
-(defmacro! profile/cpu [#* body]
-  "Profile a bit of code
-
-  Examples:
-    ::
-
-       => (require hyrule.contrib.profile [profile/cpu])
-       => (profile/cpu (print \"hey there\"))
-
-    .. code-block:: bash
-
-      hey there
-      <pstats.Stats instance at 0x14ff320>
-                2 function calls in 0.000 seconds
-
-        Random listing order was used
-
-        ncalls  tottime  percall  cumtime  percall filename:lineno(function)        1    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}
-            1    0.000    0.000    0.000    0.000 {print}
-
-  "
-  `(do
-     (import cProfile pstats)
-
-     (import io [StringIO])
-
-     (setv ~g!hy-pr (.Profile cProfile))
-     (.enable ~g!hy-pr)
-     (do ~@body)
-     (.disable ~g!hy-pr)
-     (setv ~g!hy-s (StringIO))
-     (setv ~g!hy-ps
-           (.sort-stats (pstats.Stats ~g!hy-pr :stream ~g!hy-s)))
-     (.print-stats ~g!hy-ps)
-     (print (.getvalue ~g!hy-s))))
-
-
 (defmacro pun [#* body]
   #[[Evaluate ``body`` with a shorthand for keyword arguments that are set to variables of the same name. Any keyword whose name starts with an exclamation point, such as ``:!foo``, is replaced with a keyword followed by a symbol, such as ``:foo foo``::
 
