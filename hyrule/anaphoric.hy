@@ -4,7 +4,7 @@ easier to read. An anaphoric macro assigns values to designated symbols
 
 
 (require
-  hyrule.macrotools [defmacro!]
+  hyrule.macrotools [defmacro! def-gensyms]
   hyrule.argmove [->])
 
 
@@ -100,7 +100,7 @@ easier to read. An anaphoric macro assigns values to designated symbols
   there is no such element. ::
 
     (ap-last (> it 5) (range 10))  ; => 9"
-  (setv x (hy.gensym))
+  (def-gensyms x)
   `(let [it None]
     (setv ~x None)
     (for  [it ~xs  :if ~form]

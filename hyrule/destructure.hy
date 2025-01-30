@@ -126,7 +126,7 @@ Iterator patterns are specified with a :class:`hy.models.Expression`. They work 
 (require
   hyrule.argmove [->>]
   hyrule.control [unless branch]
-  hyrule.macrotools [defmacro!])
+  hyrule.macrotools [defmacro! def-gensyms])
 (import
   itertools [starmap chain count]
   functools [reduce]
@@ -158,8 +158,8 @@ Take pairs of destructuring patterns and input data structures, and return a dic
             {"apple" 1  "banana" 2})
       ; => {'a 1  'b 2}]]
 
-  (setv gsyms []
-        result (hy.gensym 'dict=:))
+  (setv gsyms [])
+  (def-gensyms result)
   `(do
      (setv ~result {}
            ~@(gfor [binds expr] (by2s pairs)
@@ -184,8 +184,8 @@ Take pairs of destructuring patterns and input data structures, and return a dic
   and :as must be last, if present.
   "
   (defn dispatch [f]
-    (setv dcoll (hy.gensym f.__name__)
-      result [dcoll expr]
+    (def-gensyms dcoll)
+    (setv result [dcoll expr]
       seen #{})
     (defn found [magic target]
       (when (= magic target)
@@ -320,9 +320,8 @@ Take pairs of destructuring patterns and input data structures, and return a dic
   ``itertools.tee`` to ``foo``.
   For example, try ``(destructure '(a b c :& more :as it) (count))``.
   "
-  (setv [bs magics] (find-magics binds)
-        copy-iter (hy.gensym)
-        tee (hy.gensym))
+  (setv [bs magics] (find-magics binds))
+  (def-gensyms copy-iter tee)
   (if (in ':as (sfor  [x #* _] magics  x))
     (.extend result [diter `(do
                               (import itertools [tee :as ~tee])
@@ -354,7 +353,7 @@ Take pairs of destructuring patterns and input data structures, and return a dic
 
 (defn destructuring-fn [like args]
   (setv [headers params doc body] (parse-defn-like like args))
-  (setv args (hy.gensym) kwargs (hy.gensym))
+  (def-gensyms args kwargs)
   `(~@headers [#* ~args #** ~kwargs]
      ~doc
      ~(_expanded-setv params args kwargs)

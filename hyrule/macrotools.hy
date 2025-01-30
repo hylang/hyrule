@@ -32,7 +32,7 @@
   local variables that can be used in the macro body. ::
 
     (defmacro-kwargs do10times [form [print-iteration 'False]]
-      (setv i (hy.gensym))
+      (def-gensyms i)
       `(for [~i (range 10)]
         (when ~print-iteration
           (print "Now on iteration:" ~i))
@@ -51,7 +51,7 @@
   (setv docstring None)
   (when (and body (isinstance (get body 0) hy.models.String))
     (setv [docstring #* body] body))
-  (setv g (hy.gensym))
+  (def-gensyms g)
   `(defmacro ~name [#* ~g]
     ~@(if docstring [docstring] [])
     (setv ~g (hy.I.hyrule.match-fn-params ~g '~params))

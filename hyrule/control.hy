@@ -1,5 +1,5 @@
 (require
-  hyrule.macrotools [defmacro!])
+  hyrule.macrotools [defmacro! def-gensyms])
 (import
   hyrule.collections [by2s]
   hyrule.iterables [coll?]
@@ -123,7 +123,7 @@
   ; the key exactly once.
   (when (% (len rest) 2)
     (raise (TypeError "each test-form needs a result-form")))
-  (setv x (hy.gensym "case-key"))
+  (def-gensyms x)
   `(do
     (setv ~x ~key)
     (cond ~@(sum
@@ -147,7 +147,7 @@
 
 
 (defn _do-n [count-form body]
-  (setv count (hy.gensym))
+  (def-gensyms count)
   `(do
     (setv ~count ~count-form)
     (for [~(hy.gensym)
@@ -192,8 +192,7 @@
   module :mod:`argparse` in the usual way, because ``defmain`` doesn't change
   ``sys.argv``. See also :hy:func:`parse-args`.]]
 
-  (setv retval (hy.gensym)
-        restval (hy.gensym))
+  (def-gensyms retval restval)
   `(when (= __name__ "__main__")
      (import sys)
      (setv ~retval ((fn [~@(or args `[#* ~restval])] ~@body) #* sys.argv))
@@ -247,7 +246,7 @@
 
     (setv counter 0)
     (list-n 5 (+= counter 1) counter)  ; => [1 2 3 4 5]"
-  (setv l (hy.gensym))
+  (def-gensyms l)
   `(do
     (setv ~l [])
     ~(_do-n count-form [`(.append ~l (do ~@body))])
