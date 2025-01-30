@@ -4,6 +4,26 @@
   hyrule.iterables [coll? flatten])
 
 
+(defmacro def-gensyms [#* symbols]
+
+  #[[Define a number of gensyms, binding each symbol to a call to
+  :hy:func:`hy.gensym`. The syntax ::
+
+    (def-gensyms a b c)
+
+  is equivalent to ::
+
+    (setv
+      a (hy.gensym 'a)
+      b (hy.gensym 'b)
+      c (hy.gensym 'c))]]
+
+  `(setv ~@(gfor
+    sym symbols
+    x [sym `(hy.gensym '~sym)]
+    x)))
+
+
 (defmacro defmacro-kwargs [name params #* body]
 
   #[=[Define a macro that can take keyword arguments. When the macro
@@ -331,26 +351,6 @@
         True
           {}))
     x))
-
-
-(defmacro def-gensyms [#* symbols]
-
-  #[[Define a number of gensyms, binding each symbol to a call to
-  :hy:func:`hy.gensym`. The syntax ::
-
-    (def-gensyms a b c)
-
-  is equivalent to ::
-
-    (setv
-      a (hy.gensym 'a)
-      b (hy.gensym 'b)
-      c (hy.gensym 'c))]]
-
-  `(setv ~@(gfor
-    sym symbols
-    x [sym `(hy.gensym '~sym)]
-    x)))
 
 
 (defreader /
