@@ -7,6 +7,8 @@ Removals
 ------------------------------
 * `defn/a+` has been removed. Use `(defn+ :async …)` instead.
 * `fn/a+` has been removed. Use `(fn+ :async …)` instead.
+* `profile/calls` has been removed. Use `pycallgraph2` or
+  `python-call-graph`, which are available on PyPI, instead.
 
 Other Breaking Changes
 ------------------------------

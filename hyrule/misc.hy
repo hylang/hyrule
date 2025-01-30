@@ -137,24 +137,6 @@
   (.parse-args parser args))
 
 
-(defmacro profile/calls [#* body]
-  "``profile/calls`` allows you to create a call graph visualization.
-  **Note:** You must have `Graphviz <http://www.graphviz.org/>`_
-  installed for this to work.
-
-  Examples:
-    ::
-
-       => (require hyrule.contrib.profile [profile/calls])
-       => (profile/calls (print \"hey there\"))
-  "
-  `(do
-     (import pycallgraph [PyCallGraph]
-             pycallgraph.output [GraphvizOutput])
-     (with [(PyCallGraph :output (GraphvizOutput))]
-           ~@body)))
-
-
 (defmacro! profile/cpu [#* body]
   "Profile a bit of code
 
