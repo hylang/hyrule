@@ -333,28 +333,24 @@
     x))
 
 
-(defmacro with-gensyms [args #* body]
+(defmacro def-gensyms [#* symbols]
 
-  #[[Evaluate ``body`` with each name in ``args`` (a list of symbols) bound to
-  a gensym. The syntax ::
+  #[[Define a number of gensyms, binding each symbol to a call to
+  :hy:func:`hy.gensym`. The syntax ::
 
-    (with-gensyms [a b c]
-      …)
+    (def-gensyms a b c)
 
   is equivalent to ::
 
-    (do
-      (setv a (hy.gensym 'a))
-      (setv b (hy.gensym 'b))
-      (setv c (hy.gensym 'c))
-      …)]]
+    (setv
+      a (hy.gensym 'a)
+      b (hy.gensym 'b)
+      c (hy.gensym 'c))]]
 
-  (setv syms [])
-  (for [arg args]
-    (.extend syms [arg `(hy.gensym '~arg)]))
-  `(do
-    (setv ~@syms)
-    ~@body))
+  `(setv ~@(gfor
+    sym symbols
+    x [sym `(hy.gensym '~sym)]
+    x)))
 
 
 (defreader /

@@ -10,6 +10,7 @@ Removals
 
 Other Breaking Changes
 ------------------------------
+* `(with-gensyms [a b c] …)` is now written `(def-gensyms a b c) …`.
 * The names of gensyms produced by `import-path` have changed. (This
   shouldn't break your code unless you're doing something
   exceptionally weird, but the argument to `hy.gensym` was documented,
