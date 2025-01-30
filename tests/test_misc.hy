@@ -120,17 +120,25 @@
   (with [exc (pytest.raises UnboundLocalError)]
     (smacrolet [b c]
       b))
-  (assert (or (in "cannot access local variable 'c' where it is not associated with a value" (str exc))
-              (in "local variable 'c' referenced before assignment" (str exc))))
+  (assert (in "local variable 'c'" (. exc value args [0])))
   (assert (not-in "b" (locals)))
 
   (setv c 42)
-  (assert (= 42 (smacrolet [b c] b)))
+  (assert (= (smacrolet [b c] b) 42))
 
-  (smacrolet [b c]
-    (defn afunc [a [b 1]] (+ a b)))
-  (assert (= 2 (afunc 1)))
+  (setv x "a")
+  (setv y "other")
+  (smacrolet [y x  z x]
+    (+= y "b")
+    (+= z "c"))
+  (assert (= x "abc"))
+  (assert (= y "other"))
 
-  (smacrolet [foo bar]
-    (setv foo (fn [x] x)))
-  (assert (= 1 (bar 1))))
+  (setv x 1)
+  (assert (=
+    (smacrolet [a x]
+      (defclass C []
+        (setv a 2))
+      a)
+    1))
+  (assert (= C.a 2)))

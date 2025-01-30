@@ -198,30 +198,25 @@
     (or a b)))
 
 (defmacro smacrolet [_hy_compiler bindings #* body]
-  "symbol macro let.
+  #[=[Tell the Hy compiler to translate certain symbols when compiling the body. The effect is similar to symbol macros (as seen in e.g. Common Lisp) and uses the same scoping logic as :hy:func:`let`, hence the name ``smacrolet``, i.e., "symbol macro let". The first argument is a list of bindings, which must be pairs of symbols. ::
 
-  Replaces symbols in body, but only where it would be a valid let binding. The
-  bindings pairs the target symbol and the expansion form for that symbol
+    (setv x "a")
+    (setv y "other")
+    (smacrolet [y x  z x]
+      (+= y "b")
+      (+= z "c"))
+    (print x)  ; "abc"
+    (print y)  ; "other"
 
-  Examples:
+  The translation doesn't occur in uses of the symbol that wouldn't apply to a :hy:func:`let` binding. Here, for example, ``a`` in an attribute assignment isn't replaced::
 
-    ::
+    (setv x 1)
+    (smacrolet [a x]
+      (defclass C []
+        (setv a 2))
+      (print a))  ; 1
+    (print C.a)   ; 2]=]
 
-       (smacrolet [b c]
-         (defn foo [a [b 1]]
-           (* b (+ a 1)))
-         (* b (foo 7)))
-
-    Would compile to::
-
-       (defn foo [a [b 1]]
-         (* b (+ a 1)))
-       (* c (foo 7))
-
-    Notice that the ``b`` symbol defined by the ``defn`` remains unchanged as it
-    is not a valid ``let`` binding. Only the top level ``b`` sym has been
-    replaced with ``c``
-  "
   (when (% (len bindings) 2)
     (raise (ValueError "bindings must be paired")))
 
