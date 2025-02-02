@@ -1,5 +1,6 @@
 (import
   hy.compiler [HyASTCompiler calling-module]
+  hy.model-patterns [sym pexpr]
   hyrule.iterables [coll? flatten])
 
 
@@ -124,6 +125,9 @@
     #** (if p-rest {p-rest (tuple collected-rest)} {})
     #** (if p-kwargs {p-kwargs collected-kwargs} {})))
 
+(defn _pvalue [root wanted]
+  (>> (pexpr (+ (sym root) wanted)) (fn [x] (get x 0))))
+
 (defn parse-fn-params [params]
   "A subroutine for `defmacro-kwargs` and `match-params`."
   (import
@@ -131,13 +135,11 @@
     hy.model-patterns [SYM FORM sym brackets pexpr whole])
 
   (setv msym (>> SYM hy.mangle))
-  (defn pvalue [root wanted]
-    (>> (pexpr (+ (sym root) wanted)) (fn [x] (get x 0))))
   (setv [ps p-rest p-kwargs] (.parse
     (whole [
       (many (| msym (brackets msym FORM)))
-      (maybe (pvalue "unpack-iterable" msym))
-      (maybe (pvalue "unpack-mapping" msym))])
+      (maybe (_pvalue "unpack-iterable" msym))
+      (maybe (_pvalue "unpack-mapping" msym))])
     params))
   (setv ps (dfor
     p ps
@@ -171,12 +173,27 @@
     (setv l (list "abc"))
     (m (.pop l))  ; => "ccc"]]
 
-  (setv os (lfor x (flatten args)
-                 :if (and (isinstance x hy.models.Symbol)
-                          (.startswith x "o!"))
+  (import
+    funcparserlib.parser [maybe many]
+    hy.model-patterns [SYM FORM brackets whole])
+
+  (setv [ps p-rest] (.parse
+    (whole [
+      (many (| SYM (brackets SYM FORM)))
+      (maybe (_pvalue "unpack-iterable" SYM))])
+    args))
+  (setv ps (lfor
+    p [#* ps #* (if p-rest [p-rest] [])]
+    (if (isinstance p hy.models.List) (get p 0) p)))
+
+  (setv os (lfor x ps
+                 :if (.startswith x "o!")
                  x)
         gs (lfor s os
                  (hy.models.Symbol (+ "g!" (cut s 2 None))))
+        nl (lfor x ps
+                 :if (not (.startswith x "o!"))
+                 x)
         gensyms (gfor sym (sfor x (flatten [gs body])
                                 :if (and (isinstance x hy.models.Symbol)
                                          (.startswith x "g!"))
@@ -193,7 +210,7 @@
   `(defmacro ~name ~args
      ~docstring
      (setv ~@gensyms
-           ~res ((fn [] ~@body)))
+           ~res ((fn [] (nonlocal ~@nl) ~@body)))
      `(do
         (setv ~~gs ~~os)
         ~~res)))

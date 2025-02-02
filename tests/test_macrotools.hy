@@ -85,6 +85,27 @@
   (assert (= (m (f)) 6)))
 
 
+(defn test-defmacro!-modify-args []
+  ;; https://github.com/hylang/hyrule/issues/112
+  ;; test that modifying args compiles
+  (defmacro! foo [x]
+    (+= x 1)
+    x)
+  (assert (= (foo 1) 2))
+  ;; test optional/default args
+  (defmacro! bar [x [y 0]]
+    (+= y 1)
+    y)
+  (assert (= (bar 2) 1))
+  (assert (= (bar 2 3) 4))
+  ;; test unpack-iterable args
+  (defmacro! baz [o!x #* ys]
+    (+= ys #(3))
+    `(+ ~g!x ~g!x ~(. ys [-1])))
+  (setv z 9)
+  (assert (= (baz (do (+= z 1) z) bing bang bong)) 23))
+
+
 (defmacro foo-walk []
   42)
 

@@ -13,6 +13,7 @@ Bug Fixes
 * A lot of incompatibilities of `meth`, `ameth`, `defn+`, and `fn+`
   with the core `defn` and `fn` have been fixed. You can now use `:async`,
   docstrings are recognized properly, etc.
+* `defmacro!` no longer crashes when mutating macro arguments.
 
 0.8.0 (released 2025-01-08)
 ======================================================
