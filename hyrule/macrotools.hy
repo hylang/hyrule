@@ -4,6 +4,26 @@
   hyrule.iterables [coll? flatten])
 
 
+(defmacro def-gensyms [#* symbols]
+
+  #[[Define a number of gensyms, binding each symbol to a call to
+  :hy:func:`hy.gensym`. The syntax ::
+
+    (def-gensyms a b c)
+
+  is equivalent to ::
+
+    (setv
+      a (hy.gensym 'a)
+      b (hy.gensym 'b)
+      c (hy.gensym 'c))]]
+
+  `(setv ~@(gfor
+    sym symbols
+    x [sym `(hy.gensym '~sym)]
+    x)))
+
+
 (defmacro defmacro-kwargs [name params #* body]
 
   #[=[Define a macro that can take keyword arguments. When the macro
@@ -12,7 +32,7 @@
   local variables that can be used in the macro body. ::
 
     (defmacro-kwargs do10times [form [print-iteration 'False]]
-      (setv i (hy.gensym))
+      (def-gensyms i)
       `(for [~i (range 10)]
         (when ~print-iteration
           (print "Now on iteration:" ~i))
@@ -31,7 +51,7 @@
   (setv docstring None)
   (when (and body (isinstance (get body 0) hy.models.String))
     (setv [docstring #* body] body))
-  (setv g (hy.gensym))
+  (def-gensyms g)
   `(defmacro ~name [#* ~g]
     ~@(if docstring [docstring] [])
     (setv ~g (hy.I.hyrule.match-fn-params ~g '~params))
@@ -45,11 +65,11 @@
 
 (defn match-fn-params [args params]
   #[[Match an iterable of arguments against a parameter list in the
-  style of a :hy:func:`defn` lambda list. The parameter-list syntax
-  here is somewhat restricted: annotations are forbiddden, ``/`` and
-  ``*`` aren't recognized, and nothing is allowed after ``#* args``
-  other than ``#** kwargs``. Return a dictionary of the parameters and
-  their values. ::
+  style of a :hy:func:`defn` lambda list. Return a dictionary of the
+  parameters and their values. The parameter-list syntax here is
+  somewhat restricted: annotations are forbiddden, ``/`` and ``*``
+  aren't recognized, and nothing is allowed after ``#* args`` other
+  than ``#** kwargs``. ::
 
     (match-fn-params
       [1 :foo "x"]
@@ -298,7 +318,7 @@
       (+= FOO (ABS -5)))
     (print foo)  ; => 20
 
-  That's why the parameters of ``map-model`` are backwards compared to ``map``: in user code, ``x`` is typically a symbol or other simple form whereas ``f`` is a multi-line anonymous function.]]
+  That's why the parameters of ``map-model`` are backwards compared to :func:`map`: in user code, ``x`` is typically a symbol or other simple form whereas ``f`` is a multi-line anonymous function.]]
 
   (_map-model (hy.as-model x) f))
 
@@ -331,30 +351,6 @@
         True
           {}))
     x))
-
-
-(defmacro with-gensyms [args #* body]
-
-  #[[Evaluate ``body`` with each name in ``args`` (a list of symbols) bound to
-  a gensym. The syntax ::
-
-    (with-gensyms [a b c]
-      …)
-
-  is equivalent to ::
-
-    (do
-      (setv a (hy.gensym 'a))
-      (setv b (hy.gensym 'b))
-      (setv c (hy.gensym 'c))
-      …)]]
-
-  (setv syms [])
-  (for [arg args]
-    (.extend syms [arg `(hy.gensym '~arg)]))
-  `(do
-    (setv ~@syms)
-    ~@body))
 
 
 (defreader /

@@ -2,6 +2,8 @@
 also known as arrow macros."
 
 
+(require
+  hyrule.macrotools [def-gensyms])
 (import
   hyrule.iterables [rest]
   itertools [chain])
@@ -116,7 +118,7 @@ also known as arrow macros."
       (.get {"a" 1 "b" 2} char))
     (some-> "q" lookup (print "is the value"))
       ; Prints nothing, since `(lookup "q")` returns `None`.]]
-  (setv val (hy.gensym))
+  (def-gensyms val)
   `(cond (is (setx ~val ~head) None) None
          ~@(chain.from_iterable (gfor node args
            [`(is (setx ~val (hy.R.hyrule.-> ~val ~node)) None) None]))
@@ -144,7 +146,7 @@ also known as arrow macros."
 
     (doto [] (.append 1) (.append 2) (.reverse))  ; => [2 1]"
 
-  (setv f (hy.gensym))
+  (def-gensyms f)
   (defn build-form [expression]
     (setv expression (_dotted expression))
     (if (isinstance expression hy.models.Expression)

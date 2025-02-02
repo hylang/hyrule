@@ -1,5 +1,5 @@
 (require
-  hyrule [defmacro-kwargs defmacro! with-gensyms ->]
+  hyrule [defmacro-kwargs defmacro! def-gensyms ->]
          :readers [/])
 (import
   pytest
@@ -29,9 +29,9 @@
    (assert (do-mac x-is-plain-int?)))
 
 
-(defmacro example--with-gensyms []
-  (with-gensyms [a]
-    `(setv ~a 1)))
+(defmacro example--def-gensyms []
+  (def-gensyms a)
+  `(setv ~a 1))
 (defmacro! example--defmacro! []
   `(setv ~g!res 1))
 
@@ -42,7 +42,7 @@
       (len (sfor  a (dir C)  :if (not (.startswith a "__"))  a))
       2)))
 
-  (defclass C [] (example--with-gensyms) (example--with-gensyms))
+  (defclass C [] (example--def-gensyms) (example--def-gensyms))
   (check)
   (defclass C [] (example--defmacro!) (example--defmacro!))
   (check))

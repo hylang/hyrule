@@ -7,6 +7,18 @@ Removals
 ------------------------------
 * `defn/a+` has been removed. Use `(defn+ :async …)` instead.
 * `fn/a+` has been removed. Use `(fn+ :async …)` instead.
+* `profile/calls` has been removed. Use `pycallgraph2` or
+  `python-call-graph`, which are available on PyPI, instead.
+* `profile/cpu` has been removed. Use `(with [pr (cProfile.Profile)]
+  …)` instead.
+
+Other Breaking Changes
+------------------------------
+* `(with-gensyms [a b c] …)` is now written `(def-gensyms a b c) …`.
+* The names of gensyms produced by `import-path` have changed. (This
+  shouldn't break your code unless you're doing something
+  exceptionally weird, but the argument to `hy.gensym` was documented,
+  so this is technically a breaking change.)
 
 Bug Fixes
 ------------------------------

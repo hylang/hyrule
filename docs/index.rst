@@ -97,13 +97,13 @@ API
 .. hy:automodule:: hyrule.macrotools
 
 .. hy:autotag:: /
+.. hy:automacro:: def-gensyms
 .. hy:automacro:: defmacro-kwargs
 .. hy:automacro:: defmacro!
 .. hy:autofunction:: macroexpand-all
 .. hy:autofunction:: map-hyseq
 .. hy:autofunction:: map-model
 .. hy:autofunction:: match-fn-params
-.. hy:automacro:: with-gensyms
 
 ``oop`` — Tools for object-oriented programming
 ----------------------------------------------------------------------
@@ -144,8 +144,6 @@ API
 .. hy:autofunction:: import-path
 .. hy:automacro:: of
 .. hy:autofunction:: parse-args
-.. hy:automacro:: profile/calls
-.. hy:automacro:: profile/cpu
 .. hy:automacro:: pun
 .. hy:autofunction:: sign
 .. hy:automacro:: smacrolet

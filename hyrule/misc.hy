@@ -61,7 +61,7 @@
   #[[Import the Python or Hy source code at ``path`` as a module with
   :func:`importlib.util.spec_from_file_location`, per Python's documentation.
   Return the new module object. ``name`` defaults to ``(str (hy.gensym
-  "import-file"))``. ::
+  "import-path"))``. ::
 
     (setv p (hy.I.pathlib.Path "mymodule.hy"))
     (.write-text p "(setv foo 3)")
@@ -69,7 +69,7 @@
     (print m.foo)  ; => 3]]
 
   (when (is name None)
-    (setv name (str (hy.gensym "import-file"))))
+    (setv name (str (hy.gensym "import-path"))))
   (when (in name sys.modules)
     (raise (ValueError f"The name {(hy.repr name)} is already in use in `sys.modules`.")))
 
@@ -137,61 +137,6 @@
   (.parse-args parser args))
 
 
-(defmacro profile/calls [#* body]
-  "``profile/calls`` allows you to create a call graph visualization.
-  **Note:** You must have `Graphviz <http://www.graphviz.org/>`_
-  installed for this to work.
-
-  Examples:
-    ::
-
-       => (require hyrule.contrib.profile [profile/calls])
-       => (profile/calls (print \"hey there\"))
-  "
-  `(do
-     (import pycallgraph [PyCallGraph]
-             pycallgraph.output [GraphvizOutput])
-     (with [(PyCallGraph :output (GraphvizOutput))]
-           ~@body)))
-
-
-(defmacro! profile/cpu [#* body]
-  "Profile a bit of code
-
-  Examples:
-    ::
-
-       => (require hyrule.contrib.profile [profile/cpu])
-       => (profile/cpu (print \"hey there\"))
-
-    .. code-block:: bash
-
-      hey there
-      <pstats.Stats instance at 0x14ff320>
-                2 function calls in 0.000 seconds
-
-        Random listing order was used
-
-        ncalls  tottime  percall  cumtime  percall filename:lineno(function)        1    0.000    0.000    0.000    0.000 {method 'disable' of '_lsprof.Profiler' objects}
-            1    0.000    0.000    0.000    0.000 {print}
-
-  "
-  `(do
-     (import cProfile pstats)
-
-     (import io [StringIO])
-
-     (setv ~g!hy-pr (.Profile cProfile))
-     (.enable ~g!hy-pr)
-     (do ~@body)
-     (.disable ~g!hy-pr)
-     (setv ~g!hy-s (StringIO))
-     (setv ~g!hy-ps
-           (.sort-stats (pstats.Stats ~g!hy-pr :stream ~g!hy-s)))
-     (.print-stats ~g!hy-ps)
-     (print (.getvalue ~g!hy-s))))
-
-
 (defmacro pun [#* body]
   #[[Evaluate ``body`` with a shorthand for keyword arguments that are set to variables of the same name. Any keyword whose name starts with an exclamation point, such as ``:!foo``, is replaced with a keyword followed by a symbol, such as ``:foo foo``::
 
@@ -253,30 +198,25 @@
     (or a b)))
 
 (defmacro smacrolet [_hy_compiler bindings #* body]
-  "symbol macro let.
+  #[=[Tell the Hy compiler to translate certain symbols when compiling the body. The effect is similar to symbol macros (as seen in e.g. Common Lisp) and uses the same scoping logic as :hy:func:`let`, hence the name ``smacrolet``, i.e., "symbol macro let". The first argument is a list of bindings, which must be pairs of symbols. ::
 
-  Replaces symbols in body, but only where it would be a valid let binding. The
-  bindings pairs the target symbol and the expansion form for that symbol
+    (setv x "a")
+    (setv y "other")
+    (smacrolet [y x  z x]
+      (+= y "b")
+      (+= z "c"))
+    (print x)  ; "abc"
+    (print y)  ; "other"
 
-  Examples:
+  The translation doesn't occur in uses of the symbol that wouldn't apply to a :hy:func:`let` binding. Here, for example, ``a`` in an attribute assignment isn't replaced::
 
-    ::
+    (setv x 1)
+    (smacrolet [a x]
+      (defclass C []
+        (setv a 2))
+      (print a))  ; 1
+    (print C.a)   ; 2]=]
 
-       (smacrolet [b c]
-         (defn foo [a [b 1]]
-           (* b (+ a 1)))
-         (* b (foo 7)))
-
-    Would compile to::
-
-       (defn foo [a [b 1]]
-         (* b (+ a 1)))
-       (* c (foo 7))
-
-    Notice that the ``b`` symbol defined by the ``defn`` remains unchanged as it
-    is not a valid ``let`` binding. Only the top level ``b`` sym has been
-    replaced with ``c``
-  "
   (when (% (len bindings) 2)
     (raise (ValueError "bindings must be paired")))
 
