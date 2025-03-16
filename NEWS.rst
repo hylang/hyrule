@@ -1,6 +1,8 @@
 .. default-role:: code
 
-Unreleased
+Hyrule is `semantically versioned <https://semver.org/>`__ since 1.0.0.
+
+1.0.0 (released 2025-03-19)
 ======================================================
 
 Removals
