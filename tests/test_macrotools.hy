@@ -250,6 +250,10 @@
 
   (defn f [args]
     (match-fn-params args '[a b [c "default-c"] #* rest #** kw]))
+
+  (assert (=
+    (f [None None])
+    (dict :a None :b None :c "default-c" :rest #() :kw {})))
   (assert (=
     (f [1 2])
     (dict :a 1 :b 2 :c "default-c" :rest #() :kw {})))
@@ -291,7 +295,19 @@
   ; A syntactically invalid parameter list
   (with [(pytest.raises hy.I.funcparserlib/parser.NoParseError)]
      (match-fn-params [1] '[a 3]))
-  (assert (= (match-fn-params [1] '[a]) (dict :a 1))))
+  (assert (= (match-fn-params [1] '[a]) (dict :a 1)))
+
+  ; `'None` or `None` as a default value.
+  (assert (=
+    (match-fn-params
+      []
+      '[[a None]])
+    (dict :a None)))
+  (assert (=
+    (match-fn-params
+      []
+      (hy.models.List [(hy.models.List ['a None])]))
+    (dict :a None))))
 
 
 (defn test-slash-import []

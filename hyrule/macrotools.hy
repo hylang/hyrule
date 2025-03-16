@@ -106,7 +106,7 @@
         (setv x (hy.mangle x.name))
         (when (or
             (in x collected-kwargs)
-            (and (in x ps) (is-not (get ps x "value") None)))
+            (and (in x ps) (is-not (get ps x "value") Nothing)))
           (raise (TypeError (+ "keyword argument repeated: " x))))
         (setv v (.pop args 0))
         (cond
@@ -122,7 +122,7 @@
         (cond
           (< i-pos (len ps)) (do
             (setv [k d] (get (list (.items ps)) i-pos))
-            (if (is (get d "value") None)
+            (if (is (get d "value") Nothing)
               (setv (get d "value") x)
               (raise (TypeError f"got multiple values for argument '{k}'"))))
           p-rest
@@ -136,9 +136,9 @@
     #** (dfor
       [p d] (.items ps)
       p (cond
-        (is-not (get d "value") None)
+        (is-not (get d "value") Nothing)
           (get d "value")
-        (is-not (get d "default") None)
+        (is-not (get d "default") Nothing)
           (get d "default")
         True
           (raise (TypeError f"missing a required positional argument: '{p}'"))))
@@ -163,11 +163,18 @@
     params))
   (setv ps (dfor
     p ps
-    :setv [k dv] (if (isinstance p hy.models.List) p [p None])
-    k (dict :value None :default (if (isinstance dv hy.models.Object)
+    :setv [k dv] (if (isinstance p hy.models.List) p [p Nothing])
+    k (dict :value Nothing :default (if (isinstance dv hy.models.Object)
      (hy.eval dv {} :macros {})
      dv))))
   [ps p-rest p-kwargs])
+
+(defclass NothingType []
+  "A kind of missing value for when we want to distinguish from a
+  provided `None`."
+  (defn __repr__ [self]
+    "Nothing"))
+(setv Nothing (NothingType))
 
 
 (defmacro defmacro! [name args #* body]

@@ -26,6 +26,7 @@ Bug Fixes
   with the core `defn` and `fn` have been fixed. You can now use `:async`,
   docstrings are recognized properly, etc.
 * `defmacro!` no longer crashes when mutating macro arguments.
+* `match-fn-params` now handles `None` correctly.
 
 0.8.0 (released 2025-01-08)
 ======================================================
