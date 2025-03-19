@@ -31,7 +31,7 @@ requires = [
 
 setuptools.setup(
     name = 'hyrule',
-    version = '0.0.0',
+    version = '1.0.0',
     setup_requires=['wheel'] + requires,
     install_requires=requires,
     packages = setuptools.find_packages(exclude = ["tests*"]),
