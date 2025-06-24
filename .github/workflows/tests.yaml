@@ -24,7 +24,7 @@ jobs:
         python-version: ${{ matrix.python }}
     # Install dependencies. Test on Hy `master`, not the latest Hy
     # release.
-    - run: pip install pytest setuptools wheel git+https://github.com/hylang/hy@master
+    - run: pip install 'pytest >= 8.4.1' setuptools wheel git+https://github.com/hylang/hy@master
     # Be sure we're testing the installed version, instead of running
     # from the source tree. Use `--no-build-isolation` to ensure
     # Hy `master` is used to compile the bytecode.

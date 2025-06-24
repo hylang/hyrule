@@ -29,13 +29,14 @@
    (assert (do-mac x-is-plain-int?)))
 
 
-(defmacro example--def-gensyms []
-  (def-gensyms a)
-  `(setv ~a 1))
-(defmacro! example--defmacro! []
-  `(setv ~g!res 1))
-
 (defn test-gensym-tools []
+
+  (defmacro example--def-gensyms []
+    (def-gensyms a)
+    `(setv ~a 1))
+  (defmacro! example--defmacro! []
+    `(setv ~g!res 1))
+
   (defn check []
     ; `C` should have two distinct attributes.
     (assert (=
@@ -109,17 +110,16 @@
 (defmacro foo-walk []
   42)
 
-(defmacro require-macro []
-    `(do
-       (require tests.resources.macros [test-macro :as my-test-macro])
-       (my-test-macro)))
-
 (defn test-macroexpand-all []
   ;; make sure a macro from the current module works
   (assert (= (macroexpand-all '(foo-walk))
              '42))
   (assert (= (macroexpand-all '(-> 1 a))
              '(a 1)))
+  ;; likewise a local macro
+  (defmacro mmm [] 15)
+  (assert (= (macroexpand-all '(mmm) :macros (local-macros))
+             '15))
   ;; macros within f-strings should also be expanded
   ;; related to https://github.com/hylang/hy/issues/1843
   (assert (= (macroexpand-all 'f"{(foo-walk)}")
@@ -127,7 +127,11 @@
   (assert (= (macroexpand-all 'f"{(-> 1 a)}")
              'f"{(a 1)}"))
 
-  (assert (= (get (macroexpand-all '(require-macro)) -1)
+  (defmacro require-macro []
+      `(do
+         (require tests.resources.macros [test-macro :as my-test-macro])
+         (my-test-macro)))
+  (assert (= (get (macroexpand-all '(require-macro) :macros (local-macros)) -1)
              '(setv blah 1)))
 
   ; Avoid crashing on stub macros like `else`.
