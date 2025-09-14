@@ -38,3 +38,9 @@ highlight_language = 'hylang'
 intersphinx_mapping = dict(
     py = ('https://docs.python.org/3/', None),
     hy = (f'https://hylang.org/hy/doc/{hy_version}/', None))
+
+# Workaround for https://github.com/hylang/sphinxcontrib-hydomain/issues/29
+class C: pass
+for a in '__name__', '__module__', '__doc__':
+    setattr(C, a, getattr(hyrule.AttributeRow, a))
+hyrule.AttributeRow = C
