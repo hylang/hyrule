@@ -147,6 +147,8 @@ API
 .. hy:automacro:: pun
 .. hy:autofunction:: sign
 .. hy:automacro:: smacrolet
+.. hy:autofunction:: sqlite-db
+.. hy:autoclass:: AttributeRow
 .. hy:autofunction:: xor
 
 Contributing to Hyrule
