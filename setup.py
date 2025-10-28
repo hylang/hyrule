@@ -22,18 +22,10 @@ class install(install):
                 )
 
 
-# both setup_requires and install_requires
-# since we need to compile .hy files during setup
-requires = [
-    'hy >= 1'
-]
-
-
 setuptools.setup(
     name = 'hyrule',
     version = '0.0.0',
-    setup_requires=['wheel'] + requires,
-    install_requires=requires,
+    install_requires=['hy >= 1'],
     packages = setuptools.find_packages(exclude = ["tests*"]),
     package_data={'': ['*.hy']},
     author = "Paul Tagliamonte",
