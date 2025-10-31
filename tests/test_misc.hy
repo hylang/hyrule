@@ -169,6 +169,13 @@
       ; This is not committed, so it's lost.
   (assert (= (A-values) [1 2 3]))
 
+  ; Test that an early error is raised properly.
+  (with [e (pytest.raises sqlite3.OperationalError)]
+    (test [:database "/invalid_directory_name/invalid_file_name"]))
+  (assert (in (get e.value.args 0) [
+    "unable to open database file"
+    "Could not open database"]))
+
   ; Test the parameter `row-factory`.
   (test []
     (setv [row] (.execute db "select * from A"))

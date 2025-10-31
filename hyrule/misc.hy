@@ -277,6 +277,8 @@
 
 (defn [contextmanager] _sqlite-db [database isolation-level row-factory foreign-keys kwargs]
 
+  (setv db None)
+
   (try
 
     (setv db (hy.I.sqlite3.connect
@@ -289,4 +291,5 @@
     (yield db)
 
     (finally
-      (.close db))))
+      (when (is-not db None)
+        (.close db)))))
