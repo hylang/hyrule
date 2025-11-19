@@ -2,16 +2,13 @@
 
 Hyrule is `semantically versioned <https://semver.org/>`__ since 1.0.0.
 
-Unreleased
+1.0.1 (released 2025-11-19)
 ======================================================
-
-New Features
-------------------------------
-* New function ``sqlite-db``.
 
 Misc. Improvements
 ------------------------------
-* Fixed a setuptools build issue by moving build dependencies to a new `pyproject.toml`
+* Fixed a setuptools build issue by moving build dependencies to a new
+  `pyproject.toml`.
 
 1.0.0 (released 2025-03-19)
 ======================================================
