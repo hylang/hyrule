@@ -2,6 +2,13 @@
 
 Hyrule is `semantically versioned <https://semver.org/>`__ since 1.0.0.
 
+Unreleased
+======================================================
+
+New Features
+------------------------------
+* New function ``sqlite-db``.
+
 1.0.1 (released 2025-11-19)
 ======================================================
 
