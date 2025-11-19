@@ -24,7 +24,7 @@ class install(install):
 
 setuptools.setup(
     name = 'hyrule',
-    version = '0.0.0',
+    version = '1.0.1',
     install_requires=['hy >= 1'],
     packages = setuptools.find_packages(exclude = ["tests*"]),
     package_data={'': ['*.hy']},
