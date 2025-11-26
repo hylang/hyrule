@@ -67,6 +67,13 @@ Reference
 .. hy:autoclass:: recur
 .. hy:automacro:: unless
 
+``db`` — Tools for databases
+----------------------------------------------------------------------
+.. hy:automodule:: hyrule.db
+
+.. hy:autofunction:: sqlite-db
+.. hy:autoclass:: AttributeRow
+
 ``destructure`` — Macros for destructuring collections
 ----------------------------------------------------------------------
 .. hy:automodule:: hyrule.destructure
@@ -147,8 +154,6 @@ API
 .. hy:automacro:: pun
 .. hy:autofunction:: sign
 .. hy:automacro:: smacrolet
-.. hy:autofunction:: sqlite-db
-.. hy:autoclass:: AttributeRow
 .. hy:autofunction:: xor
 
 Contributing to Hyrule
