@@ -220,7 +220,6 @@
     2 "b"
     3 "c"))
   (assert (= out "b"))
-  (print l)
   (assert (= l [
     1 50 102 60 1
     2 50 102 2]))
