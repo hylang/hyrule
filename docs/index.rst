@@ -73,6 +73,8 @@ Reference
 
 .. hy:autofunction:: sqlite-db
 .. hy:autoclass:: AttributeRow
+.. hy:automacro:: sqlexec
+.. hy:autofunction:: sqlq
 
 ``destructure`` — Macros for destructuring collections
 ----------------------------------------------------------------------
