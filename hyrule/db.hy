@@ -7,6 +7,11 @@
   hyrule.collections [by2s])
 
 
+(export
+  :objects [AttributeRow sqlite-db sqlq]
+  :macros [sqlexec])
+
+
 (defclass AttributeRow [sqlite3.Row]
 
   #[[A subclass of :class:`sqlite3.Row` that also lets you fetch values of the tuple with attribute names. ::
