@@ -3,6 +3,7 @@
   hyrule.argmove *
   hyrule.collections * :readers *
   hyrule.control *
+  hyrule.db *
   hyrule.destructure *
   hyrule.macrotools * :readers *
   hyrule.misc *
@@ -11,6 +12,7 @@
 (import
   hyrule.collections *
   hyrule.control [recur]
+  hyrule.db *
   hyrule.destructure *
   hyrule.iterables *
   hyrule.macrotools *
