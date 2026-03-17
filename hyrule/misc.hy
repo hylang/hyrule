@@ -231,3 +231,17 @@
     (.add scope target (str value)))
   (with [scope]
     (.compile _hy_compiler `(do ~@body))))
+
+(defreader __
+  #[=[Discard the following two forms. This reader macro is useful for commenting out keyword arguments or dictionary entries.
+  ::
+
+    {"one" 1 #__ "two" 2} ; => {"one" 1}
+    (dict #__ :kw1 1 :kw2 2) ; => {"kw2" 2}
+
+  ]=]
+
+  (.parse-one-form &reader)
+  (.parse-one-form &reader)
+  None
+  )

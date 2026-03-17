@@ -1,5 +1,5 @@
 (require
-  hyrule [comment of pun smacrolet])
+  hyrule [comment of pun smacrolet] :readers [__])
 (import
   sys
   pytest
@@ -142,3 +142,25 @@
       a)
     1))
   (assert (= C.a 2)))
+
+(defn test-double-discard []
+    ; simple
+    (assert (= '(#__ 1 2) '()))
+    (assert (= '(#__ 1 2 3) '(3)))
+    (assert (= '(#__ 1 2 #__ 3 4) '()))
+    ; double
+    (assert (= '(#__ #__ 1 2 3 4 5) '(5)))
+    ; inner
+    (assert (= '(0 #__ 1 2) '(0)))
+    (assert (= '(0 #__ 1 2 #__ 3 4) '(0)))
+    (assert (= '(#__ 1 2 3 #__ 4 5) '(3)))
+    ; nested
+    (assert (= '(1 2 #__ (#__ 3 4) 5 6) '(1 2 6)))
+    ; discard with other prefix syntax
+    (assert (= '(a #__ 'b 'c d) '(a d)))
+    (assert (= '(a '#__ b c d) '(a 'd)))
+    (assert (= '(a '#__ b c #__ d e f) '(a 'f)))
+    (assert (= '(a '#__ #__ b c d e f) '(a 'f)))
+    ; keywords
+    (assert (= '(f #__ :kw val :kw2 val2) '(f :kw2 val2)))
+)

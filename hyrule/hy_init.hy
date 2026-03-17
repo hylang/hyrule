@@ -6,7 +6,7 @@
   hyrule.db *
   hyrule.destructure *
   hyrule.macrotools * :readers *
-  hyrule.misc *
+  hyrule.misc * :readers *
   hyrule.oop *
   hyrule.sequences *)
 (import
