@@ -157,6 +157,7 @@ API
 .. hy:autofunction:: sign
 .. hy:automacro:: smacrolet
 .. hy:autofunction:: xor
+.. hy:autotag:: __
 
 Contributing to Hyrule
 ======================

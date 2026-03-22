@@ -9,6 +9,7 @@ New Features
 ------------------------------
 * New functions ``sqlite-db``, ``sqlq``.
 * New macro ``sqlexec``.
+* New reader macro ``#__``. Similar to ``#_``, but discards the next *two* forms.
 
 1.0.1 (released 2025-11-19)
 ======================================================
