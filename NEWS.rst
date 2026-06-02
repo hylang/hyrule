@@ -2,14 +2,14 @@
 
 Hyrule is `semantically versioned <https://semver.org/>`__ since 1.0.0.
 
-Unreleased
+1.1.0 (released 2026-06-07)
 ======================================================
 
 New Features
 ------------------------------
-* New functions ``sqlite-db``, ``sqlq``.
-* New macro ``sqlexec``.
-* New reader macro ``#__``. Similar to ``#_``, but discards the next *two* forms.
+* New reader macro `#__`.
+* New macro `sqlexec`.
+* New functions `sqlite-db`, `sqlq`.
 
 1.0.1 (released 2025-11-19)
 ======================================================
